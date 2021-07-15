@@ -1,0 +1,23 @@
+---
+bundle: kubernetes
+name: lma-light
+applications:
+  alertmanager:
+    charm: alertmanager-k8s
+    channel: edge
+    scale: 1
+  prometheus:
+    charm: prometheus-k8s
+    channel: edge
+    scale: 1
+  grafana:
+    charm: grafana-k8s
+    channel: edge
+    scale: 1
+
+relations:
+- - prometheus
+  - alertmanager
+- - grafana
+  - prometheus
+

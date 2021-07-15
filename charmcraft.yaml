@@ -1,0 +1,6 @@
+type: bundle
+parts:
+  bundle:
+    prime: 
+      - README.md
+      - LICENSE

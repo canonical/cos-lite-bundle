@@ -1,0 +1,25 @@
+---
+bundle: kubernetes
+applications:
+  alertmanager:
+    charm: ./../alertmanager-operator/alertmanager-k8s.charm
+    scale: 1
+    resources:
+      alertmanager-image: "ubuntu/prometheus-alertmanager"
+  prometheus:
+    charm: ./../prometheus-operator/prometheus-k8s.charm
+    scale: 1
+    resources:
+      prometheus-image: "ubuntu/prometheus:latest"
+  grafana:
+    charm: ./../grafana-operator/grafana-k8s.charm
+    scale: 1
+    resources:
+      grafana-image: "grafana/grafana:7.2.1"
+
+relations:
+- - prometheus
+  - alertmanager
+- - grafana
+  - prometheus
+
