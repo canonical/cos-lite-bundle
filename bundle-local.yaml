@@ -15,7 +15,7 @@ applications:
     charm: ./../grafana-operator/grafana-k8s.charm
     scale: 1
     resources:
-      grafana-image: "grafana/grafana:7.2.1"
+      grafana-image: "ubuntu/grafana:latest"
 
 relations:
 - - prometheus
