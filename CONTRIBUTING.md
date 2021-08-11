@@ -22,4 +22,16 @@ juju deploy ./bundle.yaml
 juju deploy ./bundle-local.yaml
 ```
 
+## Testing
+Integration tests can be run with
+```shell
+tox -e integration
+```
+
+To keep the model and applications running after the tests completed,
+```shell
+tox -e integration -- --keep-models
+```
+
+
 Please refer to the [project page on GitHub](https://github.com/canonical/lma-light-bundle) for further details.

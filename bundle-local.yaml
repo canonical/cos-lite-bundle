@@ -2,24 +2,30 @@
 bundle: kubernetes
 applications:
   alertmanager:
-    charm: ./../alertmanager-operator/alertmanager-k8s.charm
+    charm: ./../alertmanager-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm
     scale: 1
     resources:
       alertmanager-image: "ubuntu/prometheus-alertmanager"
   prometheus:
-    charm: ./../prometheus-operator/prometheus-k8s.charm
+    charm: ./../prometheus-operator/prometheus-k8s_ubuntu-20.04-amd64.charm
     scale: 1
     resources:
       prometheus-image: "ubuntu/prometheus:latest"
   grafana:
-    charm: ./../grafana-operator/grafana-k8s.charm
+    charm: ./../grafana-operator/grafana-k8s_ubuntu-20.04-amd64.charm
     scale: 1
     resources:
       grafana-image: "ubuntu/grafana:latest"
+  tester:
+    charm: ./../prometheus-tester/prometheus-tester_ubuntu-20.04-amd64.charm
+    scale: 1
+    resources:
+      prometheus-tester-image: "localhost:32000/prometheus-tester:latest"
 
 relations:
 - - prometheus
   - alertmanager
 - - grafana
   - prometheus
-
+- - prometheus
+  - tester
