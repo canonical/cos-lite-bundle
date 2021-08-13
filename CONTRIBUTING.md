@@ -10,7 +10,7 @@ This documents explains the processes and practices recommended for contributing
 
 ## Development
 
-### Deploy with local bundle file
+### Deploy from a local bundle file
 
 ```shell
 juju deploy ./bundle.yaml
