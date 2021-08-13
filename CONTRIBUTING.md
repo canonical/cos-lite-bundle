@@ -6,7 +6,7 @@ This documents explains the processes and practices recommended for contributing
 - If you would like to chat with us about your use cases or proposed implementation, you can reach us on the [Charmhub Mattermost](https://chat.charmhub.io/charmhub/channels/charm-dev) or [Discourse](https://discourse.charmhub.io/).
 - All enhancements require review before being merged.
   Besides the code quality and test coverage, the review will also take into  account the resulting user experience for Juju administrators using this charm.
-  Please help us out in having easier reviews by rebasing onto the `main` branch, avoid merge commits and enjoy a linear Git history.
+  Please simplify the code-review process by rebasing onto the `main` branch and avoid merge commits so we can enjoy a linear Git history!
 
 ## Development
 
