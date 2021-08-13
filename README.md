@@ -12,7 +12,7 @@ For example, there is currently no "L" in LMA, i.e., there is no logging compone
 
 ## The Vision
 
-LMA Light is going to be the go-to solution for monitoring Canonical appliance when the end user does not already have an established observability stack.
+LMA Light is going to be the go-to solution for monitoring Canonical appliances when the end user does not already have an established observability stack.
 LMA Light is designed for:
 
 * Best-in-class monitoring of software [charmed with Juju](https://juju.is)
