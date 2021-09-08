@@ -39,7 +39,7 @@ async def test_build_and_deploy(ops_test):
     """
     # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
     # await cli_deploy_bundle("lma-light")
-    await cli_deploy_bundle(ops_test, "./bundle-local.yaml")
+    await cli_deploy_bundle(ops_test, "./bundle-testing.yaml")
 
     # due to a juju bug, occasionally alertmanager finishes a startup sequence with "waiting
     # for IP address". issuing a dummy config change just to trigger an event

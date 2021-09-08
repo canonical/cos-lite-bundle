@@ -1,0 +1,49 @@
+---
+bundle: kubernetes
+applications:
+  alertmanager:
+    # charmhub: alertmanager-k8s
+    # local: ./../alertmanager-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm
+    charm: {{ alertmanager|default('alertmanager-k8s') }}
+    scale: 1
+    {%- if alertmanager is defined and alertmanager.endswith('.charm') %}
+    resources:
+        alertmanager-image: "ubuntu/prometheus-alertmanager"
+    {%- else %}
+    channel: edge
+    {%- endif %}
+  prometheus:
+    # charmhub: prometheus-k8s
+    # local: ./../prometheus-operator/prometheus-k8s_ubuntu-20.04-amd64.charm
+    charm: {{ prometheus|default('prometheus-k8s') }}
+    scale: 1
+    {%- if prometheus is defined and prometheus.endswith('.charm') %}
+    resources:
+      prometheus-image: "ubuntu/prometheus:latest"
+    {%- else %}
+    channel: edge
+    {%- endif %}
+  grafana:
+    # charmhub: grafana-k8s
+    # local: ./../grafana-operator/grafana-k8s_ubuntu-20.04-amd64.charm
+    charm: {{ grafana|default('grafana-k8s') }}
+    scale: 1
+    {%- if grafana is defined and grafana.endswith('.charm') %}
+    resources:
+      grafana-image: "ubuntu/grafana:latest"
+    {%- else %}
+    channel: edge
+    {%- endif %}
+  tester:
+    charm: {{ tester|default('./../prometheus-tester/prometheus-tester_ubuntu-20.04-amd64.charm') }}
+    scale: 1
+    resources:
+      prometheus-tester-image: "cannelloni/prometheus-tester:latest"
+
+relations:
+- - prometheus
+  - alertmanager
+- - grafana
+  - prometheus
+- - prometheus
+  - tester

@@ -5,6 +5,7 @@ import asyncio
 import json
 import logging
 import urllib.request
+from pathlib import Path
 from typing import List
 
 log = logging.getLogger(__name__)
@@ -30,14 +31,17 @@ async def cli_deploy_and_wait(
 
 
 async def cli_deploy_bundle(ops_test, name: str, channel: str = "edge"):
-    retcode, stdout, stderr = await ops_test._run(
+    run_args = [
         "juju",
         "deploy",
         "-m",
         ops_test.model_full_name,
         name,
-        f"--channel={channel}",
-    )
+    ]
+    if not Path(name).is_file():
+        run_args.append(f"--channel={channel}")
+
+    retcode, stdout, stderr = await ops_test._run(*run_args)
     assert retcode == 0, f"Deploy failed: {(stderr or stdout).strip()}"
     log.info(stdout)
     await ops_test.model.wait_for_idle(timeout=120)
