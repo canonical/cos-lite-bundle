@@ -15,9 +15,9 @@
 #  limitations under the License.
 import json
 import logging
+import urllib.request
 
 import pytest
-import requests
 from helpers import (
     cli_deploy_bundle,
     get_alertmanager_alerts,
@@ -56,9 +56,9 @@ async def test_alertmanager_is_up(ops_test):
     url = f"http://{address}:9093"
     log.info("am public address: %s", url)
 
-    response = requests.get(f"{url}/api/v2/status")
-    assert response.status_code == 200
-    assert "versionInfo" in json.loads(response.text)
+    response = urllib.request.urlopen(f"{url}/api/v2/status", data=None, timeout=2.0)
+    assert response.code == 200
+    assert "versionInfo" in json.loads(response.read())
 
 
 @pytest.mark.abort_on_fail
@@ -67,8 +67,8 @@ async def test_prometheus_is_up(ops_test):
     url = f"http://{address}:9090"
     log.info("prom public address: %s", url)
 
-    response = requests.get(f"{url}/-/ready")
-    assert response.status_code == 200
+    response = urllib.request.urlopen(f"{url}/-/ready", data=None, timeout=2.0)
+    assert response.code == 200
 
 
 @pytest.mark.abort_on_fail
@@ -76,9 +76,11 @@ async def test_prometheus_sees_alertmanager(ops_test):
     am_address = await get_unit_address(ops_test, "alertmanager", 0)
     prom_address = await get_unit_address(ops_test, "prometheus", 0)
 
-    response = requests.get(f"http://{prom_address}:9090/api/v1/alertmanagers")
-    assert response.status_code == 200
-    alertmanagers = json.loads(response.text)
+    response = urllib.request.urlopen(
+        f"http://{prom_address}:9090/api/v1/alertmanagers", data=None, timeout=2.0
+    )
+    assert response.code == 200
+    alertmanagers = json.loads(response.read())
     # an empty response looks like this:
     # {"status":"success","data":{"activeAlertmanagers":[],"droppedAlertmanagers":[]}}
     # a jsonified activeAlertmanagers looks like this:
