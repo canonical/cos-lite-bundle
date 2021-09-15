@@ -16,16 +16,35 @@ contributing enhancements to the LMA Light bundle.
 
 ## Development
 
-### Deploy from a local bundle file
-
-```shell
-juju deploy ./bundle.yaml
-```
-
 ### Deploy with local charms
 
+First, render the bundle template. There are four template parameters you can
+provide (or leave as default):
+- prometheus (path to local prometheus *.charm file)
+- alertmanager (path to local alertmanager *.charm file)
+- grafana (path to local grafana *.charm file)
+- tester (path to local lma-tester *.charm file)
+
+For example:
+
 ```shell
-juju deploy ./bundle-local.yaml
+# Render template with defaults (all charms deployed from charmhub)
+./render_bundle.py ./bundle-testing.yaml.j2 ./bundle-testing.yaml
+
+# Render template with local charm files
+./render_bundle.py ./bundle-testing.yaml.j2 ./bundle-testing.yaml \
+  --prometheus=./../prometheus-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
+  --alertmanager=./../alertmanager-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
+  --grafana=./../grafana-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
+  --tester=./../lma-tester/lma-tester_ubuntu-20.04-amd64.charm
+```
+
+The above can also be achieved via `tox render`:
+
+```shell
+# using ./bundle-testing.yaml.j2 as source and ./bundle-testing.yaml as target
+tox -e render -- --prometheus=./../prometheus-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
+  # etc.
 ```
 
 ## Testing
@@ -63,7 +82,7 @@ Or to have all charms deployed from local files:
 tox -e render -- --prometheus=./../prometheus-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
   --alertmanager=./../alertmanager-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
   --grafana=./../grafana-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
-  --tester=./../prometheus-tester/prometheus-tester_ubuntu-20.04-amd64.charm
+  --tester=./../lma-tester/lma-tester_ubuntu-20.04-amd64.charm
 ```
 
 After a `bundle-testing.yaml` file is rendered, integration tests can be run

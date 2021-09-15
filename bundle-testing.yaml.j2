@@ -35,10 +35,10 @@ applications:
     channel: edge
     {%- endif %}
   tester:
-    charm: {{ tester|default('./../prometheus-tester/prometheus-tester_ubuntu-20.04-amd64.charm') }}
+    charm: {{ tester|default('./lma-tester_ubuntu-20.04-amd64.charm') }}
     scale: 1
     resources:
-      prometheus-tester-image: "cannelloni/prometheus-tester:latest"
+      lma-tester-image: "ghcr.io/sed-i/lma-tester-alerts:main"
 
 relations:
 - - prometheus
