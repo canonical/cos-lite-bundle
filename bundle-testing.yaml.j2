@@ -35,10 +35,16 @@ applications:
     channel: edge
     {%- endif %}
   tester:
-    charm: {{ tester|default('./lma-tester_ubuntu-20.04-amd64.charm') }}
+    # charmhub: lma-tester
+    # local: ./../lma-tester/lma-tester_ubuntu-20.04-amd64.charm
+    charm: {{ tester|default('lma-tester') }}
     scale: 1
+    {%- if tester is defined and tester.endswith('.charm') %}
     resources:
       lma-tester-image: "ghcr.io/sed-i/lma-tester-alerts:main"
+    {%- else %}
+    channel: edge
+    {%- endif %}
 
 relations:
 - - prometheus
