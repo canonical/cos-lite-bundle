@@ -1,5 +1,12 @@
 name: Test Suite
-on: [pull_request]
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    # every Wednesday at 23:00
+    - cron: '0 23 * * WED'
 
 jobs:
   lint:
@@ -17,7 +24,7 @@ jobs:
         python-version: ${{ matrix.python }}
     - name: Install dependencies
       run: python3 -m pip install tox
-    - name: Run liters
+    - name: Run linters
       run: tox -vve lint
   integration-test-microk8s:
     name: Integration tests (microk8s)
@@ -29,6 +36,9 @@ jobs:
       uses: charmed-kubernetes/actions-operator@main
       with:
         provider: microk8s
-    - name: Run tests
-      run: tox -e integration
-
+    - name: Run tests (edge channel)
+      if: ${{ github.event_name != 'schedule' }}
+      run: tox -e integration -- --channel=edge
+    - name: Run tests (stable channel)
+      if: ${{ github.event_name == 'schedule' }}
+      run: tox -e integration -- --channel=stable

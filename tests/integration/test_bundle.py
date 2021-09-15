@@ -13,9 +13,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import inspect
 import json
 import logging
+import os
 import urllib.request
+from pathlib import Path
 
 import pytest
 from helpers import (
@@ -28,25 +31,80 @@ from helpers import (
 log = logging.getLogger(__name__)
 
 
+def get_this_script_dir() -> Path:
+    filename = inspect.getframeinfo(inspect.currentframe()).filename  # type: ignore[arg-type]
+    path = os.path.dirname(os.path.abspath(filename))
+    return Path(path)
+
+
+@pytest.fixture()
+def alertmanager(pytestconfig):
+    return pytestconfig.getoption("alertmanager")
+
+
+@pytest.fixture()
+def prometheus(pytestconfig):
+    return pytestconfig.getoption("prometheus")
+
+
+@pytest.fixture()
+def grafana(pytestconfig):
+    return pytestconfig.getoption("grafana")
+
+
+@pytest.fixture()
+def loki(pytestconfig):
+    return pytestconfig.getoption("loki")
+
+
+@pytest.fixture()
+def tester(pytestconfig):
+    return pytestconfig.getoption("tester")
+
+
+@pytest.fixture()
+def channel(pytestconfig):
+    return pytestconfig.getoption("channel")
+
+
 juju_topology_keys = {"juju_model_uuid", "juju_model", "juju_application"}
 
 
 @pytest.mark.abort_on_fail
-async def test_build_and_deploy(ops_test):
+async def test_build_and_deploy(
+    ops_test, alertmanager, prometheus, grafana, loki, tester, channel
+):
     """Build the charm-under-test and deploy it together with related charms.
 
     Assert on the unit status before any relations/configurations take place.
     """
+    log.info("Rendering bundle %s", get_this_script_dir() / Path("./bundle-testing.yaml.j2"))
+
+    context = dict(
+        alertmanager=alertmanager,
+        prometheus=prometheus,
+        grafana=grafana,
+        loki=loki,
+        tester=tester,
+        channel=channel,
+    )
+
+    # filter out None values otherwise template won't render correctly
+    context = {k: v for k, v in context.items() if v is not None}
+
+    rendered_bundle = ops_test.render_bundle(
+        get_this_script_dir() / Path("./bundle-testing.yaml.j2"), context=context
+    )
+
     # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
-    # await cli_deploy_bundle("lma-light")
-    await cli_deploy_bundle(ops_test, "./bundle-testing.yaml")
+    await cli_deploy_bundle(ops_test, str(rendered_bundle))
 
     # due to a juju bug, occasionally alertmanager finishes a startup sequence with "waiting
     # for IP address". issuing a dummy config change just to trigger an event
     await ops_test.model.applications["alertmanager"].set_config(
         {"pagerduty::service_key": "just_a_dummy"}
     )
-    await ops_test.model.wait_for_idle(status="active", timeout=60)
+    await ops_test.model.wait_for_idle(status="active", timeout=120)
     assert ops_test.model.applications["alertmanager"].units[0].workload_status == "active"
 
 

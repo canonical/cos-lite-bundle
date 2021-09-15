@@ -11,26 +11,8 @@ from typing import List
 log = logging.getLogger(__name__)
 
 
-async def cli_deploy_and_wait(
-    ops_test, name: str, alias: str = "", wait_for_status: str = None, channel="edge"
-):
-    if not alias:
-        alias = name
-    retcode, stdout, stderr = await ops_test._run(
-        "juju",
-        "deploy",
-        "-m",
-        ops_test.model_full_name,
-        name,
-        alias,
-        f"--channel={channel}",
-    )
-    assert retcode == 0, f"Deploy failed: {(stderr or stdout).strip()}"
-    log.info(stdout)
-    await ops_test.model.wait_for_idle(apps=[alias], status=wait_for_status, timeout=60)
-
-
 async def cli_deploy_bundle(ops_test, name: str, channel: str = "edge"):
+    # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
     run_args = [
         "juju",
         "deploy",
@@ -41,7 +23,7 @@ async def cli_deploy_bundle(ops_test, name: str, channel: str = "edge"):
     if not Path(name).is_file():
         run_args.append(f"--channel={channel}")
 
-    retcode, stdout, stderr = await ops_test._run(*run_args)
+    retcode, stdout, stderr = await ops_test.run(*run_args)
     assert retcode == 0, f"Deploy failed: {(stderr or stdout).strip()}"
     log.info(stdout)
     await ops_test.model.wait_for_idle(timeout=120)
