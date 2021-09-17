@@ -27,8 +27,8 @@ relations:
   - alertmanager:alerting
 - - grafana:grafana-source
   - prometheus:grafana-source
-#- - grafana:grafana-source
-#  - loki:grafana-source
+- - grafana:grafana-source
+  - loki:grafana-source
 
 --- # overlay.yaml
 applications:
