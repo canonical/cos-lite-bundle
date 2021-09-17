@@ -1,6 +1,7 @@
 ---
 bundle: kubernetes
 name: lma-light
+description: Bundle for LMA-Light observability stack
 applications:
   alertmanager:
     charm: alertmanager-k8s
@@ -14,10 +15,44 @@ applications:
     charm: grafana-k8s
     channel: edge
     scale: 1
+  loki:
+    charm: loki-k8s
+    channel: edge
+    scale: 1
 
 relations:
-- - prometheus
-  - alertmanager
-- - grafana
-  - prometheus
+- - prometheus:alertmanager
+  - alertmanager:alerting
+- - grafana:grafana-source
+  - prometheus:grafana-source
+#- - grafana:grafana-source
+#  - loki:grafana-source
 
+--- # overlay.yaml
+# Ref: https://discourse.charmhub.io/t/bundle-reference/1158
+applications:
+  alertmanager:
+    # This (offers or acl?) is a deployment-specific field and can only be specified as part of an overlay.
+    offers:
+      alertmanager:
+        endpoints:
+          - alerting
+          - karma-dashboard
+        # acl is optional
+        acl:
+          admin: admin
+          # user1: read
+  grafana:
+    offers:
+      grafana:
+        endpoints:
+          - grafana-dashboard
+
+--- # add another overlay (render template?) but only after offers elsewhere have become available
+#    saas:
+#      svc1:  # prometheus metrics-endpoint
+#        url: localoffer.svc1
+#      svc2:
+#        url: admin/localoffer.svc2
+#      svc3:
+#        url: othercontroller:admin/offer.svc3
