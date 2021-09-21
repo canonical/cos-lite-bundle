@@ -3,9 +3,10 @@
 At Canonical, LMA stands for "Logs, Metrics and Alerts", and is a moniker to describe observability stacks.
 This Juju bundle deploys such an observability stack, called "LMA Light", based on consisting of the following interrelated charms:
 
-- [Grafana](https://charmhub.io/grafana-k8s) ([source](https://github.com/canonical/grafana-operator))
 - [Prometheus](https://charmhub.io/prometheus-k8s) ([source](https://github.com/canonical/prometheus-operator))
+- [Loki](https://charmhub.io/loki-k8s) ([source](https://github.com/canonical/loki-operator))
 - [Alertmanager](https://charmhub.io/alertmanager-k8s) ([source](https://github.com/canonical/alertmanager-operator))
+- [Grafana](https://charmhub.io/grafana-k8s) ([source](https://github.com/canonical/grafana-operator))
 
 This bundle is very much work in progress.
 For example, there is currently no "L" in LMA, i.e., there is no logging component integrated yet, there are several administrative use-cases to support, and more.
@@ -34,5 +35,8 @@ juju switch lma
 You can deploy the bundle with:
 
 ```shell
-juju deploy lma-light
+juju deploy lma-light --channel=edge
 ```
+
+Currently the bundle is available only on the `edge` channel, using `edge` charms.
+When the charms graduate to `beta`, `candidate` and `stable`, we will issue the bundle in the same channels.
