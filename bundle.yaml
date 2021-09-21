@@ -1,6 +1,9 @@
 ---
 bundle: kubernetes
 name: lma-light
+description: >
+  LMA 2 'Light' observability stack on Kubernetes:
+  A light-weight, highly-integrated, Juju-based observability stack for Logs, Metrics and Alerts.
 applications:
   alertmanager:
     charm: alertmanager-k8s
@@ -14,10 +17,38 @@ applications:
     charm: grafana-k8s
     channel: edge
     scale: 1
+  loki:
+    charm: loki-k8s
+    channel: edge
+    scale: 1
 
 relations:
-- - prometheus
-  - alertmanager
-- - grafana
-  - prometheus
+- - prometheus:alertmanager
+  - alertmanager:alerting
+- - grafana:grafana-source
+  - prometheus:grafana-source
+- - grafana:grafana-source
+  - loki:grafana-source
 
+--- # overlay.yaml
+applications:
+  alertmanager:
+    offers:
+      alertmanager-karma-dashboard:
+        endpoints:
+          - karma-dashboard
+  grafana:
+    offers:
+      grafana-dashboards:
+        endpoints:
+          - grafana-dashboard
+  loki:
+    offers:
+      loki-logging:
+        endpoints:
+        - logging
+  prometheus:
+    offers:
+      prometheus-scrape:
+        endpoints:
+        - metrics-endpoint
