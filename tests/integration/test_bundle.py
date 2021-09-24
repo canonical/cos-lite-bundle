@@ -78,7 +78,7 @@ async def test_build_and_deploy(
 
     Assert on the unit status before any relations/configurations take place.
     """
-    log.info("Rendering bundle %s", get_this_script_dir() / Path("./bundle-testing.yaml.j2"))
+    log.info("Rendering bundle %s", get_this_script_dir() / ".." / ".." / "bundle.yaml.j2")
 
     context = dict(
         alertmanager=alertmanager,
@@ -92,8 +92,11 @@ async def test_build_and_deploy(
     # filter out None values otherwise template won't render correctly
     context = {k: v for k, v in context.items() if v is not None}
 
+    # set the "testing" template variable so the templates renders for testing
+    context["testing"] = "true"
+
     rendered_bundle = ops_test.render_bundle(
-        get_this_script_dir() / Path("./bundle-testing.yaml.j2"), context=context
+        get_this_script_dir() / ".." / ".." / "bundle.yaml.j2", context=context
     )
 
     # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.

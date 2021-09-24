@@ -1,5 +1,10 @@
 ---
+{%- set testing = testing is defined and testing.casefold() in ["1", "yes", "true"] %}
 bundle: kubernetes
+name: lma-light
+description: >
+  LMA 2 'Light' observability stack on Kubernetes:
+  A light-weight, highly-integrated, Juju-based observability stack for Logs, Metrics and Alerts.
 applications:
   alertmanager:
     charm: {{ alertmanager|default('alertmanager-k8s') }}
@@ -37,9 +42,8 @@ applications:
     {%- else %}
     channel: {{ channel|default('edge') }}
     {%- endif %}
+  {%- if testing %}
   tester:
-    # charmhub: lma-tester
-    # local: ./../lma-tester/lma-tester_ubuntu-20.04-amd64.charm
     charm: {{ tester|default('lma-tester') }}
     scale: 1
     {%- if tester is defined and tester.endswith('.charm') %}
@@ -48,6 +52,7 @@ applications:
     {%- else %}
     channel: {{ channel|default('edge') }}
     {%- endif %}
+  {%- endif %}
 
 relations:
 - - prometheus:alertmanager
@@ -59,7 +64,7 @@ relations:
 - - prometheus:metrics-endpoint
   - tester:metrics-endpoint
 
-
+{% if testing -%}
 --- # overlay.yaml
 applications:
   alertmanager:
@@ -82,3 +87,4 @@ applications:
       prometheus-scrape:
         endpoints:
         - metrics-endpoint
+{% endif -%}
