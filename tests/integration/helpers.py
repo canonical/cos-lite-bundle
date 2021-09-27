@@ -16,6 +16,7 @@ async def cli_deploy_bundle(ops_test, name: str, channel: str = "edge"):
     run_args = [
         "juju",
         "deploy",
+        "--trust",
         "-m",
         ops_test.model_full_name,
         name,

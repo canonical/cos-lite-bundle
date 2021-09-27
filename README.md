@@ -47,7 +47,7 @@ source .tox/integration/bin/activate
 
 # render bundle with default values
 ./render_bundle.py bundle.yaml
-juju deploy ./bundle.yaml
+juju deploy ./bundle.yaml --trust
 ```
 
 Currently the bundle is available only on the `edge` channel, using `edge` charms.

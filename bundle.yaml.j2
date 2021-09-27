@@ -9,6 +9,7 @@ applications:
   alertmanager:
     charm: {{ alertmanager|default('alertmanager-k8s') }}
     scale: 1
+    trust: true
     {%- if alertmanager is defined and alertmanager.endswith('.charm') %}
     resources:
         alertmanager-image: "ubuntu/prometheus-alertmanager"
@@ -18,6 +19,7 @@ applications:
   prometheus:
     charm: {{ prometheus|default('prometheus-k8s') }}
     scale: 1
+    trust: true
     {%- if prometheus is defined and prometheus.endswith('.charm') %}
     resources:
       prometheus-image: "ubuntu/prometheus:latest"
@@ -27,6 +29,7 @@ applications:
   grafana:
     charm: {{ grafana|default('grafana-k8s') }}
     scale: 1
+    trust: true
     {%- if grafana is defined and grafana.endswith('.charm') %}
     resources:
       grafana-image: "ubuntu/grafana:latest"
@@ -36,6 +39,7 @@ applications:
   loki:
     charm: {{ loki|default('loki-k8s') }}
     scale: 1
+    trust: true
     {%- if loki is defined and loki.endswith('.charm') %}
     resources:
       loki-image: "grafana/loki"
@@ -46,6 +50,7 @@ applications:
   tester:
     charm: {{ tester|default('lma-tester') }}
     scale: 1
+    trust: true
     {%- if tester is defined and tester.endswith('.charm') %}
     resources:
       lma-tester-image: "ghcr.io/sed-i/lma-tester-alerts:main"
