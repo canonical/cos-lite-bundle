@@ -1,0 +1,33 @@
+# Storage overlay
+#
+# This sample overlay shows how to configure the amount of
+# storage to grant to the various LMA components. It uses the
+# default `kubernetes` storage pool.
+---
+applications:
+  alertmanager:
+    storage:
+      # The Alertmanager operator uses the `database` storage to
+      # store nflog and silence snapshots.
+      # See the `--storage.path` argument of Alertmanager
+      data: kubernetes,2G,1
+  grafana:
+    storage:
+      # The Grafana operator uses the `database` storage to store
+      # configurations, plugins, user data, etc. That is, everything
+      # that is normally stored under /var/lib/grafana.
+      database: kubernetes,2G,1
+  loki:
+    storage:
+      # This is the volume used by loki for the index of boltdb-shipper.
+      # See https://grafana.com/docs/loki/latest/configuration/examples/
+      active-index-directory: kubernetes,2G,1
+      # Loki will store in this volume the chunks, which contain the
+      # actual log content.
+      # See https://grafana.com/docs/loki/latest/operations/storage/
+      loki-chunks: kubernetes,10G,1
+  prometheus:
+    storage:
+      # Prometheus operator uses the `database` storage to store TSDB data.
+      # See the `--storage.tsdb.path` argument of Prometheus.
+      database: kubernetes,10G,1

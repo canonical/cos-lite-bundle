@@ -9,19 +9,22 @@ applications:
     charm: alertmanager-k8s
     channel: edge
     scale: 1
+    trust: true    
   prometheus:
     charm: prometheus-k8s
     channel: edge
     scale: 1
+    trust: true    
   grafana:
     charm: grafana-k8s
     channel: edge
     scale: 1
+    trust: true    
   loki:
     charm: loki-k8s
     channel: edge
     scale: 1
-
+    trust: true    
 relations:
 - - prometheus:alertmanager
   - alertmanager:alerting
@@ -29,26 +32,3 @@ relations:
   - prometheus:grafana-source
 - - grafana:grafana-source
   - loki:grafana-source
-
---- # overlay.yaml
-applications:
-  alertmanager:
-    offers:
-      alertmanager-karma-dashboard:
-        endpoints:
-          - karma-dashboard
-  grafana:
-    offers:
-      grafana-dashboards:
-        endpoints:
-          - grafana-dashboard
-  loki:
-    offers:
-      loki-logging:
-        endpoints:
-        - logging
-  prometheus:
-    offers:
-      prometheus-scrape:
-        endpoints:
-        - metrics-endpoint
