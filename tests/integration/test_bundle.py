@@ -107,7 +107,7 @@ async def test_build_and_deploy(
     await ops_test.model.applications["alertmanager"].set_config(
         {"pagerduty::service_key": "just_a_dummy"}
     )
-    await ops_test.model.wait_for_idle(status="active", timeout=120)
+    await ops_test.model.wait_for_idle(status="active", timeout=1000)
     assert ops_test.model.applications["alertmanager"].units[0].workload_status == "active"
 
 
