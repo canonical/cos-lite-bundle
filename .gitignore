@@ -2,3 +2,5 @@
 *.py[cod]
 .idea/
 .tox/
+.mypy_cache/
+
