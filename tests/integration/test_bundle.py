@@ -19,7 +19,6 @@ import logging
 import os
 import urllib.request
 from pathlib import Path
-from typing import Callable
 
 import pytest
 from helpers import (
@@ -30,6 +29,7 @@ from helpers import (
 )
 
 log = logging.getLogger(__name__)
+juju_topology_keys = {"juju_model_uuid", "juju_model", "juju_application"}
 
 
 def get_this_script_dir() -> Path:
@@ -38,28 +38,8 @@ def get_this_script_dir() -> Path:
     return Path(path)
 
 
-def option_fetcher_factory(option: str) -> str:
-    @pytest.fixture()
-    def option_fetcher(pytestconfig):
-        return pytestconfig.getoption(option)
-    return option_fetcher
-
-
-alertmanager = option_fetcher_factory("alertmanager")
-prometheus = option_fetcher_factory("prometheus")
-grafana = option_fetcher_factory("grafana")
-loki = option_fetcher_factory("loki")
-tester = option_fetcher_factory("tester")
-channel = option_fetcher_factory("channel")
-
-
-juju_topology_keys = {"juju_model_uuid", "juju_model", "juju_application"}
-
-
 @pytest.mark.abort_on_fail
-async def test_build_and_deploy(
-    ops_test, alertmanager, prometheus, grafana, loki, tester, channel
-):
+async def test_build_and_deploy(ops_test, pytestconfig):
     """Build the charm-under-test and deploy it together with related charms.
 
     Assert on the unit status before any relations/configurations take place.
@@ -73,25 +53,24 @@ async def test_build_and_deploy(
         return str(option)
 
     charms = dict(
-        alertmanager=alertmanager,
-        prometheus=prometheus,
-        grafana=grafana,
-        loki=loki,
-        tester=tester,
+        alertmanager=pytestconfig.getoption("alertmanager"),
+        prometheus=pytestconfig.getoption("prometheus"),
+        grafana=pytestconfig.getoption("grafana"),
+        loki=pytestconfig.getoption("loki"),
+        tester=pytestconfig.getoption("tester"),
     )
 
-    # filter out None values otherwise template won't render correctly
+    additional_args = dict(
+        channel=pytestconfig.getoption("channel"),
+    )
+
     context = {k: await build_charm_if_is_dir(v) for k, v in charms.items() if v is not None}
+    context.update(additional_args)
 
-    # filter out None values otherwise template won't render correctly
-    # context = {k: v for k, v in context.items() if v is not None}
-
-    context["channel"] = channel
-
-    # set the "testing" template variable so the templates renders for testing
+    # set the "testing" template variable so the template renders for testing
     context["testing"] = "true"
 
-    logging.info("context: %s", context)
+    logging.debug("context: %s", context)
 
     rendered_bundle = ops_test.render_bundle(
         get_this_script_dir() / ".." / ".." / "bundle.yaml.j2", context=context
