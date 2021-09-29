@@ -19,6 +19,7 @@ import logging
 import os
 import urllib.request
 from pathlib import Path
+from typing import Callable
 
 import pytest
 from helpers import (
@@ -37,34 +38,19 @@ def get_this_script_dir() -> Path:
     return Path(path)
 
 
-@pytest.fixture()
-def alertmanager(pytestconfig):
-    return pytestconfig.getoption("alertmanager")
+def option_fetcher_factory(option: str) -> str:
+    @pytest.fixture()
+    def option_fetcher(pytestconfig):
+        return pytestconfig.getoption(option)
+    return option_fetcher
 
 
-@pytest.fixture()
-def prometheus(pytestconfig):
-    return pytestconfig.getoption("prometheus")
-
-
-@pytest.fixture()
-def grafana(pytestconfig):
-    return pytestconfig.getoption("grafana")
-
-
-@pytest.fixture()
-def loki(pytestconfig):
-    return pytestconfig.getoption("loki")
-
-
-@pytest.fixture()
-def tester(pytestconfig):
-    return pytestconfig.getoption("tester")
-
-
-@pytest.fixture()
-def channel(pytestconfig):
-    return pytestconfig.getoption("channel")
+alertmanager = option_fetcher_factory("alertmanager")
+prometheus = option_fetcher_factory("prometheus")
+grafana = option_fetcher_factory("grafana")
+loki = option_fetcher_factory("loki")
+tester = option_fetcher_factory("tester")
+channel = option_fetcher_factory("channel")
 
 
 juju_topology_keys = {"juju_model_uuid", "juju_model", "juju_application"}
@@ -80,20 +66,32 @@ async def test_build_and_deploy(
     """
     log.info("Rendering bundle %s", get_this_script_dir() / ".." / ".." / "bundle.yaml.j2")
 
-    context = dict(
+    async def build_charm_if_is_dir(option: str) -> str:
+        if Path(option).is_dir():
+            logging.info("Building charm from source: %s", option)
+            option = await ops_test.build_charm(option)
+        return str(option)
+
+    charms = dict(
         alertmanager=alertmanager,
         prometheus=prometheus,
         grafana=grafana,
         loki=loki,
         tester=tester,
-        channel=channel,
     )
 
     # filter out None values otherwise template won't render correctly
-    context = {k: v for k, v in context.items() if v is not None}
+    context = {k: await build_charm_if_is_dir(v) for k, v in charms.items() if v is not None}
+
+    # filter out None values otherwise template won't render correctly
+    # context = {k: v for k, v in context.items() if v is not None}
+
+    context["channel"] = channel
 
     # set the "testing" template variable so the templates renders for testing
     context["testing"] = "true"
+
+    logging.info("context: %s", context)
 
     rendered_bundle = ops_test.render_bundle(
         get_this_script_dir() / ".." / ".." / "bundle.yaml.j2", context=context
