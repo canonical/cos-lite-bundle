@@ -20,13 +20,14 @@ There are four charms used for development:
 - prometheus
 - alertmanager
 - grafana
+- loki
 - avalanche
 
 ### Deploy with local charms
 
 To deploy the bundle using only/some local charms you need to render the
-[`bundle.yaml.j2`](bundle.yaml.j2) template
-and then deploy the rendered bundle as usual.
+[`bundle.yaml.j2`](bundle.yaml.j2) template and then deploy the rendered bundle
+as usual.
 
 #### Render template using the rendering script
 You can render and deploy a production bundle using:
@@ -43,20 +44,20 @@ juju deploy ./bundle.yaml
 To render the bundle for testing:
 
 ```shell
-./render_bundle.py bundle.yaml --testing=yes
+./render_bundle.py bundle.yaml --testing=yes --channel=edge
 ```
 
-This would include a tester charm and an overlay section with offers.
+This would include a tester charm (avalanche) and an overlay section with offers.
 
 Optionally, you may render the template with local charms, for example:
 
 ```shell
-./render_bundle.py bundle.yaml --testing=yes \
+./render_bundle.py bundle.yaml --testing=yes --channel=edge \
   --prometheus=$(pwd)/../prometheus-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
   --alertmanager=$(pwd)/../alertmanager-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
   --grafana=$(pwd)/../grafana-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
   --loki=$(pwd)/../loki-operator/loki-k8s_ubuntu-20.04-amd64.charm \
-  --tester=$(pwd)/../lma-tester/lma-tester_ubuntu-20.04-amd64.charm
+  --avalanche=$(pwd)/../avalanche-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
 ```
 
 #### Render template using tox
@@ -68,7 +69,7 @@ tox -e integration -- --keep-models -k test_build_and_deploy \
   --alertmanager=$(pwd)/../alertmanager-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
   --grafana=$(pwd)/../grafana-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
   --loki=$(pwd)/../loki-operator/loki-k8s_ubuntu-20.04-amd64.charm \
-  --tester=$(pwd)/../lma-tester/lma-tester_ubuntu-20.04-amd64.charm
+  --avalanche=$(pwd)/../avalanche-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
 ```
 
 Now `juju switch` into the newly created model (or use `--model=MODEL` in
@@ -110,5 +111,6 @@ tox -e integration -- \
   --prometheus=$(pwd)/../prometheus-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
   --alertmanager=$(pwd)/../alertmanager-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
   --grafana=$(pwd)/../grafana-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
+  --loki=$(pwd)/../loki-operator/loki-k8s_ubuntu-20.04-amd64.charm \
   --avalanche=$(pwd)/../avalanche-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
 ```
