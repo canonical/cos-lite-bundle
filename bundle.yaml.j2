@@ -47,13 +47,13 @@ applications:
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
   {%- if testing %}
-  tester:
-    charm: {{ tester|default('lma-tester', true) }}
+  avalanche:
+    charm: {{ avalanche|default('avalanche-k8s', true) }}
     scale: 1
     trust: true
-    {%- if tester is defined and tester.endswith('.charm') %}
+    {%- if avalanche is defined and avalanche.endswith('.charm') %}
     resources:
-      lma-tester-image: "ghcr.io/sed-i/lma-tester-alerts:main"
+      avalanche-image: "quay.io/freshtracks.io/avalanche"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -66,8 +66,10 @@ relations:
   - prometheus:grafana-source
 - - grafana:grafana-source
   - loki:grafana-source
+{% if testing -%}
 - - prometheus:metrics-endpoint
-  - tester:metrics-endpoint
+  - avalanche:metrics-endpoint
+{% endif -%}
 
 {% if testing -%}
 --- # overlay.yaml

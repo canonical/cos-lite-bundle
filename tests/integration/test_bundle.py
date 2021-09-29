@@ -57,7 +57,7 @@ async def test_build_and_deploy(ops_test, pytestconfig):
         prometheus=pytestconfig.getoption("prometheus"),
         grafana=pytestconfig.getoption("grafana"),
         loki=pytestconfig.getoption("loki"),
-        tester=pytestconfig.getoption("tester"),
+        avalanche=pytestconfig.getoption("avalanche"),
     )
 
     additional_args = dict(

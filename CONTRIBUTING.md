@@ -20,7 +20,7 @@ There are four charms used for development:
 - prometheus
 - alertmanager
 - grafana
-- tester
+- avalanche
 
 ### Deploy with local charms
 
@@ -110,5 +110,5 @@ tox -e integration -- \
   --prometheus=$(pwd)/../prometheus-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
   --alertmanager=$(pwd)/../alertmanager-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
   --grafana=$(pwd)/../grafana-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
-  --tester=$(pwd)/../lma-tester/lma-tester_ubuntu-20.04-amd64.charm
+  --avalanche=$(pwd)/../avalanche-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
 ```

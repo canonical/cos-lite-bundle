@@ -8,5 +8,5 @@ def pytest_addoption(parser):
     parser.addoption("--prometheus", action="store")
     parser.addoption("--grafana", action="store")
     parser.addoption("--loki", action="store")
-    parser.addoption("--tester", action="store")
+    parser.addoption("--avalanche", action="store")
     parser.addoption("--channel", action="store")
