@@ -32,10 +32,22 @@ juju add-model lma
 juju switch lma
 ```
 
-You can deploy the bundle with:
+You can deploy the bundle from charmhub with:
 
 ```shell
 juju deploy lma-light --channel=edge --trust
+```
+
+or, to deploy the bundle from a local file:
+
+```shell
+# generate and activate a virtual environment with dependencies
+tox -e integration --notest
+source .tox/integration/bin/activate
+
+# render bundle with default values
+./render_bundle.py bundle.yaml
+juju deploy ./bundle.yaml --trust
 ```
 
 Currently the bundle is available only on the `edge` channel, using `edge` charms.

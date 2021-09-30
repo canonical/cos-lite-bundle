@@ -1,0 +1,47 @@
+name: Test Suite
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    # every Wednesday at 23:00
+    - cron: '0 23 * * WED'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [3.8]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Install dependencies
+      run: python3 -m pip install tox
+    - name: Run linters
+      run: tox -vve lint
+  integration-test-microk8s:
+    name: Integration tests (microk8s)
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup operator environment
+      uses: charmed-kubernetes/actions-operator@main
+      with:
+        provider: microk8s
+    - name: Run tests (edge channel)
+      if: ${{ github.event_name != 'schedule' }}
+      run: tox -e integration -- --channel=edge
+    - name: Run scheduled tests (stable channel)
+      if: ${{ github.event_name == 'schedule' }}
+      run: tox -e integration -- --channel=stable
+    - name: Run scheduled tests (edge channel)
+      if: ${{ github.event_name == 'schedule' }}
+      run: tox -e integration -- --channel=edge

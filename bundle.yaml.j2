@@ -1,0 +1,97 @@
+---
+{%- set testing = testing is defined and testing.casefold() in ["1", "yes", "true"] %}
+bundle: kubernetes
+name: lma-light
+description: >
+  LMA 2 'Light' observability stack on Kubernetes:
+  A light-weight, highly-integrated, Juju-based observability stack for Logs, Metrics and Alerts.
+applications:
+  alertmanager:
+    charm: {{ alertmanager|default('alertmanager-k8s', true) }}
+    scale: 1
+    trust: true
+    {%- if alertmanager is defined and alertmanager.endswith('.charm') %}
+    resources:
+        alertmanager-image: "ubuntu/prometheus-alertmanager"
+    {%- else %}
+    channel: {{ channel|default('edge', true) }}
+    {%- endif %}
+  prometheus:
+    charm: {{ prometheus|default('prometheus-k8s', true) }}
+    scale: 1
+    trust: true
+    {%- if prometheus is defined and prometheus.endswith('.charm') %}
+    resources:
+      prometheus-image: "ubuntu/prometheus:latest"
+    {%- else %}
+    channel: {{ channel|default('edge', true) }}
+    {%- endif %}
+  grafana:
+    charm: {{ grafana|default('grafana-k8s', true) }}
+    scale: 1
+    trust: true
+    {%- if grafana is defined and grafana.endswith('.charm') %}
+    resources:
+      grafana-image: "ubuntu/grafana:latest"
+    {%- else %}
+    channel: {{ channel|default('edge', true) }}
+    {%- endif %}
+  loki:
+    charm: {{ loki|default('loki-k8s', true) }}
+    scale: 1
+    trust: true
+    {%- if loki is defined and loki.endswith('.charm') %}
+    resources:
+      loki-image: "grafana/loki"
+    {%- else %}
+    channel: {{ channel|default('edge', true) }}
+    {%- endif %}
+  {%- if testing %}
+  avalanche:
+    charm: {{ avalanche|default('avalanche-k8s', true) }}
+    scale: 1
+    trust: true
+    {%- if avalanche is defined and avalanche.endswith('.charm') %}
+    resources:
+      avalanche-image: "quay.io/freshtracks.io/avalanche"
+    {%- else %}
+    channel: {{ channel|default('edge', true) }}
+    {%- endif %}
+  {%- endif %}
+
+relations:
+- - prometheus:alertmanager
+  - alertmanager:alerting
+- - grafana:grafana-source
+  - prometheus:grafana-source
+- - grafana:grafana-source
+  - loki:grafana-source
+{% if testing -%}
+- - prometheus:metrics-endpoint
+  - avalanche:metrics-endpoint
+{% endif -%}
+
+{% if testing -%}
+--- # overlay.yaml
+applications:
+  alertmanager:
+    offers:
+      alertmanager-karma-dashboard:
+        endpoints:
+          - karma-dashboard
+  grafana:
+    offers:
+      grafana-dashboards:
+        endpoints:
+          - grafana-dashboard
+  loki:
+    offers:
+      loki-logging:
+        endpoints:
+        - logging
+  prometheus:
+    offers:
+      prometheus-scrape:
+        endpoints:
+        - metrics-endpoint
+{% endif -%}

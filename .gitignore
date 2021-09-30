@@ -1,0 +1,6 @@
+**/__pycache__/
+*.py[cod]
+.idea/
+.tox/
+.mypy_cache/
+
