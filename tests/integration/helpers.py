@@ -27,7 +27,7 @@ async def cli_deploy_bundle(ops_test, name: str, channel: str = "edge"):
     retcode, stdout, stderr = await ops_test.run(*run_args)
     assert retcode == 0, f"Deploy failed: {(stderr or stdout).strip()}"
     log.info(stdout)
-    await ops_test.model.wait_for_idle(timeout=120)
+    await ops_test.model.wait_for_idle(timeout=1000)
 
 
 async def get_unit_address(ops_test, app_name: str, unit_num: int) -> str:
