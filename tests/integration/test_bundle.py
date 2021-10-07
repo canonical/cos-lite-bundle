@@ -79,13 +79,16 @@ async def test_build_and_deploy(ops_test, pytestconfig):
     # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
     await cli_deploy_bundle(ops_test, str(rendered_bundle))
 
-    # due to a juju bug, occasionally alertmanager finishes a startup sequence with "waiting
-    # for IP address". issuing a dummy config change just to trigger an event
-    await ops_test.model.applications["alertmanager"].set_config(
-        {"pagerduty::service_key": "just_a_dummy"}
-    )
+    # due to a juju bug, occasionally some charms finish a startup sequence with "waiting for IP
+    # address"
+    # issuing dummy update_status just to trigger an event
+    await ops_test.model.set_config({"update-status-hook-interval": "10s"})
+
     await ops_test.model.wait_for_idle(status="active", timeout=1000)
     assert ops_test.model.applications["alertmanager"].units[0].workload_status == "active"
+
+    # effectively disable the update status from firing
+    await ops_test.model.set_config({"update-status-hook-interval": "60m"})
 
 
 @pytest.mark.abort_on_fail
