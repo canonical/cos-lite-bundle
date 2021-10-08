@@ -1,12 +1,5 @@
-[project]
-name = "lma-light-bundle"
-description = "Kubernetes bundle for LMA"
-license = "Apache 2.0"
-python = "^3.8"
-readme = "README.md"
-homepage = "https://charmhub.io/lma-light"
-repository = "https://github.com/canonical/lma-light-bundle/"
-documentation = "https://charmhub.io/lma-light/docs"
+# Copyright 2021 Canonical Ltd.
+# See LICENSE file for licensing details.
 
 # Testing tools configuration
 [tool.coverage.run]
@@ -56,11 +49,6 @@ namespace_packages = true
 explicit_package_bases = true
 check_untyped_defs = true
 allow_redefinition = true
-
-# Ignore libraries that do not have type hint nor stubs
-[[tool.mypy.overrides]]
-module = ["ops.*", "kubernetes.*", "flatten_json.*"]
-ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"
