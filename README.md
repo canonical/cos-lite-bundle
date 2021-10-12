@@ -71,7 +71,7 @@ In order to use the overlays above, you need to:
 For example, to deploy the LMA Light bundle with the offers overlay, you would do the following:
 
 ```sh
-curl -L https://github.com/canonical/lma-light-bundle/blob/main/overlays/offer-overlay.yaml -O
+curl -L https://raw.githubusercontent.com/canonical/lma-light-bundle/main/overlays/offers-overlay.yaml -O
 
 juju deploy lma-light --channel=edge --overlay ./offers-overlay.yaml
 ```
