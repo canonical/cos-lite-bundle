@@ -8,8 +8,8 @@ This Juju bundle deploys such an observability stack, called "LMA Light", based 
 - [Alertmanager](https://charmhub.io/alertmanager-k8s) ([source](https://github.com/canonical/alertmanager-operator))
 - [Grafana](https://charmhub.io/grafana-k8s) ([source](https://github.com/canonical/grafana-operator))
 
-This bundle is very much work in progress.
-For example, there is currently no "L" in LMA, i.e., there is no logging component integrated yet, there are several administrative use-cases to support, and more.
+This bundle is under development.
+Join us on [Discourse](https://discourse.charmhub.io/t/logs-metrics-and-alerts-lma-2/5132) and [MatterMost](https://chat.charmhub.io/charmhub/channels/juju)!
 
 ## The Vision
 
