@@ -1,0 +1,45 @@
+---
+bundle: kubernetes
+
+name: remote-scrape-target-load-tester
+
+description: >
+  This bundle sets up charms for load-testing a remote metrics provider (scrape target).
+  In this case no instance of avalanche is deployed and the user is left to configure the
+  prometheus-scrape-target charm with the correct IP address.
+
+applications:
+  prometheus:
+    charm: prometheus-k8s
+    scale: 1
+    trust: true
+    channel: edge
+  scrape-target:
+    charm: prometheus-scrape-target-k8s
+    scale: 1
+    trust: true
+    channel: edge
+    options:
+      targets: 192.168.1.101:9001
+  scrape-config:
+    charm: prometheus-scrape-config-k8s
+    scale: 1
+    trust: true
+    channel: edge
+    options:
+      scrape-interval: 1s
+
+relations:
+- - scrape-target:metrics-endpoint
+  - scrape-config:configurable-scrape-jobs
+- - scrape-config:metrics-endpoint
+  - prometheus:metrics-endpoint
+
+
+--- # overlay.yaml
+applications:
+  prometheus:
+    offers:
+      prometheus-scrape:
+        endpoints:
+        - metrics-endpoint
