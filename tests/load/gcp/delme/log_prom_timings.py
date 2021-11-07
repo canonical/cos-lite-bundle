@@ -1,23 +1,20 @@
 #!/usr/bin/env python3
 
-import subprocess
-import time
-import yaml
 import json
-
+import subprocess
+import syslog
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
-
-import syslog
+from pathlib import Path
 from typing import Tuple
 
-from pathlib import Path
-
+import yaml
 
 
 def get_stdout(args: list):
-    return subprocess.run(args, stdout=subprocess.PIPE).stdout.decode('utf-8')
+    return subprocess.run(args, stdout=subprocess.PIPE).stdout.decode("utf-8")
 
 
 def get_json_from_url(url: str, timeout: float = 5.0) -> Tuple[float, dict]:
@@ -42,7 +39,7 @@ def get_json_from_url(url: str, timeout: float = 5.0) -> Tuple[float, dict]:
 
 
 def get_prom_address(unit="prometheus/0") -> str:
-    unit_info = yaml.safe_load(get_stdout(['juju', 'show-unit', unit]))
+    unit_info = yaml.safe_load(get_stdout(["juju", "show-unit", unit]))
     return unit_info[unit]["address"]
 
 
@@ -187,11 +184,13 @@ def get_prom_address(unit="prometheus/0") -> str:
 #   }
 # }
 
+
 def prom_dir_size(path="/var/snap/microk8s") -> float:
     root_directory = Path(path)
-    return sum(f.stat().st_size for f in root_directory.glob('**/*') if f.is_file()) / 1e6  # in MB
+    return sum(f.stat().st_size for f in root_directory.glob("**/*") if f.is_file()) / 1e6  # in MB
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     targets_url = f"http://{get_prom_address()}:9090/api/v1/targets"
 
     period = 60  # sec
@@ -200,7 +199,10 @@ if __name__ == '__main__':
     while True:
         response_time, targets_info = get_json_from_url(targets_url)
         if targets_info:
-            scrapeDurations = [float(target["lastScrapeDuration"]) for target in targets_info["data"]["activeTargets"]]
+            scrapeDurations = [
+                float(target["lastScrapeDuration"])
+                for target in targets_info["data"]["activeTargets"]
+            ]
         else:
             error_count += 1
             scrapeDurations = [float("inf")]
