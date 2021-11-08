@@ -59,8 +59,8 @@ We also make available some [**overlays**](https://juju.is/docs/sdk/bundle-refer
 A Juju overlay is a set of model-specific modifications, which reduce the amount of commands needed to set up a bundle like LMA Light.
 Specifically, we offer the following overlays:
 
-* the [`offers` overlay](https://github.com/canonical/lma-light-bundle/blob/main/overlays/offers-overlay.yaml) exposes as offers the relation endpoints of the LMA Light charms that are likely to be consumed over [cross-model relations](https://juju.is/docs/olm/cross-model-relations).
-* the [`storage-small` overlays](https://github.com/canonical/lma-light-bundle/blob/main/overlays/storage-small-overlay.yaml) provides a setup of the various storages for the LMA Light charms for a small setup.
+* the [`offers` overlay](https://raw.githubusercontent.com/canonical/lma-light-bundle/main/overlays/offers-overlay.yaml) exposes as offers the relation endpoints of the LMA Light charms that are likely to be consumed over [cross-model relations](https://juju.is/docs/olm/cross-model-relations).
+* the [`storage-small` overlays](https://raw.githubusercontent.com/canonical/lma-light-bundle/main/overlays/storage-small-overlay.yaml) provides a setup of the various storages for the LMA Light charms for a small setup.
   Using an overlay for storage is fundamental for a productive setup, as you cannot change the amount of storage assigned to the various charms after the deployment of LMA Light.
 
 In order to use the overlays above, you need to:
