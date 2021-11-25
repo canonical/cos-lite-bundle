@@ -37,7 +37,6 @@ resource "google_compute_instance" "vm_ssd_2cpu_8gb" {
 
   boot_disk {
     initialize_params {
-      # image = "debian-cloud/debian-9"
       image = "projects/lma-light-load-testing/global/images/juju-hirsute-dns-ingress"
       type  = "pd-ssd"
       size  = "50"
@@ -50,16 +49,9 @@ resource "google_compute_instance" "vm_ssd_2cpu_8gb" {
   network_interface {
     network = google_compute_network.net_lma_light_load_test_net.name
 
-    # Public IP
     access_config {
     }
   }
-
-  #service_account {
-  #  # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
-  #  email = google_service_account.default.email
-  #  scopes = ["cloud-platform"]
-  #}
 }
 
 resource "google_compute_instance" "vm_avalanche_for_ssd_2cpu_8gb" {
@@ -75,7 +67,6 @@ resource "google_compute_instance" "vm_avalanche_for_ssd_2cpu_8gb" {
   network_interface {
     network = google_compute_network.net_lma_light_load_test_net.name
 
-    # Public IP
     access_config {
     }
   }
