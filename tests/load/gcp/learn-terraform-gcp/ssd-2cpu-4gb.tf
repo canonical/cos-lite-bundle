@@ -19,21 +19,36 @@ resource "google_compute_network" "net_lma_light_load_test_net" {
   name = "lma-light-load-test-net"
 }
 
-resource "google_compute_firewall" "ssh-rule" {
-  name = "demo-ssh"
+resource "google_compute_firewall" "load_test_traffic" {
+  name    = "load-test-traffic"
   network = google_compute_network.net_lma_light_load_test_net.name
+
   allow {
     protocol = "tcp"
-    ports = ["22"]
+    ports    = ["22", "80", "9001-9100", "9090"]
   }
-  target_tags = ["ssd-2cpu-8gb"]
+
+  allow {
+    protocol = "icmp"
+  }
+
+  target_tags   = ["load-test-traffic"]
   source_ranges = ["0.0.0.0/0"]
+}
+
+resource "google_compute_project_metadata" "my_ssh_key" {
+  metadata = {
+    # ssh-keygen -t rsa -b 4096 -f ~/secrets/lma-light-load-testing-ssh -C "" 
+    ssh-keys = <<EOF
+      ubuntu:${file("~/secrets/lma-light-load-testing-ssh.pub")}
+    EOF
+  }
 }
 
 resource "google_compute_instance" "vm_ssd_2cpu_8gb" {
   name         = "ssd-2cpu-8gb"
   machine_type = "custom-4-8192"
-  tags         = ["ssd-2cpu-8gb"]
+  tags         = ["load-test-traffic"]
 
   boot_disk {
     initialize_params {
@@ -41,10 +56,11 @@ resource "google_compute_instance" "vm_ssd_2cpu_8gb" {
       type  = "pd-ssd"
       size  = "50"
     }
-  
+
   }
 
-  metadata_startup_script = file(var.lma_startup_script)
+  # URL_AVALANCHE: e.g. avalanche-n1-ssd-2cpu-8gb.c.lma-light-load-testing.internal
+  metadata_startup_script = templatefile(var.lma_startup_script, { URL_AVALANCHE = "${google_compute_instance.vm_avalanche_for_ssd_2cpu_8gb.name}.${var.zone}.c.${var.project}.internal", NUM_SCRAPE_TARGETS = 3 })
 
   network_interface {
     network = google_compute_network.net_lma_light_load_test_net.name
@@ -57,12 +73,15 @@ resource "google_compute_instance" "vm_ssd_2cpu_8gb" {
 resource "google_compute_instance" "vm_avalanche_for_ssd_2cpu_8gb" {
   name         = "avalanche-for-ssd-2cpu-8gb"
   machine_type = "e2-standard-4"
+  tags         = ["load-test-traffic"]
 
   boot_disk {
     initialize_params {
       image = "projects/lma-light-load-testing/global/images/avalanche"
     }
   }
+
+  metadata_startup_script = file(var.avalanche_startup_script)
 
   network_interface {
     network = google_compute_network.net_lma_light_load_test_net.name
@@ -72,4 +91,52 @@ resource "google_compute_instance" "vm_avalanche_for_ssd_2cpu_8gb" {
   }
 }
 
+resource "google_compute_instance" "vm_locust_for_ssd_2cpu_8gb" {
+  name         = "locust-for-ssd-2cpu-8gb"
+  machine_type = "e2-standard-2"
+  tags         = ["load-test-traffic"]
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2104-hirsute-v20211119"
+    }
+  }
+
+  provisioner "file" {
+    source      = "prom-query-locustfile.py"
+    destination = "/home/ubuntu/prom-query-locustfile.py"
+
+    connection {
+      type = "ssh"
+      user = "ubuntu"
+      #host = self.network_interface[0].access_config[0].nat_ip
+      host        = google_compute_instance.vm_locust_for_ssd_2cpu_8gb.network_interface.0.access_config.0.nat_ip
+      private_key = file("~/secrets/lma-light-load-testing-ssh")
+      #agent = "false"
+    }
+  }
+
+  #  provisioner "remote-exec" {
+  #    inline = [
+  #      "chmod +x ~/installations.sh",
+  #      "cd ~",
+  #      "./installations.sh"
+  #    ]
+  #    connection {
+  #        type = "ssh"
+  #        user = "ubuntu"
+  #        private_key = "${file("~/.ssh/google_compute_engine")}"
+  #    }
+  #}
+
+  # TODO use var for gcp internal hostnames
+  metadata_startup_script = templatefile(var.locust_startup_script, { PROM_URL = "http://${google_compute_instance.vm_ssd_2cpu_8gb.name}.${var.zone}.c.${var.project}.internal/prom" })
+
+  network_interface {
+    network = google_compute_network.net_lma_light_load_test_net.name
+
+    access_config {
+    }
+  }
+}
 

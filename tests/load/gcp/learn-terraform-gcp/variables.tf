@@ -15,5 +15,14 @@ variable "zone" {
 }
 
 variable "lma_startup_script" {
-  default = "lma_startup_script.sh"
+  default = "lma_startup_script.tpl.sh"
 }
+
+variable "avalanche_startup_script" {
+  default = "avalanche_startup_script.sh"
+}
+
+variable "locust_startup_script" {
+  default = "locust_startup_script.tpl.sh"
+}
+
