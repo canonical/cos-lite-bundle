@@ -38,3 +38,12 @@ variable "disk_type" {
   default = "pd-ssd"
   # default = "pd-standard"
 }
+
+variable "ncpus" {
+  default = 2
+}
+
+variable "gbmem" {
+  default = 8
+}
+

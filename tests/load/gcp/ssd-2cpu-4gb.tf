@@ -45,9 +45,17 @@ resource "google_compute_project_metadata" "my_ssh_key" {
   }
 }
 
-resource "google_compute_instance" "vm_ssd_2cpu_8gb" {
-  name         = "ssd-2cpu-8gb"
-  machine_type = "custom-4-8192"
+
+locals {
+  # ncpus = 4
+  # gbmem = 8
+  instance_name = "ssd-${var.ncpus}cpu-${var.gbmem}gb"
+  machine_type = "custom-${var.ncpus}-${var.gbmem * 1024}"
+}
+
+resource "google_compute_instance" "vm_lma_appliance" {
+  name         = local.instance_name
+  machine_type = local.machine_type
   tags         = ["load-test-traffic"]
 
   boot_disk {
@@ -67,7 +75,7 @@ resource "google_compute_instance" "vm_ssd_2cpu_8gb" {
       type = "ssh"
       user = "ubuntu"
       #host = self.network_interface[0].access_config[0].nat_ip
-      host        = google_compute_instance.vm_ssd_2cpu_8gb.network_interface.0.access_config.0.nat_ip
+      host        = google_compute_instance.vm_lma_appliance.network_interface.0.access_config.0.nat_ip
       private_key = file("~/secrets/lma-light-load-testing-ssh")
       #agent = "false"
     }
@@ -143,7 +151,7 @@ resource "google_compute_instance" "vm_locust_for_ssd_2cpu_8gb" {
   #}
 
   # TODO use var for gcp internal hostnames
-  metadata_startup_script = templatefile(var.locust_startup_script, { PROM_URL = "http://${google_compute_instance.vm_ssd_2cpu_8gb.name}.${var.zone}.c.${var.project}.internal/prom" })
+  metadata_startup_script = templatefile(var.locust_startup_script, { PROM_URL = "http://${google_compute_instance.vm_lma_appliance.name}.${var.zone}.c.${var.project}.internal/prom" })
 
   network_interface {
     network = google_compute_network.net_lma_light_load_test_net.name
