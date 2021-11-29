@@ -6,7 +6,7 @@ applications:
     trust: true
     channel: edge
     options:
-    targets: ${join(",", [for port in PORTS: "${AVALANCHE_URL}:${port}"])}
+      targets: ${join(",", [for port in PORTS: "${AVALANCHE_URL}:${port}"])}
   scrape-config:
     charm: prometheus-scrape-config-k8s
     scale: 1
