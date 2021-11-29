@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euxo pipefail
+
 apt update && apt install -y python3-pip jq && python3 -m pip install locust
 
 # wait until the lma node is up

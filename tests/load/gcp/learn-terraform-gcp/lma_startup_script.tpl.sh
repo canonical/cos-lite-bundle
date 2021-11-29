@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euxo pipefail
+
 systemctl disable systemd-tmpfiles-clean.timer --now
 microk8s status --wait-ready
 microk8s.enable storage dns ingress
