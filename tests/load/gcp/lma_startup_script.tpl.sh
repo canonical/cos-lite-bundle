@@ -24,16 +24,9 @@ microk8s kubectl create serviceaccount test-sa
 timeout 600 sh -c "until microk8s kubectl get secrets | grep -q test-sa-token-; do sleep 5; done"
 microk8s kubectl delete serviceaccount test-sa
 
-SCRAPE_TARGETS="${URL_AVALANCHE}:9001"
-for ((i = 2 ; i <= ${NUM_SCRAPE_TARGETS} ; i++)) ; do SCRAPE_TARGETS="$SCRAPE_TARGETS,${URL_AVALANCHE}:$((9000 + $i))"; done
-
 sudo -u ubuntu juju bootstrap --no-gui microk8s uk8s
 sudo -u ubuntu juju add-model --config logging-config="<root>=WARNING; unit=DEBUG" --config update-status-hook-interval="60m" lma-load-test
-sudo -u ubuntu juju deploy --channel=edge lma-light --trust
-sudo -u ubuntu juju deploy --channel=edge --trust prometheus-scrape-target-k8s scrape-target --config targets=$SCRAPE_TARGETS
-sudo -u ubuntu juju deploy --channel=edge --trust prometheus-scrape-config-k8s scrape-config --config scrape-interval=60s --config scrape-timeout=55s
-sudo -u ubuntu juju relate scrape-config:configurable-scrape-jobs scrape-target:metrics-endpoint
-sudo -u ubuntu juju relate scrape-config:metrics-endpoint prometheus:metrics-endpoint
+sudo -u ubuntu juju deploy --channel=edge lma-light --trust --overlay ${OVERLAY_LOAD_TEST} --trust
 
 microk8s.kubectl apply -f - <<'EOY'
 apiVersion: networking.k8s.io/v1

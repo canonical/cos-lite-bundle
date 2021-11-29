@@ -56,11 +56,24 @@ resource "google_compute_instance" "vm_ssd_2cpu_8gb" {
       type  = "pd-ssd"
       size  = "50"
     }
-
   }
 
-  # URL_AVALANCHE: e.g. avalanche-n1-ssd-2cpu-8gb.c.lma-light-load-testing.internal
-  metadata_startup_script = templatefile(var.lma_startup_script, { URL_AVALANCHE = "${google_compute_instance.vm_avalanche_for_ssd_2cpu_8gb.name}.${var.zone}.c.${var.project}.internal", NUM_SCRAPE_TARGETS = 3 })
+  provisioner "file" {
+    # AVALANCHE_URL: e.g. avalanche-n1-ssd-2cpu-8gb.c.lma-light-load-testing.internal
+    content      = templatefile("overlay-load-test.tpl.yaml", { AVALANCHE_URL = "http://${google_compute_instance.vm_avalanche_for_ssd_2cpu_8gb.name}.${var.zone}.c.${var.project}.internal", PORTS = [9001, 9002, 9003, 9004] })
+    destination = var.overlay_load_test
+    
+    connection {
+      type = "ssh"
+      user = "ubuntu"
+      #host = self.network_interface[0].access_config[0].nat_ip
+      host        = google_compute_instance.vm_ssd_2cpu_8gb.network_interface.0.access_config.0.nat_ip
+      private_key = file("~/secrets/lma-light-load-testing-ssh")
+      #agent = "false"
+    }
+  }
+
+  metadata_startup_script = templatefile(var.lma_startup_script, { OVERLAY_LOAD_TEST = var.overlay_load_test })
 
   network_interface {
     network = google_compute_network.net_lma_light_load_test_net.name

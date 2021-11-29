@@ -26,3 +26,10 @@ variable "locust_startup_script" {
   default = "locust_startup_script.tpl.sh"
 }
 
+variable "overlay_load_test" {
+  default = "/home/ubuntu/overlay-load-test.yaml"
+}
+
+variable "avports" {
+  default = [9001, 9002, 9003]
+}
