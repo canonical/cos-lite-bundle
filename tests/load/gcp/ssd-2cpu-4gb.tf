@@ -53,14 +53,14 @@ resource "google_compute_instance" "vm_ssd_2cpu_8gb" {
   boot_disk {
     initialize_params {
       image = "projects/lma-light-load-testing/global/images/juju-hirsute-dns-ingress"
-      type  = "pd-ssd"
+      type  = var.disk_type
       size  = "50"
     }
   }
 
   provisioner "file" {
     # AVALANCHE_URL: e.g. avalanche-n1-ssd-2cpu-8gb.c.lma-light-load-testing.internal
-    content      = templatefile("overlay-load-test.tpl.yaml", { AVALANCHE_URL = "http://${google_compute_instance.vm_avalanche_for_ssd_2cpu_8gb.name}.${var.zone}.c.${var.project}.internal", PORTS = [9001, 9002, 9003, 9004] })
+    content      = templatefile("overlay-load-test.tpl.yaml", { AVALANCHE_URL = "${google_compute_instance.vm_avalanche_for_ssd_2cpu_8gb.name}.${var.zone}.c.${var.project}.internal", PORTS = var.avalanche_ports })
     destination = var.overlay_load_test
     
     connection {

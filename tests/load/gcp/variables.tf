@@ -30,6 +30,11 @@ variable "overlay_load_test" {
   default = "/home/ubuntu/overlay-load-test.yaml"
 }
 
-variable "avports" {
+variable "avalanche_ports" {
   default = [9001, 9002, 9003]
+}
+
+variable "disk_type" {
+  default = "pd-ssd"
+  # default = "pd-standard"
 }
