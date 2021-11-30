@@ -56,6 +56,19 @@ resource "google_compute_project_metadata" "gcp_metadata" {
   }
 }
 
+data "cloudinit_config" "lma" {
+  # https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs/data-sources/cloudinit_config
+  # https://github.com/hashicorp/terraform-provider-template/blob/79c2094838bfb2b6bba91dc5b02f5071dd497083/website/docs/d/cloudinit_config.html.markdown
+  gzip = false
+  base64_encode = false
+
+  part {
+    content_type = "text/cloud-config"
+    content = file("lma_cloud_init.conf")
+    filename = "lma_cloud_init.conf"
+  }
+}
+
 resource "google_compute_instance" "vm_lma_appliance" {
   name         = local.lma_appliance_resource_name
   machine_type = "custom-${var.ncpus}-${var.gbmem * 1024}"
@@ -84,6 +97,10 @@ resource "google_compute_instance" "vm_lma_appliance" {
   }
 
   metadata_startup_script = templatefile(var.lma_startup_script, { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.lma_appliance_resource_name, OVERLAY_LOAD_TEST = var.overlay_load_test })
+
+  metadata = {
+    user-data = "${data.cloudinit_config.lma.rendered}"
+  }
 
   network_interface {
     network = google_compute_network.net_lma_light_load_test_net.name
