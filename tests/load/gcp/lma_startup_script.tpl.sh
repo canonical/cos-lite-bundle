@@ -58,3 +58,10 @@ spec:
               number: 3100
 EOY
 
+# install ops agent for observability
+#echo '"projects/${PROJECT}/zones/${ZONE}/instances/${INSTANCE}","[{""type"":""ops-agent""}]"' >> agents_to_install.csv && \
+#curl -sSO https://dl.google.com/cloudagents/mass-provision-google-cloud-ops-agents.py && \
+#python3 mass-provision-google-cloud-ops-agents.py --file agents_to_install.csv
+curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
+sudo bash add-google-cloud-ops-agent-repo.sh --also-install
+

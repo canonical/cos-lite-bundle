@@ -49,20 +49,21 @@ variable "overlay_load_test" {
 variable "avalanche_ports" {
   type = list(number)
   description = "List of ports (avalanche targets) for LMA appliance to scrape"
-  default = [9001, 9002, 9003]
 }
 
 variable "disk_type" {
   type = string
   description = "GCP disk type (ssd/magnetic)"
-  default = "pd-ssd"
-  # default = "pd-standard"
+
+  validation {
+    condition = var.disk_type == "pd-ssd" || var.disk_type == "pd-standard"
+    error_message = "The disk_type variable must be one of: 'pd-ssd', 'pd-standard'."
+  }
 }
 
 variable "ncpus" {
   type = number
   description = "Number of vCPUs for the LMA appliance VM"
-  default = 2
 
   validation {
     condition = can(regex("[0-9][0-9]*", var.ncpus))
@@ -73,7 +74,6 @@ variable "ncpus" {
 variable "gbmem" {
   type = number
   description = "Amount of memory (GB) for the LMA appliance VM"
-  default = 8
 
   validation {
     condition = can(regex("[0-9][0-9]*", var.gbmem))

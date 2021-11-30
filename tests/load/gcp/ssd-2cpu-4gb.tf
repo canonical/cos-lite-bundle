@@ -46,6 +46,8 @@ locals {
   EOF
 
   file_provisioner_ssh_key = file(var.ssh_key_private_path)
+
+  lma_appliance_resource_name = "${var.disk_type}-${var.ncpus}cpu-${var.gbmem}gb"
 }
 
 resource "google_compute_project_metadata" "gcp_metadata" {
@@ -55,7 +57,7 @@ resource "google_compute_project_metadata" "gcp_metadata" {
 }
 
 resource "google_compute_instance" "vm_lma_appliance" {
-  name         = "${var.disk_type}-${var.ncpus}cpu-${var.gbmem}gb"
+  name         = local.lma_appliance_resource_name
   machine_type = "custom-${var.ncpus}-${var.gbmem * 1024}"
   tags         = ["load-test-traffic"]
 
@@ -81,7 +83,7 @@ resource "google_compute_instance" "vm_lma_appliance" {
     }
   }
 
-  metadata_startup_script = templatefile(var.lma_startup_script, { OVERLAY_LOAD_TEST = var.overlay_load_test })
+  metadata_startup_script = templatefile(var.lma_startup_script, { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.lma_appliance_resource_name, OVERLAY_LOAD_TEST = var.overlay_load_test })
 
   network_interface {
     network = google_compute_network.net_lma_light_load_test_net.name
