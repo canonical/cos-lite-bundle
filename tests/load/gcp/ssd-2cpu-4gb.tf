@@ -110,6 +110,17 @@ resource "google_compute_instance" "vm_lma_appliance" {
   }
 }
 
+data "cloudinit_config" "avalanche" {
+  gzip = false
+  base64_encode = false
+
+  part {
+    content_type = "text/cloud-config"
+    content = file("avalanche.conf")
+    filename = "avalanche.conf"
+  }
+}
+
 resource "google_compute_instance" "vm_avalanche" {
   name         = "avalanche"
   machine_type = "e2-standard-4"
@@ -121,7 +132,9 @@ resource "google_compute_instance" "vm_avalanche" {
     }
   }
 
-  metadata_startup_script = file(var.avalanche_startup_script)
+  metadata = {
+    user-data = "${data.cloudinit_config.avalanche.rendered}"
+  }
 
   network_interface {
     network = google_compute_network.net_lma_light_load_test_net.name
