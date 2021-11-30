@@ -64,8 +64,8 @@ data "cloudinit_config" "lma" {
 
   part {
     content_type = "text/cloud-config"
-    content = file("lma_cloud_init.conf")
-    filename = "lma_cloud_init.conf"
+    content = templatefile("lma.tpl.conf", { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.lma_appliance_resource_name, OVERLAY_LOAD_TEST = var.overlay_load_test })
+    filename = "lma.conf"
   }
 }
 
@@ -95,8 +95,6 @@ resource "google_compute_instance" "vm_lma_appliance" {
       #agent = "false"
     }
   }
-
-  metadata_startup_script = templatefile(var.lma_startup_script, { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.lma_appliance_resource_name, OVERLAY_LOAD_TEST = var.overlay_load_test })
 
   metadata = {
     user-data = "${data.cloudinit_config.lma.rendered}"
