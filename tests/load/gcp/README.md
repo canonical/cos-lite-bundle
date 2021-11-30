@@ -16,18 +16,20 @@ To start a load test:
 
 ```shell
 terraform apply -var-file="var_ssd-2cpu-8gb.tfvars"
+
+# or, override some of the variables
+
+terraform apply -var-file="var_ssd-2cpu-8gb.tfvars" -var="ncpus=4" -var="gbmem=16"
+
+# or, do not use a var-file at all
+
+terraform apply -var="disk_type=pd-ssd" -var="avalanche_ports=[9001,9002,9003]" -var="ncpus=2" -var="gbmem=8"
 ```
 
 which will create three vm instances:
 - avalanche
 - locust
 - pd-ssd-2cpu-8gb
-
-To override some of the variables,
-
-```shell
-terraform apply -var-file="var_ssd-2cpu-8gb.tfvars" -var="ncpus=4" -var="gbmem=16"
-```
 
 Similarly, to destroy,
 

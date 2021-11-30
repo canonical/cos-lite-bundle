@@ -1,59 +1,11 @@
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "3.5.0"
-    }
-  }
-}
-
-provider "google" {
-  credentials = file(var.credentials_file)
-
-  project = var.project
-  region  = var.region
-  zone    = var.zone
-}
-
-resource "google_compute_network" "net_lma_light_load_test_net" {
-  name = "lma-light-load-test-net"
-}
-
-resource "google_compute_firewall" "load_test_traffic" {
-  name    = "load-test-traffic"
-  network = google_compute_network.net_lma_light_load_test_net.name
-
-  allow {
-    protocol = "tcp"
-    ports    = ["22", "80", "9001-9100", "9090"]
-  }
-
-  allow {
-    protocol = "icmp"
-  }
-
-  target_tags   = ["load-test-traffic"]
-  source_ranges = ["0.0.0.0/0"]
-}
-
 locals {
   # avalanhe_url: e.g. vm_avalanche.c.lma-light-load-testing.internal
   avalanche_target = "${google_compute_instance.vm_avalanche.name}.${var.zone}.c.${var.project}.internal"
   prom_url = "http://${google_compute_instance.vm_lma_appliance.name}.${var.zone}.c.${var.project}.internal/prom"
 
-  ssh_keys = <<EOF
-    ubuntu:${file(var.ssh_key_public_path)}
-  EOF
-
   file_provisioner_ssh_key = file(var.ssh_key_private_path)
 
   lma_appliance_resource_name = "${var.disk_type}-${var.ncpus}cpu-${var.gbmem}gb"
-}
-
-resource "google_compute_project_metadata" "gcp_metadata" {
-  metadata = {
-    ssh-keys = local.ssh_keys
-  }
 }
 
 data "cloudinit_config" "lma" {
@@ -177,19 +129,6 @@ resource "google_compute_instance" "vm_locust" {
       #agent = "false"
     }
   }
-
-  #  provisioner "remote-exec" {
-  #    inline = [
-  #      "chmod +x ~/installations.sh",
-  #      "cd ~",
-  #      "./installations.sh"
-  #    ]
-  #    connection {
-  #        type = "ssh"
-  #        user = "ubuntu"
-  #        private_key = "${file("~/.ssh/google_compute_engine")}"
-  #    }
-  #}
 
   metadata = {
     user-data = "${data.cloudinit_config.locust.rendered}"
