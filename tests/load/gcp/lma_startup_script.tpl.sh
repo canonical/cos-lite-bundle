@@ -21,7 +21,7 @@ sh -c "until microk8s.kubectl rollout status daemonset.apps/speaker -n metallb-s
 # ERROR resolving microk8s credentials: max duration exceeded: secret for service account "juju-credential-microk8s" not found
 # Ref: https://github.com/charmed-kubernetes/actions-operator/blob/main/src/bootstrap/index.ts
 microk8s.kubectl create serviceaccount test-sa
-timeout 600 sh -c "until.microk8s kubectl get secrets | grep -q test-sa-token-; do sleep 5; done"
+timeout 600 sh -c "until microk8s.kubectl get secrets | grep -q test-sa-token-; do sleep 5; done"
 microk8s.kubectl delete serviceaccount test-sa
 
 sudo -u ubuntu juju bootstrap --no-gui microk8s uk8s

@@ -144,6 +144,17 @@ resource "google_compute_instance" "vm_avalanche" {
   }
 }
 
+data "cloudinit_config" "locust" {
+  gzip = false
+  base64_encode = false
+
+  part {
+    content_type = "text/cloud-config"
+    content = templatefile("locust.tpl.conf", { PROM_URL = local.prom_url })
+    filename = "locust.conf"
+  }
+}
+
 resource "google_compute_instance" "vm_locust" {
   name         = "locust"
   machine_type = "e2-standard-2"
@@ -182,8 +193,9 @@ resource "google_compute_instance" "vm_locust" {
   #    }
   #}
 
-  # TODO use var for gcp internal hostnames
-  metadata_startup_script = templatefile(var.locust_startup_script, { PROM_URL = local.prom_url })
+  metadata = {
+    user-data = "${data.cloudinit_config.locust.rendered}"
+  }
 
   network_interface {
     network = google_compute_network.net_lma_light_load_test_net.name
