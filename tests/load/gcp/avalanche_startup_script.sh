@@ -10,6 +10,6 @@ for ((i = 1 ; i <= 20 ; i++)) ; do
 	--value-interval=30 \
 	--series-interval=36000000 \
 	--metric-interval=36000000 \
-	--port=$port 1>/dev/null 2>&1 & 
+	--port="${port}" 1>/dev/null 2>&1 & 
 done
 

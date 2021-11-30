@@ -5,7 +5,7 @@ systemctl disable systemd-tmpfiles-clean.timer --now
 microk8s status --wait-ready
 microk8s.enable storage dns ingress
 
-IPADDR=$(ip -4 route | grep default | grep -oP 'src \K\S+')
+IPADDR=$(ip -4 -j route | jq -r '.[] | select(.dst | contains("default")) | .src')
 
 # Occasionally, enabling metallb fails with the following error:
 # The connection to the server 127.0.0.1:16443 was refused - did you specify the right host or port?
