@@ -13,8 +13,8 @@ applications:
     trust: true
     channel: edge
     options:
-      scrape-interval: 60s
-      scrape-timeout: 55s
+      scrape-interval: ${SCRAPE_INTERVAL}s
+      scrape-timeout: ${max(SCRAPE_INTERVAL - 1, 1)}s
 
 relations:
 - - scrape-target:metrics-endpoint

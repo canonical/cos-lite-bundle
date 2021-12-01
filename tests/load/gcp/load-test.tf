@@ -35,7 +35,7 @@ resource "google_compute_instance" "vm_lma_appliance" {
   }
 
   provisioner "file" {
-    content      = templatefile("overlay-load-test.tpl.yaml", { AVALANCHE_URL = local.avalanche_target, PORTS = var.avalanche_ports })
+    content      = templatefile("overlay-load-test.tpl.yaml", { AVALANCHE_URL = local.avalanche_target, PORTS = var.avalanche_ports, SCRAPE_INTERVAL = var.prom_scrape_interval })
     destination = var.overlay_load_test
     
     connection {
@@ -66,14 +66,14 @@ data "cloudinit_config" "avalanche" {
 
   part {
     content_type = "text/cloud-config"
-    content = file("avalanche.conf")
+    content = templatefile("prom-scrape-avalanche.tpl.conf", { METRIC_COUNT = var.avalanche_metric_count, VALUE_INTERVAL = var.avalanche_value_interval })
     filename = "avalanche.conf"
   }
 }
 
 resource "google_compute_instance" "vm_avalanche" {
   name         = "avalanche"
-  machine_type = "e2-standard-4"
+  machine_type = "custom-4-16384"
   tags         = ["load-test-traffic"]
 
   boot_disk {
@@ -100,7 +100,7 @@ data "cloudinit_config" "locust" {
 
   part {
     content_type = "text/cloud-config"
-    content = templatefile("locust.tpl.conf", { PROM_URL = local.prom_url })
+    content = templatefile("prom-query-locust.tpl.conf", { PROM_URL = local.prom_url, USERS = var.locust_users })
     filename = "locust.conf"
   }
 }

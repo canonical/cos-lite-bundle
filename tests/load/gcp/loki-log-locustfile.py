@@ -5,7 +5,7 @@ import random
 from datetime import datetime
 from time import time_ns
 
-from locust import HttpUser, TaskSet, between, task
+from locust import HttpUser, TaskSet, constant, task, events
 from locust.contrib.fasthttp import FastHttpUser
 
 
@@ -39,24 +39,49 @@ class LogGenerator:
         ]
 
     @staticmethod
-    def generate():
-        num = 100  # random.randint(50, 150)
+    def generate(num: int):
         return LogGenerator._get_sample(num)
 
 
+def timepad(pad: float):
+    """Decorator that guarantees a function won't return before some minimum time has elapsed.
+    Args:
+        pad: minimum time in seconds that should elapse before the wrapped function returns.
+    """
+    pad = max(0, pad)
+    def decorator(func):
+        from functools import wraps
+        import time
+        @wraps(func)
+        def inner(*args, **kwargs):
+            tic = time.time()
+            func(*args, **kwargs)
+            toc = time.time()
+            time.sleep(max(0, pad - (toc - tic)))
+        return inner
+    return decorator
+
+
+@events.init_command_line_parser.add_listener
+def _(parser):
+    parser.add_argument("--log-lines", type=int, help="Log lines per seconds to post to loki")
+
+
 class LokiTest1(FastHttpUser):
-    wait_time = between(1, 1)
+    wait_time = constant(0)  # use timepad instead, for more acurate rates
 
     HEADERS = {
         "Content-Type": "application/json",
     }
 
     @task
+    @timepad(1.0)
     def logfile1(self):
         data = {
             "streams": [
-                {"stream": {"filename": "/var/log/pepetest"}, "values": LogGenerator.generate()}
+                {"stream": {"filename": "/var/log/pepetest"}, "values": LogGenerator.generate(self.environment.parsed_options.log_lines)}
             ]
         }
 
         self.client.post("/loki/api/v1/push", data=json.dumps(data), headers=self.HEADERS)
+
