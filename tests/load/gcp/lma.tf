@@ -16,7 +16,7 @@ data "cloudinit_config" "lma" {
 
   part {
     content_type = "text/cloud-config"
-    content = templatefile("lma.tpl.conf", { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.lma_appliance_resource_name, OVERLAY_LOAD_TEST = var.overlay_load_test })
+    content = templatefile("lma.tpl.conf", { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.lma_appliance_resource_name, AVALANCHE_URL = local.avalanche_target, PORTS = var.avalanche_ports, SCRAPE_INTERVAL = var.prom_scrape_interval })
     filename = "lma.conf"
   }
 }
@@ -31,20 +31,6 @@ resource "google_compute_instance" "vm_lma_appliance" {
       image = "projects/lma-light-load-testing/global/images/juju-hirsute-dns-ingress"
       type  = var.disk_type
       size  = "50"
-    }
-  }
-
-  provisioner "file" {
-    content      = templatefile("overlay-load-test.tpl.yaml", { AVALANCHE_URL = local.avalanche_target, PORTS = var.avalanche_ports, SCRAPE_INTERVAL = var.prom_scrape_interval })
-    destination = var.overlay_load_test
-    
-    connection {
-      type = "ssh"
-      user = "ubuntu"
-      #host = self.network_interface[0].access_config[0].nat_ip
-      host        = google_compute_instance.vm_lma_appliance.network_interface.0.access_config.0.nat_ip
-      private_key = local.file_provisioner_ssh_key
-      #agent = "false"
     }
   }
 

@@ -50,8 +50,9 @@ variable "avalanche_ports" {
   type = list(number)
   description = "List of ports (avalanche targets) for LMA appliance to scrape"
   # Use 20 scrape targets by default and adjust datapoint/min via the metric_count and value_interval variables (which do not have a defaults)
-  # default = [9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012, 9013, 9014, 9015, 9016, 9017, 9018, 9019, 9020]
-  default = [9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010]
+  default = [9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012, 9013, 9014, 9015, 9016, 9017, 9018, 9019, 9020]
+  # default = [9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010]
+  # default = [9001, 9002, 9003, 9004, 9005]
 }
 
 variable "avalanche_metric_count" {
@@ -136,12 +137,6 @@ variable "gbmem" {
     condition = can(regex("[0-9][0-9]*", var.gbmem))
     error_message = "The gbmem variable must be an integer."
   }
-}
-
-variable "overlay_load_test" {
-  type = string
-  description = "Path in the load test appliance VM to store the overlay file"
-  default = "/home/ubuntu/overlay-load-test.yaml"
 }
 
 variable "prom_scrape_interval" {
