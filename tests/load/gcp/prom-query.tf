@@ -1,11 +1,11 @@
 data "cloudinit_config" "locust" {
-  gzip = false
+  gzip          = false
   base64_encode = false
 
   part {
     content_type = "text/cloud-config"
-    content = templatefile("prom-query-locust.tpl.conf", { PROM_URL = local.prom_url, USERS = var.locust_users })
-    filename = "locust.conf"
+    content      = templatefile("prom-query-locust.tpl.conf", { PROM_URL = local.prom_url, USERS = var.locust_users })
+    filename     = "locust.conf"
   }
 }
 

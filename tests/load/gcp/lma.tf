@@ -1,7 +1,7 @@
 locals {
   # avalanhe_url: e.g. vm_avalanche.c.lma-light-load-testing.internal
   avalanche_target = "${google_compute_instance.vm_avalanche.name}.${var.zone}.c.${var.project}.internal"
-  prom_url = "http://${google_compute_instance.vm_lma_appliance.name}.${var.zone}.c.${var.project}.internal/prom"
+  prom_url         = "http://${google_compute_instance.vm_lma_appliance.name}.${var.zone}.c.${var.project}.internal/prom"
 
   file_provisioner_ssh_key = file(var.ssh_key_private_path)
 
@@ -11,13 +11,13 @@ locals {
 data "cloudinit_config" "lma" {
   # https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs/data-sources/cloudinit_config
   # https://github.com/hashicorp/terraform-provider-template/blob/79c2094838bfb2b6bba91dc5b02f5071dd497083/website/docs/d/cloudinit_config.html.markdown
-  gzip = false
+  gzip          = false
   base64_encode = false
 
   part {
     content_type = "text/cloud-config"
-    content = templatefile("lma.tpl.conf", { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.lma_appliance_resource_name, AVALANCHE_URL = local.avalanche_target, PORTS = var.avalanche_ports, SCRAPE_INTERVAL = var.prom_scrape_interval })
-    filename = "lma.conf"
+    content      = templatefile("lma.tpl.conf", { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.lma_appliance_resource_name, AVALANCHE_URL = local.avalanche_target, PORTS = var.avalanche_ports, SCRAPE_INTERVAL = var.prom_scrape_interval })
+    filename     = "lma.conf"
   }
 }
 

@@ -1,11 +1,11 @@
 data "cloudinit_config" "avalanche" {
-  gzip = false
+  gzip          = false
   base64_encode = false
 
   part {
     content_type = "text/cloud-config"
-    content = templatefile("prom-scrape-avalanche.tpl.conf", { METRIC_COUNT = var.avalanche_metric_count, VALUE_INTERVAL = var.avalanche_value_interval })
-    filename = "avalanche.conf"
+    content      = templatefile("prom-scrape-avalanche.tpl.conf", { METRIC_COUNT = var.avalanche_metric_count, VALUE_INTERVAL = var.avalanche_value_interval })
+    filename     = "avalanche.conf"
   }
 }
 
