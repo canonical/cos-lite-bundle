@@ -53,6 +53,7 @@ variable "avalanche_ports" {
   default = [9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012, 9013, 9014, 9015, 9016, 9017, 9018, 9019, 9020]
   # default = [9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010]
   # default = [9001, 9002, 9003, 9004, 9005]
+  # default = [9001]
 }
 
 variable "avalanche_metric_count" {
@@ -70,8 +71,9 @@ variable "avalanche_metric_count" {
 
 variable "avalanche_value_interval" {
   type = number
-  description = "Refresh period [sec] of metric values; should be shorter than scrape interval"
-  
+  description = "Refresh period [sec] of metric values; could be shorter than scrape interval"
+  default = 30
+
   validation {
     condition = can(regex("[0-9][0-9]*", var.avalanche_value_interval))
     error_message = "The avalanche_value_interval variable must be an integer."
@@ -142,6 +144,7 @@ variable "gbmem" {
 variable "prom_scrape_interval" {
   type = number
   description = "Scrape interval (sec) for prom to scrape its targets"
+  default = 15
 
   validation {
     condition = can(regex("[0-9][0-9]*", var.prom_scrape_interval))

@@ -21,7 +21,7 @@ resource "google_compute_instance" "vm_locust" {
   }
 
   provisioner "file" {
-    source      = "prom-query-locustfile.py"
+    content     = templatefile("prom-query-locustfile.tpl.py", { USERS = var.locust_users, REFRESH_INTERVAL = var.prom_scrape_interval })
     destination = "/home/ubuntu/prom-query-locustfile.py"
 
     connection {
