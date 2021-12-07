@@ -16,7 +16,7 @@ resource "google_compute_instance" "vm_avalanche" {
 
   boot_disk {
     initialize_params {
-      image = "projects/lma-light-load-testing/global/images/avalanche"
+      image = "ubuntu-os-cloud/ubuntu-2104-hirsute-v20211119"
     }
   }
 

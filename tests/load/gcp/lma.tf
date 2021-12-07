@@ -28,7 +28,7 @@ resource "google_compute_instance" "vm_lma_appliance" {
 
   boot_disk {
     initialize_params {
-      image = "projects/lma-light-load-testing/global/images/juju-hirsute-dns-ingress"
+      image = "ubuntu-os-cloud/ubuntu-2104-hirsute-v20211119"
       type  = var.disk_type
       size  = "50"
     }
