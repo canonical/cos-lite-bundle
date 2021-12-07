@@ -25,8 +25,8 @@ resource "google_compute_instance" "vm_locust" {
     destination = "/home/ubuntu/prom-query-locustfile.py"
 
     connection {
-      type = "ssh"
-      user = "ubuntu"
+      type        = "ssh"
+      user        = "ubuntu"
       host        = google_compute_instance.vm_locust.network_interface.0.access_config.0.nat_ip
       private_key = local.file_provisioner_ssh_key
     }

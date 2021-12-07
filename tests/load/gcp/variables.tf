@@ -50,10 +50,10 @@ variable "avalanche_ports" {
   type        = list(number)
   description = "List of ports (avalanche targets) for LMA appliance to scrape"
   # Use 20 scrape targets by default and adjust datapoint/min via the metric_count and value_interval variables (which do not have a defaults)
-  default = [9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012, 9013, 9014, 9015, 9016, 9017, 9018, 9019, 9020]
+  # default = [9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012, 9013, 9014, 9015, 9016, 9017, 9018, 9019, 9020]
   # default = [9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010]
   # default = [9001, 9002, 9003, 9004, 9005]
-  # default = [9001]
+  default = [9001]
 }
 
 variable "avalanche_metric_count" {
