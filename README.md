@@ -73,5 +73,5 @@ For example, to deploy the LMA Light bundle with the offers overlay, you would d
 ```sh
 curl -L https://raw.githubusercontent.com/canonical/lma-light-bundle/main/overlays/offers-overlay.yaml -O
 
-juju deploy lma-light --channel=edge --overlay ./offers-overlay.yaml
+juju deploy lma-light --channel=edge --trust --overlay ./offers-overlay.yaml
 ```
