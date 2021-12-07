@@ -12,32 +12,20 @@ from locust import HttpUser, TaskSet, constant_pacing, task
 from locust.contrib.fasthttp import FastHttpUser
 
 
-def timepad(pad: float):
-    """Decorator that guarantees a function won't return before some minimum time has elapsed.
-    Args:
-        pad: minimum time in seconds that should elapse before the wrapped function returns.
-    """
-    pad = max(0, pad)
-    def decorator(func):
-        import time
-        from functools import wraps
-        @wraps(func)
-        def inner(*args, **kwargs):
-            tic = time.time()
-            func(*args, **kwargs)
-            toc = time.time()
-            time.sleep(max(0, pad - (toc - tic)))
-        return inner
-    return decorator
-
-
-def scale_probabilities(*args):
+def normalize(*args):
     """Scale a sequence of occurrences into probabilities that sum up to 1."""
-    scale_factor = 1.0 / sum(args)
-    return [scale_factor * arg for arg in args]
+    total = sum(args)
+    return [arg / total for arg in args]
 
 def probabilities_to_weights(*args):
-    """Scale a sequence of probabilities into integer weights."""
+    """Scale a sequence of probabilities into integer weights.
+    
+    Locust's `@task` decorator takes integer weight rather than probability.
+    """
+    # Rescale args such that the lowest arg becomes 1, then multiply by
+    # 10 before casting to int, such that the first decimal would be accounted
+    # for rather than truncated.
+    # This was the lowest arg is scaled to 10, and the rest - proportionally.
     scale_factor = 10.0 / min(args)
     return [int(scale_factor * arg) for arg in args]
 
@@ -49,12 +37,12 @@ entire_panel_fetch_period = 10 * 60  # 10 minutes
 incremental_fetch_period = GRAFANA_DASHBOARD_REFRESH_PERIOD
 
 entire_panel_fetch_weight, incremental_fetch_weight = probabilities_to_weights(
-    *scale_probabilities(1.0 / entire_panel_fetch_period, 1.0 / incremental_fetch_period)
+    *normalize(1.0 / entire_panel_fetch_period, 1.0 / incremental_fetch_period)
 )
 
 
 # Each panel displays one metric; assumed to be less than num of metrics otherwise the response would be blank
-ASSUMED_NUM_WORKERS = ${USERS}  # TODO add assertion in terraform confirming this is less than num of metrics
+ASSUMED_NUM_WORKERS = ${USERS}
 
 
 class PromTest1(FastHttpUser):

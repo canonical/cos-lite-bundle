@@ -8,7 +8,7 @@ import random
 from datetime import datetime
 from time import time_ns
 
-from locust import constant, events, task
+from locust import constant_pacing, events, task
 from locust.contrib.fasthttp import FastHttpUser
 
 
@@ -31,59 +31,33 @@ class LogGenerator:
         date_time = datetime.now().isoformat()
         return f"{date_time} - [{level}] - [{num}]: {line}"
 
-    @staticmethod
-    def _pack_log(line: str, num: int):
-        return [str(time_ns()), LogGenerator._stamp(line, num)]
+    @classmethod
+    def _pack_log(cls, line: str, num: int):
+        return [str(time_ns()), cls._stamp(line, num)]
 
-    @staticmethod
-    def _get_sample(num: int):
-        return [
-            LogGenerator._pack_log(random.choice(LogGenerator.population), num) for _ in range(num)
-        ]
+    @classmethod
+    def _get_sample(cls, num: int):
+        return [cls._pack_log(random.choice(LogGenerator.population), num) for _ in range(num)]
 
-    @staticmethod
-    def generate(num: int):
-        return LogGenerator._get_sample(num)
-
-
-def timepad(pad: float):
-    """Decorator that guarantees a function won't return before some minimum time has elapsed.
-
-    Args:
-        pad: minimum time in seconds that should elapse before the wrapped function returns.
-    """
-    pad = max(0, pad)
-
-    def decorator(func):
-        import time
-        from functools import wraps
-
-        @wraps(func)
-        def inner(*args, **kwargs):
-            tic = time.time()
-            func(*args, **kwargs)
-            toc = time.time()
-            time.sleep(max(0, pad - (toc - tic)))
-
-        return inner
-
-    return decorator
+    @classmethod
+    def generate(cls, num: int):
+        return cls._get_sample(num)
 
 
 @events.init_command_line_parser.add_listener
 def _(parser):
+    """Add custom command line to be passed to the locustfile."""
     parser.add_argument("--log-lines", type=int, help="Log lines per seconds to post to loki")
 
 
 class LokiTest1(FastHttpUser):
-    wait_time = constant(0)  # use timepad instead, for more accurate rates
+    wait_time = constant_pacing(1.0)  # use timepad instead, for more accurate rates
 
     HEADERS = {
         "Content-Type": "application/json",
     }
 
     @task
-    @timepad(1.0)
     def logfile1(self):
         data = {
             "streams": [
