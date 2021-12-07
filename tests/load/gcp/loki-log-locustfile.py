@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
+# Copyright 2021 Canonical Ltd.
+# See LICENSE file for licensing details.
+
 import json
 import random
 from datetime import datetime
 from time import time_ns
 
-from locust import HttpUser, TaskSet, constant, task, events
+from locust import constant, events, task
 from locust.contrib.fasthttp import FastHttpUser
 
 
@@ -45,20 +48,25 @@ class LogGenerator:
 
 def timepad(pad: float):
     """Decorator that guarantees a function won't return before some minimum time has elapsed.
+
     Args:
         pad: minimum time in seconds that should elapse before the wrapped function returns.
     """
     pad = max(0, pad)
+
     def decorator(func):
-        from functools import wraps
         import time
+        from functools import wraps
+
         @wraps(func)
         def inner(*args, **kwargs):
             tic = time.time()
             func(*args, **kwargs)
             toc = time.time()
             time.sleep(max(0, pad - (toc - tic)))
+
         return inner
+
     return decorator
 
 
@@ -68,7 +76,7 @@ def _(parser):
 
 
 class LokiTest1(FastHttpUser):
-    wait_time = constant(0)  # use timepad instead, for more acurate rates
+    wait_time = constant(0)  # use timepad instead, for more accurate rates
 
     HEADERS = {
         "Content-Type": "application/json",
@@ -79,9 +87,11 @@ class LokiTest1(FastHttpUser):
     def logfile1(self):
         data = {
             "streams": [
-                {"stream": {"filename": "/var/log/pepetest"}, "values": LogGenerator.generate(self.environment.parsed_options.log_lines)}
+                {
+                    "stream": {"filename": "/var/log/pepetest"},
+                    "values": LogGenerator.generate(self.environment.parsed_options.log_lines),
+                }
             ]
         }
 
         self.client.post("/loki/api/v1/push", data=json.dumps(data), headers=self.HEADERS)
-

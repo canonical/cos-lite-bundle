@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Copyright 2021 Canonical Ltd.
+# See LICENSE file for licensing details.
+
 import json
 import random
 from datetime import datetime
@@ -16,8 +19,8 @@ def timepad(pad: float):
     """
     pad = max(0, pad)
     def decorator(func):
-        from functools import wraps
         import time
+        from functools import wraps
         @wraps(func)
         def inner(*args, **kwargs):
             tic = time.time()
@@ -34,7 +37,7 @@ def scale_probabilities(*args):
     return [scale_factor * arg for arg in args]
 
 def probabilities_to_weights(*args):
-    """Scale a sequence of probabilites into integer weights."""
+    """Scale a sequence of probabilities into integer weights."""
     scale_factor = 10.0 / min(args)
     return [int(scale_factor * arg) for arg in args]
 
@@ -59,7 +62,7 @@ class PromTest1(FastHttpUser):
 
     @task(weight=incremental_fetch_weight)
     def query_incremental(self):
-        """Only query point recevied during the past scrape interval (that's how grafana updates panels)."""
+        """Only query point received during the past scrape interval (that's how grafana updates panels)."""
         
         self.client.get(
             "/api/v1/query?query=avalanche_metric_mmmmm_0_{}".format(random.randint(0, ASSUMED_NUM_WORKERS - 1)) + \
