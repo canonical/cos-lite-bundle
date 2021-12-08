@@ -16,7 +16,7 @@ data "cloudinit_config" "lma" {
 
   part {
     content_type = "text/cloud-config"
-    content      = templatefile("lma.tpl.conf", { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.lma_appliance_resource_name, AVALANCHE_URL = local.avalanche_target, PORTS = var.avalanche_ports, SCRAPE_INTERVAL = var.prom_scrape_interval })
+    content      = templatefile("lma.tpl.conf", { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.lma_appliance_resource_name, AVALANCHE_URL = local.avalanche_target, NUM_TARGETS = var.num_avalanche_targets, SCRAPE_INTERVAL = var.prom_scrape_interval })
     filename     = "lma.conf"
   }
 }

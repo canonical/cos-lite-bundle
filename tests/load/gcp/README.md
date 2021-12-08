@@ -23,7 +23,7 @@ terraform apply -var-file="var_ssd-2cpu-8gb.tfvars" -var="ncpus=4" -var="gbmem=1
 
 # or, do not use a var-file at all
 
-terraform apply -var="disk_type=pd-ssd" -var="avalanche_ports=[9001,9002,9003]" -var="ncpus=2" -var="gbmem=8"
+terraform apply -var="disk_type=pd-ssd" -var="num_avalanche_targets=3" -var="ncpus=2" -var="gbmem=8"
 ```
 
 which will create three vm instances:

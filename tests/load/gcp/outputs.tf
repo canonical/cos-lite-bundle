@@ -27,6 +27,6 @@ output "data_points_per_minute" {
   # The number of data points per minute is equal to:
   # avalanche_metric_count * 10 * num_scrape_targets / (prom_scrape_interval / 60)
   # (times 10 because there are 10 "series" per metric)
-  value = var.avalanche_metric_count * 10 * length(var.avalanche_ports) / (var.prom_scrape_interval / 60)
+  value = var.avalanche_metric_count * 10 * var.num_avalanche_targets / (var.prom_scrape_interval / 60)
 }
 

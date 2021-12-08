@@ -46,21 +46,16 @@ variable "ssh_key_private_path" {
 # Avalanche     #
 #################
 
-variable "avalanche_ports" {
-  type        = list(number)
-  description = "List of ports (avalanche targets) for LMA appliance to scrape"
-  # Use 20 scrape targets by default and adjust datapoint/min via the metric_count and value_interval variables (which do not have a defaults)
-  # default = [9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012, 9013, 9014, 9015, 9016, 9017, 9018, 9019, 9020]
-  # default = [9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010]
-  default = [9001, 9002, 9003, 9004, 9005]
-  # default = [9001]
+variable "num_avalanche_targets" {
+  type        = number
+  description = "Number of avalanche scrape targets to launch and for LMA appliance to scrape."
 }
 
 variable "avalanche_metric_count" {
   type        = number
   description = "Number of metrics to generate on each avalanche target."
   # The number of data points per minute is equal to:
-  # len(avalanche_ports) * avalanche_metric_count * 10 / (avalanche_value_interval / 60)
+  # num_avalanche_targets * avalanche_metric_count * 10 / (avalanche_value_interval / 60)
   # (times 10 because there are 10 "series" per metric)"
 
   validation {
