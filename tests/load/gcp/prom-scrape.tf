@@ -4,7 +4,7 @@ data "cloudinit_config" "avalanche" {
 
   part {
     content_type = "text/cloud-config"
-    content      = templatefile("prom-scrape-avalanche.tpl.conf", { METRIC_COUNT = var.avalanche_metric_count, VALUE_INTERVAL = var.avalanche_value_interval })
+    content      = templatefile("prom-scrape-avalanche.tpl.conf", { METRIC_COUNT = var.avalanche_metric_count, VALUE_INTERVAL = var.avalanche_value_interval, PORTS = var.avalanche_ports })
     filename     = "avalanche.conf"
   }
 }
