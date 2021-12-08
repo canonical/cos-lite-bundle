@@ -7,3 +7,12 @@ disk_type = "pd-ssd"
 ncpus     = 4
 gbmem     = 8
 
+
+# date       | avalanche_metric_count | num_avalanche_targets | prom_scrape_interval | datapoints/min | # locust | CPU % | mem % | disk gb/day | IOPS
+# -----------|------------------------|-----------------------|----------------------|----------------|----------|-------|-------|-------------------
+# 2021-12-08 |                        |                       |                      |                |          |       |       |             |
+#            |                        |                       |                      |                |          |       |       |             |
+#            |                        |                       |                      |                |          |       |       |             |
+#            |                        |                       |                      |                |          |       |       |             |
+
+

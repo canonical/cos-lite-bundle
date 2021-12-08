@@ -52,9 +52,12 @@ class PromTest1(FastHttpUser):
     def query_incremental(self):
         """Only query point received during the past scrape interval (that's how grafana updates panels)."""
         
+        # Fetching the double of GRAFANA_DASHBOARD_REFRESH_PERIOD to account for potentially missed 
+        # data points missed around interval boundaries or lost packets
+        # A factor of 2 might be an overkill but is still small enough to not care much about it.
         self.client.get(
             "/api/v1/query?query=avalanche_metric_mmmmm_0_{}".format(random.randint(0, ASSUMED_NUM_WORKERS - 1)) + \
-            "{series_id='0'}" + "[{}s]".format(GRAFANA_DASHBOARD_REFRESH_PERIOD)
+            "{series_id='0'}" + "[{}s]".format(2 * GRAFANA_DASHBOARD_REFRESH_PERIOD)
         )
 
     @task(weight=entire_panel_fetch_weight)

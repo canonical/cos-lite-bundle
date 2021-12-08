@@ -54,9 +54,6 @@ variable "num_avalanche_targets" {
 variable "avalanche_metric_count" {
   type        = number
   description = "Number of metrics to generate on each avalanche target."
-  # The number of data points per minute is equal to:
-  # num_avalanche_targets * avalanche_metric_count * 10 / (avalanche_value_interval / 60)
-  # (times 10 because there are 10 "series" per metric)"
 
   validation {
     condition     = can(regex("[0-9][0-9]*", var.avalanche_metric_count))
