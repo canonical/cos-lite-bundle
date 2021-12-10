@@ -61,7 +61,7 @@ class PromTest1(FastHttpUser):
         )
 
     @task(weight=entire_panel_fetch_weight)
-    def query_panel_starup(self):
+    def query_panel_startup(self):
         """"Get lots of data, representing a query for a newly loaded panel."""
         # ~10MB
         # /api/v1/query?query=rate(avalanche_metric_mmmmm_0_0[5m])[60m:130ms]

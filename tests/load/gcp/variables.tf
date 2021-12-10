@@ -80,7 +80,7 @@ variable "avalanche_value_interval" {
 variable "locust_users" {
   type        = number
   description = "Number of locust users to query prometheus"
-  # Assume grafana would have 20 dashboards, so 20 locust users
+  # Assume grafana would have (2 dashboards * 10 panels) = 20 panels, so 20 locust users
   default = 20
 
   validation {
