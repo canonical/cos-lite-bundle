@@ -37,6 +37,15 @@ Similarly, to destroy,
 terraform destroy -var-file="var_ssd-2cpu-8gb.tfvars"
 ```
 
-Note that only one load test can run at a time. This is because terraform does not support 
+Note that only one load test can run at a time. This is because terraform does not support
 parametrizing resource names.
+
+To ssh into a vm instance,
+
+```shell
+ssh -i ~/secrets/lma-light-load-testing-ssh \
+  -o "UserKnownHostsFile=/dev/null" \
+  -o "StrictHostKeyChecking no" \
+  ubuntu@$(terraform output ip_nat_vm_lma_appliance | xargs -n1 echo)
+```
 
