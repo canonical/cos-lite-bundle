@@ -80,8 +80,8 @@ variable "avalanche_value_interval" {
 variable "locust_users" {
   type        = number
   description = "Number of locust users to query prometheus"
-  # Assume grafana would have (2 dashboards * 10 panels) = 20 panels, so 20 locust users
-  default = 20
+  # Assume grafana would have (20 SREs * 10 panels) = 200 panels, so 200 locust users
+  default = 200
 
   validation {
     condition     = can(regex("[0-9][0-9]*", var.locust_users))

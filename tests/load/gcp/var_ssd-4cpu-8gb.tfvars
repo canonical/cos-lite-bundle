@@ -1,5 +1,5 @@
-avalanche_metric_count   = 100
-num_avalanche_targets    = 5
+avalanche_metric_count = 200
+num_avalanche_targets  = 5
 
 locust_log_lines_per_sec = 0
 
@@ -39,8 +39,28 @@ gbmem     = 8
 # datapoints/min = 20,000
 # # locust = 20
 # big query period = 5 min
-# % CPU =
-# % mem =
-# network: sent X MiB/s, recv X MiB/s
-# write = X MiB/s ~ X IOPS (steady state)
-# read = X MiB/s ~ X IOPS (steady state); X MiB/s ~ X IOPS
+# % CPU = 15%
+# % mem = 28%
+# storage = 0.16 GiB/day
+# network: sent 0.13 MiB/s, recv 0.005 MiB/s
+# write = 0.3 MiB/s ~ 25 IOPS (steady state)
+# read = 0 MiB/s ~ 0.01 IOPS (steady state)
+# 
+# This was running for 3 days without issues
+
+
+# 2021-12-13 pd-ssd-4cpu-8gb
+# Now using 200 locust workers
+# avalanche_metric_count = 200
+# num_avalanche_targets = 5
+# prom_scrape_interval = 15
+# datapoints/min = 40,000
+# # locust = 200
+# big query period = 5 min
+# % CPU = 40%
+# % mem = 33%
+# storage = 2.86 GiB/day
+# network: sent 1.35 MiB/s, recv 0.31 MiB/s
+# write = 0.3 MiB/s ~ 25 IOPS (steady state)
+# read = 0 MiB/s ~ 0.02 IOPS (steady state)
+
