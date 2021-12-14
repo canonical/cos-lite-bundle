@@ -49,3 +49,49 @@ ssh -i ~/secrets/lma-light-load-testing-ssh \
   ubuntu@$(terraform output ip_nat_vm_lma_appliance | xargs -n1 echo)
 ```
 
+### Manual verifications
+#### Avalanche (prom_scrape)
+```shell
+# check service status
+systemctl status avalanche-targets.target
+
+# count number of scrape targets
+pgrep avalanche | wc -l
+
+# count number datapoints a scrape target is offering (each series id is in its own line)
+curl localhost:9001/metrics | grep -v '^#' | wc -l
+```
+
+#### Locust (prom_query)
+```shell
+# check service status
+systemctl status locust
+
+# check lma appliance and prom are reachable
+ping http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal
+curl http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal/prom/api/v1/labels
+
+# follow the progress of the load test
+journalctl -u locust -f
+```
+
+#### LMA appliance
+```shell
+# check cloud-init completed
+cat /var/log/cloud-init-output.log
+
+# check all units are up
+juju status
+
+# check avalanche vm is reachable
+curl http://avalanche.us-central1-a.c.lma-light-load-testing.internal:9001/metrics | wc -l
+
+# check service status
+systemctl status node-exporter
+systemctl status prometheus-stdout-logger
+systemctl status pod-top-logger
+
+# check ingress is working
+curl localhost/prom/api/v1/targets
+```
+
