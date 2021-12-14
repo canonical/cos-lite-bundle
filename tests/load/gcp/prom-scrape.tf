@@ -9,10 +9,10 @@ data "cloudinit_config" "avalanche" {
   }
 }
 
-resource "google_compute_instance" "vm_avalanche" {
+resource "google_compute_instance" "vm_prom_scrape" {
   name         = "avalanche"
   machine_type = "custom-4-16384"
-  tags         = ["load-test-traffic"]
+  tags         = ["load-test-traffic", "vm-prom-scrape"]
 
   boot_disk {
     initialize_params {

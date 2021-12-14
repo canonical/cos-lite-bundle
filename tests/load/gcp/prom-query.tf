@@ -9,10 +9,10 @@ data "cloudinit_config" "locust" {
   }
 }
 
-resource "google_compute_instance" "vm_locust" {
+resource "google_compute_instance" "vm_prom_query" {
   name         = "locust"
   machine_type = "e2-standard-2"
-  tags         = ["load-test-traffic"]
+  tags         = ["load-test-traffic", "vm-prom-query"]
 
   boot_disk {
     initialize_params {
@@ -27,7 +27,7 @@ resource "google_compute_instance" "vm_locust" {
     connection {
       type        = "ssh"
       user        = "ubuntu"
-      host        = google_compute_instance.vm_locust.network_interface.0.access_config.0.nat_ip
+      host        = google_compute_instance.vm_prom_query.network_interface.0.access_config.0.nat_ip
       private_key = local.file_provisioner_ssh_key
     }
   }

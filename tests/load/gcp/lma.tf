@@ -1,6 +1,6 @@
 locals {
-  # avalanhe_url: e.g. vm_avalanche.c.lma-light-load-testing.internal
-  avalanche_target = "${google_compute_instance.vm_avalanche.name}.${var.zone}.c.${var.project}.internal"
+  # avalanhe_url: e.g. vm_prom_scrape.c.lma-light-load-testing.internal
+  avalanche_target = "${google_compute_instance.vm_prom_scrape.name}.${var.zone}.c.${var.project}.internal"
   prom_url         = "http://${google_compute_instance.vm_lma_appliance.name}.${var.zone}.c.${var.project}.internal/prom"
 
   file_provisioner_ssh_key = file(var.ssh_key_private_path)
@@ -24,7 +24,7 @@ data "cloudinit_config" "lma" {
 resource "google_compute_instance" "vm_lma_appliance" {
   name         = local.lma_appliance_resource_name
   machine_type = "custom-${var.ncpus}-${var.gbmem * 1024}"
-  tags         = ["load-test-traffic"]
+  tags         = ["load-test-traffic", "vm-lma-appliance"]
 
   boot_disk {
     initialize_params {
