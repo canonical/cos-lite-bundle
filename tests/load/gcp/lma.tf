@@ -2,6 +2,7 @@ locals {
   # avalanhe_url: e.g. vm_prom_scrape.c.lma-light-load-testing.internal
   avalanche_target = "${google_compute_instance.vm_prom_scrape.name}.${var.zone}.c.${var.project}.internal"
   prom_url         = "http://${google_compute_instance.vm_lma_appliance.name}.${var.zone}.c.${var.project}.internal/prom"
+  loki_url         = "http://${google_compute_instance.vm_lma_appliance.name}.${var.zone}.c.${var.project}.internal/loki"
 
   file_provisioner_ssh_key = file(var.ssh_key_private_path)
 

@@ -1,10 +1,10 @@
-data "cloudinit_config" "locust" {
+data "cloudinit_config" "prom_query" {
   gzip          = false
   base64_encode = false
 
   part {
     content_type = "text/cloud-config"
-    content      = templatefile("prom-query-locust.tpl.conf", { PROM_URL = local.prom_url, USERS = var.locust_users })
+    content      = templatefile("prom-query-locust.tpl.conf", { PROM_URL = local.prom_url, USERS = var.prom_query_locust_users })
     filename     = "locust.conf"
   }
 }
@@ -21,7 +21,7 @@ resource "google_compute_instance" "vm_prom_query" {
   }
 
   provisioner "file" {
-    content     = templatefile("prom-query-locustfile.tpl.py", { USERS = var.locust_users, REFRESH_INTERVAL = var.prom_scrape_interval })
+    content     = templatefile("prom-query-locustfile.tpl.py", { USERS = var.prom_query_locust_users, REFRESH_INTERVAL = var.prom_scrape_interval })
     destination = "/home/ubuntu/prom-query-locustfile.py"
 
     connection {
@@ -33,7 +33,7 @@ resource "google_compute_instance" "vm_prom_query" {
   }
 
   metadata = {
-    user-data = "${data.cloudinit_config.locust.rendered}"
+    user-data = "${data.cloudinit_config.prom_query.rendered}"
   }
 
   network_interface {

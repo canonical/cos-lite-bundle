@@ -73,29 +73,45 @@ variable "avalanche_value_interval" {
 }
 
 
-#################
-# Locust        #
-#################
+#######################
+# Locust (prom_query) #
+#######################
 
-variable "locust_users" {
+variable "prom_query_locust_users" {
   type        = number
   description = "Number of locust users to query prometheus"
   # Assume grafana would have (20 SREs * 10 panels) = 200 panels, so 200 locust users
   default = 200
 
   validation {
-    condition     = can(regex("[0-9][0-9]*", var.locust_users))
-    error_message = "The locust_users variable must be an integer."
+    condition     = can(regex("[0-9][0-9]*", var.prom_query_locust_users))
+    error_message = "The prom_query_locust_users variable must be an integer."
   }
 }
 
-variable "locust_log_lines_per_sec" {
+
+#######################
+# Locust (loki_log)   #
+#######################
+
+variable "loki_log_locust_users" {
+  type        = number
+  description = "Number of locust users to log logs to loki"
+  default = 200
+
+  validation {
+    condition     = can(regex("[0-9][0-9]*", var.loki_log_locust_users))
+    error_message = "The loki_log_locust_users variable must be an integer."
+  }
+}
+
+variable "loki_log_lines_per_sec" {
   type        = number
   description = "Number of log lines pers second for locust to post to loki"
 
   validation {
-    condition     = can(regex("[0-9][0-9]*", var.locust_log_lines_per_sec))
-    error_message = "The locust_log_lines_per_sec variable must be an integer."
+    condition     = can(regex("[0-9][0-9]*", var.loki_log_lines_per_sec))
+    error_message = "The loki_log_lines_per_sec variable must be an integer."
   }
 }
 

@@ -47,11 +47,19 @@ class LogGenerator:
 @events.init_command_line_parser.add_listener
 def _(parser):
     """Add custom command line to be passed to the locustfile."""
+    # num log lines is analogous to promtail's `[batchsize: <int> | default = 1048576]`
     parser.add_argument("--log-lines", type=int, help="Log lines per seconds to post to loki")
 
 
+# Ideally locust would expose the worker id, but rolling my own since it doesn't
+# https://github.com/locustio/locust/issues/1601
+NUM_WORKERS = ${USERS}
+
+
 class LokiTest1(FastHttpUser):
-    wait_time = constant_pacing(1.0)  # use timepad instead, for more accurate rates
+    # equivalent to promtail's `[batchwait: <duration> | default = 1s]`
+    # https://grafana.com/docs/loki/latest/clients/promtail/configuration/#clients
+    wait_time = constant_pacing(1.0)
 
     HEADERS = {
         "Content-Type": "application/json",
@@ -59,13 +67,15 @@ class LokiTest1(FastHttpUser):
 
     @task
     def logfile1(self):
+        filenum = random.randint(0, NUM_WORKERS - 1)
         data = {
             "streams": [
                 {
-                    "stream": {"filename": "/var/log/pepetest"},
+                    "stream": {"filename": f"/var/log/pepetest_{filenum}"},
                     "values": LogGenerator.generate(self.environment.parsed_options.log_lines),
                 }
             ]
         }
 
         self.client.post("/loki/api/v1/push", data=json.dumps(data), headers=self.HEADERS)
+
