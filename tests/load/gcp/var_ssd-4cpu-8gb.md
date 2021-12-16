@@ -1,22 +1,22 @@
 ## Record
 
-| Identifier                  | 2021-12-08 | 2021-12-10 | 2021-12-13 | 2021-12-14 | xxxx-xx-xx | xxxx-xx-xx | xxxx-xx-xx |
-|-----------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
-| Metrics per target          |     100    |     100    |     200    |    1000    |            |            |            |
-| Avalanche targets           |      5     |      5     |      5     |      5     |            |            |            |
-| Prom scrape interval        |     15     |     15     |     15     |     15     |            |            |            |
-| Loki log lines [1/sec]      |      0     |      0     |      0     |      0     |            |            |            |
-| Datapoints/min              |   20,000   |   20,000   |   40,000   |   200,000  |            |            |            |
-| Locust workers              |     20     |     20     |     200    |     200    |            |            |            |
-| Big prom query period [min] |      10    |      5     |      5     |      5     |            |            |            |
-| Prom query success rate [%] |            |            |     100    |     100    |            |            |            |
-| % CPU                       |     20     |     15     |     40     |     38     |            |            |            |
-| % mem                       |     90     |     28     |     33     |     37     |            |            |            |
-| Storage [GiB/day]           |            |            |    0.18    |     0.8    |            |            |            |
-| Network tx [MiB/s]          |     1.8    |    0.13    |    1.35    |     1.3    |            |            |            |
-| Network rx [MiB/s]          |    0.02    |    0.005   |    0.31    |    0.05    |            |            |            |
-| Disk write [MiB/s] ~ IOPS   |  0.5 ~ 25  |  0.3 ~ 25  |  0.3 ~ 25  |  0.33 ~ 26 |            |            |            |
-| Disk read [MiB/s] ~ IOPS    |   0.5 ~ 4  |  0 ~ 0.01  |  0 ~ 0.02  |  0 ~ 0.01  |            |            |            |
+| Identifier                  | 2021-12-08 | 2021-12-10 | 2021-12-13 | 2021-12-14 | 2021-12-15 |  2021-12-15  | 2021-12-16 |
+|-----------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:------------:|:----------:|
+| Metrics per target          |     100    |     100    |     200    |    1000    |    1000    |      500     |     200    |
+| Avalanche targets           |      5     |      5     |      5     |      5     |     20     |      20      |     20     |
+| Prom scrape interval        |     15     |     15     |     15     |     15     |     15     |      15      |     15     |
+| Loki log lines [1/sec]      |      0     |      0     |      0     |      0     |      0     |       0      |      0     |
+| Datapoints/min              |   20,000   |   20,000   |   40,000   |   200,000  |   800,000  |    400,000   |   160,000  |
+| Locust workers              |     20     |     20     |     200    |     200    |     200    |      200     |     200    |
+| Big prom query period [min] |      10    |      5     |      5     |      5     |      5     |       5      |      5     |
+| Prom query success rate [%] |            |            |     100    |     100    |     65     |      80      |     76     |
+| % CPU                       |     20     |     15     |     40     |     38     |   40-100   |    40-100    |   40-100   |
+| % mem                       |     90     |     28     |     33     |     37     | 30~100 OOM |  20~100 OOM  | 20~100 OOM |
+| Storage [GiB/day]           |            |            |    0.18    |     0.8    |   unclear  |    unclear   |   unclear  |
+| Network tx [MiB/s]          |     1.8    |    0.13    |    1.35    |     1.3    |   0.00063  |       4      |     0~5    |
+| Network rx [MiB/s]          |    0.02    |    0.005   |    0.31    |    0.05    |    0.003   |     0.09     |    0.06    |
+| Disk write [MiB/s] ~ IOPS   |  0.5 ~ 25  |  0.3 ~ 25  |  0.3 ~ 25  |  0.33 ~ 26 |  0 ~ 0.15  |  0 ~ unclear |  0.35 ~ 14 |
+| Disk read [MiB/s] ~ IOPS    |   0.5 ~ 4  |  0 ~ 0.01  |  0 ~ 0.02  |  0 ~ 0.01  |  24 ~ 520  | 24 ~ unclear |  24 ~ 500  |
 
 ## Comments
 ### 2021-12-08
@@ -40,4 +40,13 @@ Now using 200 locust workers
 
 ### 2021-12-14
 Attempting 1000 metrics per target
+
+### 2021-12-15
+Attempted 20 workers. Kept OOMing repeatedly.
+Repeating with 500 metrics per target instead of 1000. OOM.
+
+### 2021-12-16
+This runs is with a lower total datapoints/min (160k vs 200k on 2021-12-14),
+but with 20 scrape targets instead of 5, and 200 metrics per target instead of 1000.
+OOM.
 
