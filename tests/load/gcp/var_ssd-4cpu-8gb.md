@@ -18,6 +18,24 @@
 | Disk write [MiB/s] ~ IOPS   |  0.5 ~ 25  |  0.3 ~ 25  |  0.3 ~ 25  |  0.33 ~ 26 |  0 ~ 0.15  |  0 ~ unclear |  0.35 ~ 14 |
 | Disk read [MiB/s] ~ IOPS    |   0.5 ~ 4  |  0 ~ 0.01  |  0 ~ 0.02  |  0 ~ 0.01  |  24 ~ 520  | 24 ~ unclear |  24 ~ 500  |
 
+| Identifier                  | 2021-12-16 | 2021-12-17 | 2022-12-xx | 2022-12-xx | 2022-12-xx | 2022-12-xx | 2022-12-xx |
+|-----------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
+| Metrics per target          |     200    |     200    |            |            |            |            |            |
+| Avalanche targets           |     10     |     10     |            |            |            |            |            |
+| Prom scrape interval        |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
+| Loki log lines [1/sec]      |      0     |      0     |      0     |      0     |      0     |      0     |      0     |
+| Datapoints/min              |   80,000   |   80,000   |            |            |            |            |            |
+| Locust workers              |     200    |     200    |     200    |     200    |     200    |     200    |     200    |
+| Big prom query period [min] |      5     |      5     |      5     |      5     |      5     |      5     |      5     |
+| Prom query success rate [%] |     100    |     100    |            |            |            |            |            |
+| % CPU                       |     73     |     60     |            |            |            |            |            |
+| % mem                       |     64     |     40     |            |            |            |            |            |
+| Storage [GiB/day]           |    0.345   |     0.4    |            |            |            |            |            |
+| Network tx [MiB/s]          |     2.5    |     2.5    |            |            |            |            |            |
+| Network rx [MiB/s]          |    0.04    |    0.04    |            |            |            |            |            |
+| Disk write [MiB/s] ~ IOPS   |  0.33 ~ 25 |  0.32 ~ 27 |            |            |            |            |            |
+| Disk read [MiB/s] ~ IOPS    |  0 ~ 0.05  |  0 ~ 0.01  |            |            |            |            |            |
+
 ## Comments
 ### 2021-12-08
 Occasionally (2-2.5hrs) the VM would hang and prom get oomkilled.
@@ -49,4 +67,10 @@ Repeating with 500 metrics per target instead of 1000. OOM.
 This runs is with a lower total datapoints/min (160k vs 200k on 2021-12-14),
 but with 20 scrape targets instead of 5, and 200 metrics per target instead of 1000.
 OOM.
+Repeating with 10 workers.
+
+### 2021-12-17
+Rerunning previous test, but with a bundle overlay that uses latest prom image.
+Memory usage pattern is noticeably different: previously was flat at 60%, now fluctuating under 40%.
+Ran stable for 2 days.
 
