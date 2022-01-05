@@ -18,23 +18,23 @@
 | Disk write [MiB/s] ~ IOPS   |  0.5 ~ 25  |  0.3 ~ 25  |  0.3 ~ 25  |  0.33 ~ 26 |  0 ~ 0.15  |  0 ~ unclear |  0.35 ~ 14 |
 | Disk read [MiB/s] ~ IOPS    |   0.5 ~ 4  |  0 ~ 0.01  |  0 ~ 0.02  |  0 ~ 0.01  |  24 ~ 520  | 24 ~ unclear |  24 ~ 500  |
 
-| Identifier                  | 2021-12-16 | 2021-12-17 | 2022-01-04 | 2022-01-04 | 2022-01-00 | 2022-01-00 | 2022-01-00 |
+| Identifier                  | 2021-12-16 | 2021-12-17 | 2022-01-04 | 2022-01-04 | 2022-01-05 | 2022-01-00 | 2022-01-00 |
 |-----------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
-| Metrics per target          |     200    |     200    |     200    |            |            |            |            |
-| Avalanche targets           |     10     |     10     |     15     |     13     |            |            |            |
+| Metrics per target          |     200    |     200    |     200    |     200    |     200    |            |            |
+| Avalanche targets           |     10     |     10     |     15     |     13     |     13     |            |            |
 | Prom scrape interval        |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
 | Loki log lines [1/sec]      |      0     |      0     |      0     |      0     |      0     |      0     |      0     |
-| Datapoints/min              |   80,000   |   80,000   |   120,000  |   104,000  |            |            |            |
+| Datapoints/min              |   80,000   |   80,000   |   120,000  |   104,000  |   104,000  |            |            |
 | Locust workers              |     200    |     200    |     200    |     200    |     200    |     200    |     200    |
 | Big prom query period [min] |      5     |      5     |      5     |      5     |      5     |      5     |      5     |
-| Prom query success rate [%] |     100    |     100    |            |            |            |            |            |
-| % CPU                       |     73     |     60     |            |            |            |            |            |
-| % mem                       |     64     |     40     |     OOM    |            |            |            |            |
-| Storage [GiB/day]           |    0.345   |     0.4    |            |            |            |            |            |
-| Network tx [MiB/s]          |     2.5    |     2.5    |            |            |            |            |            |
-| Network rx [MiB/s]          |    0.04    |    0.04    |            |            |            |            |            |
-| Disk write [MiB/s] ~ IOPS   |  0.33 ~ 25 |  0.32 ~ 27 |            |            |            |            |            |
-| Disk read [MiB/s] ~ IOPS    |  0 ~ 0.05  |  0 ~ 0.01  |            |            |            |            |            |
+| Prom query success rate [%] |     100    |     100    |            |     100    |            |            |            |
+| % CPU                       |     73     |     60     |            |    70-80   |            |            |            |
+| % mem                       |     64     |     40     |     OOM    |    40-70   |            |            |            |
+| Storage [GiB/day]           |    0.345   |     0.4    |            |     0.5    |            |            |            |
+| Network tx [MiB/s]          |     2.5    |     2.5    |            |     3.4    |            |            |            |
+| Network rx [MiB/s]          |    0.04    |    0.04    |            |    0.05    |            |            |            |
+| Disk write [MiB/s] ~ IOPS   |  0.33 ~ 25 |  0.32 ~ 27 |            |  0.34 ~ 25 |            |            |            |
+| Disk read [MiB/s] ~ IOPS    |  0 ~ 0.05  |  0 ~ 0.01  |            | 0 ~ 0.05-3 |            |            |            |
 
 ## Comments
 ### 2021-12-08
@@ -73,4 +73,7 @@ Repeating with 10 workers.
 Rerunning previous test, but with a bundle overlay that uses latest prom image.
 Memory usage pattern is noticeably different: previously was flat at 60%, now fluctuating under 40%.
 Ran stable for 2 days.
+
+### 2022-01-05
+Repeat test from yesterday but with avalanche refresh of 15 sec (to match prom interval) instead of 30 sec.
 

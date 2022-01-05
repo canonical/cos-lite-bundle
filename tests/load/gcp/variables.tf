@@ -64,7 +64,7 @@ variable "avalanche_metric_count" {
 variable "avalanche_value_interval" {
   type        = number
   description = "Refresh period [sec] of metric values; could be shorter than scrape interval"
-  default     = 30
+  default     = 15
 
   validation {
     condition     = can(regex("[0-9][0-9]*", var.avalanche_value_interval))
