@@ -27,12 +27,12 @@
 | Datapoints/min              |   80,000   |   80,000   |   120,000  |   104,000  |   104,000  |            |            |
 | Locust workers              |     200    |     200    |     200    |     200    |     200    |     200    |     200    |
 | Big prom query period [min] |      5     |      5     |      5     |      5     |      5     |      5     |      5     |
-| Prom query success rate [%] |     100    |     100    |            |     100    |            |            |            |
-| % CPU                       |     73     |     60     |            |    70-80   |            |            |            |
-| % mem                       |     64     |     40     |     OOM    |    40-70   |            |            |            |
-| Storage [GiB/day]           |    0.345   |     0.4    |            |     0.5    |            |            |            |
-| Network tx [MiB/s]          |     2.5    |     2.5    |            |     3.4    |            |            |            |
-| Network rx [MiB/s]          |    0.04    |    0.04    |            |    0.05    |            |            |            |
+| Prom query success rate [%] |     100    |     100    |            |     100    |     95     |            |            |
+| % CPU                       |     73     |     60     |            |    70-80   |   40-100   |            |            |
+| % mem                       |     64     |     40     |     OOM    |    40-70   |   40-OOM   |            |            |
+| Storage [GiB/day]           |    0.345   |     0.4    |            |     0.5    |   unclear  |            |            |
+| Network tx [MiB/s]          |     2.5    |     2.5    |            |     3.4    |     4.0    |            |            |
+| Network rx [MiB/s]          |    0.04    |    0.04    |            |    0.05    |    0.06    |            |            |
 | Disk write [MiB/s] ~ IOPS   |  0.33 ~ 25 |  0.32 ~ 27 |            |  0.34 ~ 25 |            |            |            |
 | Disk read [MiB/s] ~ IOPS    |  0 ~ 0.05  |  0 ~ 0.01  |            | 0 ~ 0.05-3 |            |            |            |
 
@@ -76,4 +76,8 @@ Ran stable for 2 days.
 
 ### 2022-01-05
 Repeat test from yesterday but with avalanche refresh of 15 sec (to match prom interval) instead of 30 sec.
+Mem % now fuctuates between 40 and OOM; cpu is near 100%.
+This probably means that prom has some optimizations in place when data doesn't change between scrape intervals.
+Using 15 sec for avalanche from now on.
+
 
