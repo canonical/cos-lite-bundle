@@ -1,9 +1,13 @@
+## Results
+- 96,000 datapoints per minute / 0 log lines per second
+
 ## Record
 
 | Identifier                  | 2021-12-08 | 2021-12-10 | 2021-12-13 | 2021-12-14 | 2021-12-15 |  2021-12-15  | 2021-12-16 |
 |-----------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:------------:|:----------:|
 | Metrics per target          |     100    |     100    |     200    |    1000    |    1000    |      500     |     200    |
 | Avalanche targets           |      5     |      5     |      5     |      5     |     20     |      20      |     20     |
+| Avalanche value interval    |     30     |     30     |     30     |     30     |     30     |      30      |     30     |
 | Prom scrape interval        |     15     |     15     |     15     |     15     |     15     |      15      |     15     |
 | Loki log lines [1/sec]      |      0     |      0     |      0     |      0     |      0     |       0      |      0     |
 | Datapoints/min              |   20,000   |   20,000   |   40,000   |   200,000  |   800,000  |    400,000   |   160,000  |
@@ -18,23 +22,24 @@
 | Disk write [MiB/s] ~ IOPS   |  0.5 ~ 25  |  0.3 ~ 25  |  0.3 ~ 25  |  0.33 ~ 26 |  0 ~ 0.15  |  0 ~ unclear |  0.35 ~ 14 |
 | Disk read [MiB/s] ~ IOPS    |   0.5 ~ 4  |  0 ~ 0.01  |  0 ~ 0.02  |  0 ~ 0.01  |  24 ~ 520  | 24 ~ unclear |  24 ~ 500  |
 
-| Identifier                  | 2021-12-16 | 2021-12-17 | 2022-01-04 | 2022-01-04 | 2022-01-05 | 2022-01-00 | 2022-01-00 |
-|-----------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
-| Metrics per target          |     200    |     200    |     200    |     200    |     200    |            |            |
-| Avalanche targets           |     10     |     10     |     15     |     13     |     13     |            |            |
-| Prom scrape interval        |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
-| Loki log lines [1/sec]      |      0     |      0     |      0     |      0     |      0     |      0     |      0     |
-| Datapoints/min              |   80,000   |   80,000   |   120,000  |   104,000  |   104,000  |            |            |
-| Locust workers              |     200    |     200    |     200    |     200    |     200    |     200    |     200    |
-| Big prom query period [min] |      5     |      5     |      5     |      5     |      5     |      5     |      5     |
-| Prom query success rate [%] |     100    |     100    |            |     100    |     95     |            |            |
-| % CPU                       |     73     |     60     |            |    70-80   |   40-100   |            |            |
-| % mem                       |     64     |     40     |     OOM    |    40-70   |   40-OOM   |            |            |
-| Storage [GiB/day]           |    0.345   |     0.4    |            |     0.5    |   unclear  |            |            |
-| Network tx [MiB/s]          |     2.5    |     2.5    |            |     3.4    |     4.0    |            |            |
-| Network rx [MiB/s]          |    0.04    |    0.04    |            |    0.05    |    0.06    |            |            |
-| Disk write [MiB/s] ~ IOPS   |  0.33 ~ 25 |  0.32 ~ 27 |            |  0.34 ~ 25 |            |            |            |
-| Disk read [MiB/s] ~ IOPS    |  0 ~ 0.05  |  0 ~ 0.01  |            | 0 ~ 0.05-3 |            |            |            |
+| Identifier                  | 2021-12-16 | 2021-12-17 | 2022-01-04 | 2022-01-04 | 2022-01-05 | 2022-01-06 |  2022-01-07 |
+|-----------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:-----------:|
+| Metrics per target          |     200    |     200    |     200    |     200    |     200    |     200    |     200     |
+| Avalanche targets           |     10     |     10     |     15     |     13     |     13     |     10     |      12     |
+| Avalanche value interval    |     30     |     30     |     30     |     30     |     15     |     15     |      15     |
+| Prom scrape interval        |     15     |     15     |     15     |     15     |     15     |     15     |      15     |
+| Loki log lines [1/sec]      |      0     |      0     |      0     |      0     |      0     |      0     |      0      |
+| Datapoints/min              |   80,000   |   80,000   |   120,000  |   104,000  |   104,000  |   80,000   |    96,000   |
+| Locust workers              |     200    |     200    |     200    |     200    |     200    |     200    |     200     |
+| Big prom query period [min] |      5     |      5     |      5     |      5     |      5     |      5     |      5      |
+| Prom query success rate [%] |     100    |     100    |            |     100    |     95     |     100    |     100     |
+| % CPU                       |     73     |     60     |            |    70-80   |   40-100   |    60-70   |    50-95    |
+| % mem                       |     64     |     40     |     OOM    |    40-70   |   40-OOM   |    30-50   |    40-60*   |
+| Storage [GiB/day]           |    0.345   |     0.4    |            |     0.5    |   unclear  |    0.54    |    0.572    |
+| Network tx [MiB/s]          |     2.5    |     2.5    |            |     3.4    |     4.0    |     3.0    |     3-4     |
+| Network rx [MiB/s]          |    0.04    |    0.04    |            |    0.05    |    0.06    |    0.05    |     0.06    |
+| Disk write [MiB/s] ~ IOPS   |  0.33 ~ 25 |  0.32 ~ 27 |            |  0.34 ~ 25 |            |  0.3 ~ 26  |   0.6 ~ 50  |
+| Disk read [MiB/s] ~ IOPS    |  0 ~ 0.05  |  0 ~ 0.01  |            | 0 ~ 0.05-3 |            |  0 ~ 0.04  | 0.005 ~ 0.2 |
 
 ## Comments
 ### 2021-12-08
@@ -80,4 +85,5 @@ Mem % now fuctuates between 40 and OOM; cpu is near 100%.
 This probably means that prom has some optimizations in place when data doesn't change between scrape intervals.
 Using 15 sec for avalanche from now on.
 
-
+### 2022-01-07
+Occasional (every ~2-3hrs) short-lived %mem spikes 70-85%. 
