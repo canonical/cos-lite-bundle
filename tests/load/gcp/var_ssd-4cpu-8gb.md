@@ -1,5 +1,5 @@
 ## Results
-- 96,000 datapoints per minute / 0 log lines per second
+- 96,000 datapoints per minute / 0 log lines per second (12 targets, 200 metrics per target)
 
 ## Record
 
