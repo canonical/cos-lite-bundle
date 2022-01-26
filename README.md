@@ -1,3 +1,8 @@
+> ### ⚠️This bundle has been renamed
+> 
+> This bundle has been renamed. Development of the observability stack will be
+> continued over at  https://charmhub.io/cos-lite.
+
 # LMA Light bundle
 
 At Canonical, LMA stands for "Logs, Metrics and Alerts", and is a moniker to describe observability stacks.
