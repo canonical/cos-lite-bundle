@@ -1,10 +1,10 @@
 # Overview
 
 This documents explains the processes and practices recommended for
-contributing enhancements to the LMA Light bundle.
+contributing enhancements to the COS Lite bundle.
 
 - Generally, before developing enhancements to this charm, you should consider
-  [opening an issue](https://github.com/canonical/lma-light-bundle) explaining
+  [opening an issue](https://github.com/canonical/cos-lite-bundle) explaining
   your use case.
 - If you would like to chat with us about your use cases or proposed
   implementation, you can reach us on the

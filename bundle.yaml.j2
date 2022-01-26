@@ -1,10 +1,9 @@
 ---
 {%- set testing = testing is defined and testing.casefold() in ["1", "yes", "true"] %}
 bundle: kubernetes
-name: lma-light
+name: cos-lite
 description: >
-  LMA 2 'Light' observability stack on Kubernetes:
-  A light-weight, highly-integrated, Juju-based observability stack for Logs, Metrics and Alerts.
+  COS Lite is a light-weight, highly-integrated, observability stack running on Kubernetes
 applications:
   alertmanager:
     charm: {{ alertmanager|default('alertmanager-k8s', true) }}

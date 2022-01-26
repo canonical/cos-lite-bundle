@@ -1,7 +1,7 @@
 # Storage overlay
 #
 # This sample overlay shows how to configure the amount of
-# storage to grant to the various LMA components.
+# storage to grant to the various COS components.
 ---
 applications:
   alertmanager:
