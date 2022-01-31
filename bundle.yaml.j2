@@ -65,6 +65,8 @@ relations:
   - prometheus:grafana-source
 - - grafana:grafana-source
   - loki:grafana-source
+- - loki:alertmanager
+  - alertmanager:alerting
 {% if testing -%}
 - - prometheus:metrics-endpoint
   - avalanche:metrics-endpoint
