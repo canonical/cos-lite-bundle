@@ -75,3 +75,11 @@ curl -L https://raw.githubusercontent.com/canonical/cos-lite-bundle/main/overlay
 
 juju deploy cos-lite --channel=edge --trust --overlay ./offers-overlay.yaml
 ```
+
+## Publishing
+```shell
+./render_bundle.py bundle.yaml --channel=edge
+charmcraft pack
+charmcraft upload cos-lite.zip
+charmcraft release cos-lite --channel=beta --revision=4
+```
