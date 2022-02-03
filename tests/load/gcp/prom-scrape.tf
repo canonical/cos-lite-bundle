@@ -25,7 +25,7 @@ resource "google_compute_instance" "vm_prom_scrape" {
   }
 
   network_interface {
-    network = google_compute_network.net_lma_light_load_test_net.name
+    network = google_compute_network.net_cos_lite_load_test_net.name
 
     access_config {
     }

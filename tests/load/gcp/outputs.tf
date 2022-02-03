@@ -1,9 +1,9 @@
-output "ip_vm_lma_appliance" {
-  value = google_compute_instance.vm_lma_appliance.network_interface.0.network_ip
+output "ip_vm_cos_lite_appliance" {
+  value = google_compute_instance.vm_cos_lite_appliance.network_interface.0.network_ip
 }
 
-output "ip_nat_vm_lma_appliance" {
-  value = google_compute_instance.vm_lma_appliance.network_interface.0.access_config.0.nat_ip
+output "ip_nat_vm_cos_lite_appliance" {
+  value = google_compute_instance.vm_cos_lite_appliance.network_interface.0.access_config.0.nat_ip
 }
 
 output "ip_vm_prom_scrape" {

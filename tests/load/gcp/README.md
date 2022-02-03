@@ -46,7 +46,7 @@ To ssh into a vm instance,
 ssh -i ~/secrets/cos-lite-load-testing-ssh \
   -o "UserKnownHostsFile=/dev/null" \
   -o "StrictHostKeyChecking no" \
-  ubuntu@$(terraform output ip_nat_vm_cos_appliance | xargs -n1 echo)
+  ubuntu@$(terraform output ip_nat_vm_cos_lite_appliance | xargs -n1 echo)
 ```
 
 Note: first you'd have to generate ssh keys with:
@@ -56,7 +56,7 @@ ssh-keygen -t rsa -b 4096 -f ~/secrets/cos-lite-load-testing-ssh -C ""
 ```
 
 ### Web interfaces
-There is already an [ingress in place](lma.tpl.conf) in the COS appliance VM
+There is already an [ingress in place](cos-lite.tpl.conf) in the COS appliance VM
 which maps `prom`, `loki` and `grafana` subpaths to their corresponding ports.
 To use their web interfaces from your local machine, use ssh tunneling by
 adding a `-L` argument to the `ssh` command above:
@@ -66,7 +66,7 @@ ssh -i ~/secrets/cos-lite-load-testing-ssh \
   -o "UserKnownHostsFile=/dev/null" \
   -o "StrictHostKeyChecking no" \
   -L 8080:localhost:80 \
-  ubuntu@$(terraform output ip_nat_vm_cos_appliance | xargs -n1 echo)
+  ubuntu@$(terraform output ip_nat_vm_cos_lite_appliance | xargs -n1 echo)
 ```
 
 After this the various endpoints would be available on your local machine as:

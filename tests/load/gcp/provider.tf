@@ -15,13 +15,13 @@ provider "google" {
   zone    = var.zone
 }
 
-resource "google_compute_network" "net_lma_light_load_test_net" {
-  name = "lma-light-load-test-net"
+resource "google_compute_network" "net_cos_lite_load_test_net" {
+  name = "cos-lite-load-test-net"
 }
 
 resource "google_compute_firewall" "internal_all_to_all" {
   name    = "internal-all-to-all"
-  network = google_compute_network.net_lma_light_load_test_net.name
+  network = google_compute_network.net_cos_lite_load_test_net.name
 
   allow {
     protocol = "icmp"
@@ -43,14 +43,14 @@ data "http" "myip" {
 resource "google_compute_firewall" "external_scrape" {
   # For scraping node-exporter from the terraform host machine.
   name    = "external-scrape"
-  network = google_compute_network.net_lma_light_load_test_net.name
+  network = google_compute_network.net_cos_lite_load_test_net.name
 
   allow {
     protocol = "tcp"
     ports    = ["9100"]
   }
 
-  target_tags   = ["vm-lma-appliance"]
+  target_tags   = ["vm-cos-lite-appliance"]
   source_ranges = ["${chomp(data.http.myip.body)}/32"]
 }
 
@@ -58,7 +58,7 @@ resource "google_compute_firewall" "external_scrape" {
 resource "google_compute_firewall" "ssh" {
   # For ssh-ing into VMs from the terraform host machine.
   name    = "ssh"
-  network = google_compute_network.net_lma_light_load_test_net.name
+  network = google_compute_network.net_cos_lite_load_test_net.name
 
   allow {
     protocol = "tcp"

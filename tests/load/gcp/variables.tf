@@ -5,13 +5,14 @@
 variable "project" {
   type        = string
   description = "Name of GCP project"
+  # TODO: rename to "cos-lite-load-testing"
   default     = "lma-light-load-testing"
 }
 
 variable "credentials_file" {
   type        = string
   description = "Path to the JSON key file for editing GCP resources"
-  default     = "~/secrets/lma-light-load-testing-e767258f9d07.json"
+  default     = "~/secrets/cos-lite-load-testing-e767258f9d07.json"
 }
 
 variable "region" {
@@ -29,15 +30,15 @@ variable "zone" {
 variable "ssh_key_public_path" {
   type        = string
   description = "Path to file with public ssh key"
-  default     = "~/secrets/lma-light-load-testing-ssh.pub"
+  default     = "~/secrets/cos-lite-load-testing-ssh.pub"
   sensitive   = true
 }
 
 variable "ssh_key_private_path" {
   type        = string
   description = "Path to file with private ssh key"
-  # ssh-keygen -t rsa -b 4096 -f ~/secrets/lma-light-load-testing-ssh -C "" 
-  default   = "~/secrets/lma-light-load-testing-ssh"
+  # ssh-keygen -t rsa -b 4096 -f ~/secrets/cos-lite-load-testing-ssh -C ""
+  default   = "~/secrets/cos-lite-load-testing-ssh"
   sensitive = true
 }
 
@@ -48,7 +49,7 @@ variable "ssh_key_private_path" {
 
 variable "num_avalanche_targets" {
   type        = number
-  description = "Number of avalanche scrape targets to launch and for LMA appliance to scrape."
+  description = "Number of avalanche scrape targets to launch and for COS appliance to scrape."
 }
 
 variable "avalanche_metric_count" {
@@ -116,7 +117,7 @@ variable "loki_log_lines_per_sec" {
 }
 
 #################
-# LMA appliance #
+# COS appliance #
 #################
 
 variable "disk_type" {
@@ -131,7 +132,7 @@ variable "disk_type" {
 
 variable "ncpus" {
   type        = number
-  description = "Number of vCPUs for the LMA appliance VM"
+  description = "Number of vCPUs for the COS appliance VM"
 
   validation {
     condition     = can(regex("[0-9][0-9]*", var.ncpus))
@@ -141,7 +142,7 @@ variable "ncpus" {
 
 variable "gbmem" {
   type        = number
-  description = "Amount of memory (GB) for the LMA appliance VM"
+  description = "Amount of memory (GB) for the COS appliance VM"
 
   validation {
     condition     = can(regex("[0-9][0-9]*", var.gbmem))

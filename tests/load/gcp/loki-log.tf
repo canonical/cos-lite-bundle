@@ -14,7 +14,7 @@ resource "google_compute_instance" "vm_loki_log" {
 
   # provision this vm only if it is needed for the load test
   count = var.loki_log_lines_per_sec > 0 ? 1 : 0
-  
+
   name         = "loki-log"
   machine_type = "e2-standard-2"
   tags         = ["load-test-traffic", "vm-loki-log"]
@@ -42,7 +42,7 @@ resource "google_compute_instance" "vm_loki_log" {
   }
 
   network_interface {
-    network = google_compute_network.net_lma_light_load_test_net.name
+    network = google_compute_network.net_cos_lite_load_test_net.name
 
     access_config {
     }
