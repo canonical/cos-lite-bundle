@@ -3,6 +3,7 @@ locals {
   avalanche_target = "${google_compute_instance.vm_prom_scrape.name}.${var.zone}.c.${var.project}.internal"
   prom_url         = "http://${google_compute_instance.vm_lma_appliance.name}.${var.zone}.c.${var.project}.internal/prom"
   loki_url         = "http://${google_compute_instance.vm_lma_appliance.name}.${var.zone}.c.${var.project}.internal/loki"
+  grafana_url      = "http://${google_compute_instance.vm_lma_appliance.name}.${var.zone}.c.${var.project}.internal/grafana"
 
   file_provisioner_ssh_key = file(var.ssh_key_private_path)
 

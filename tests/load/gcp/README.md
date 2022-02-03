@@ -1,6 +1,6 @@
 ## Load tests on Google Cloud Platform (GCP)
 
-The purpose of these load tests is to produce performance anchors for lma-light
+The purpose of these load tests is to produce performance anchors for cos-lite
 operating as a standalone appliance, for the following resource matrix:
 
 | Disk type | vCPUs | Mem, GB |
@@ -43,11 +43,37 @@ parametrizing resource names.
 To ssh into a vm instance,
 
 ```shell
-ssh -i ~/secrets/lma-light-load-testing-ssh \
+ssh -i ~/secrets/cos-lite-load-testing-ssh \
   -o "UserKnownHostsFile=/dev/null" \
   -o "StrictHostKeyChecking no" \
-  ubuntu@$(terraform output ip_nat_vm_lma_appliance | xargs -n1 echo)
+  ubuntu@$(terraform output ip_nat_vm_cos_appliance | xargs -n1 echo)
 ```
+
+Note: first you'd have to generate ssh keys with:
+
+```shell
+ssh-keygen -t rsa -b 4096 -f ~/secrets/cos-lite-load-testing-ssh -C ""
+```
+
+### Web interfaces
+There is already an [ingress in place](lma.tpl.conf) in the COS appliance VM
+which maps `prom`, `loki` and `grafana` subpaths to their corresponding ports.
+To use their web interfaces from your local machine, use ssh tunneling by
+adding a `-L` argument to the `ssh` command above:
+
+```shell
+ssh -i ~/secrets/cos-lite-load-testing-ssh \
+  -o "UserKnownHostsFile=/dev/null" \
+  -o "StrictHostKeyChecking no" \
+  -L 8080:localhost:80 \
+  ubuntu@$(terraform output ip_nat_vm_cos_appliance | xargs -n1 echo)
+```
+
+After this the various endpoints would be available on your local machine as:
+- `127.0.0.1:8080/loki/loki/api/v1/rules`
+- `127.0.0.1:8080/prom/api/v1/alerts`
+- `127.0.0.1:8080/grafana`
+- etc.
 
 ### Manual verifications
 #### Avalanche (prom_scrape)
@@ -58,7 +84,8 @@ systemctl status avalanche-targets.target
 # count number of scrape targets
 pgrep avalanche | wc -l
 
-# count number datapoints a scrape target is offering (each series id is in its own line)
+# count number of datapoints a scrape target is offering
+# (each series id is in its own line)
 curl localhost:9001/metrics | grep -v '^#' | wc -l
 ```
 
@@ -67,15 +94,15 @@ curl localhost:9001/metrics | grep -v '^#' | wc -l
 # check service status
 systemctl status locust
 
-# check lma appliance and prom are reachable
-ping http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal
-curl http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal/prom/api/v1/labels
+# check COS appliance and prom are reachable
+ping http://pd-ssd-4cpu-8gb.us-central1-a.c.cos-lite-load-testing.internal
+curl http://pd-ssd-4cpu-8gb.us-central1-a.c.cos-lite-load-testing.internal/prom/api/v1/labels
 
 # follow the progress of the load test
 journalctl -u locust -f
 ```
 
-#### LMA appliance
+#### COS appliance
 ```shell
 # check cloud-init completed
 cat /var/log/cloud-init-output.log
@@ -84,7 +111,7 @@ cat /var/log/cloud-init-output.log
 juju status
 
 # check avalanche vm is reachable
-curl http://avalanche.us-central1-a.c.lma-light-load-testing.internal:9001/metrics | wc -l
+curl http://avalanche.us-central1-a.c.cos-lite-load-testing.internal:9001/metrics | wc -l
 
 # check service status
 systemctl status node-exporter
