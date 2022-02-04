@@ -69,5 +69,8 @@ class PromTest1(FastHttpUser):
         # "This is sufficient for 60s resolution for a week or 1h resolution for a year."
         # Ref: https://www.robustperception.io/limiting-promql-resource-usage
 
-        self.client.get("/api/v1/query?query=rate(avalanche_metric_mmmmm_0_0[5m])[3300s:300ms]")
-
+        # NOTE: assuming '--series-count=10', so when not specifying the series label, we're
+        # actually getting 10 timeseries in one query. See variables.tf file.
+        query_range = 11000. / 10 * ${REFRESH_INTERVAL}
+        range_vector = f"[{query_range}s:${REFRESH_INTERVAL}s]"  #  renders as e.g. [16500s:15s]
+        self.client.get(f"/api/v1/query?query=rate(avalanche_metric_mmmmm_0_0[5m]){range_vector}")
