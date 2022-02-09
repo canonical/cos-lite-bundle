@@ -160,3 +160,11 @@ variable "prom_scrape_interval" {
     error_message = "The prom_scrape_interval variable must be an integer."
   }
 }
+
+variable "grafana_admin_password" {
+  type        = string
+  description = "Grafana admin password for logging into web UI"
+  # If password is set to "admin" then grafana will ask to set a new password.
+  # To avoid the extra interactions via selenium/splinter, a non-default password is used.
+  default     = "password"
+}

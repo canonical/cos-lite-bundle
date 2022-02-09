@@ -18,7 +18,7 @@ data "cloudinit_config" "cos_lite" {
 
   part {
     content_type = "text/cloud-config"
-    content      = templatefile("cos-lite.tpl.conf", { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.cos_lite_appliance_resource_name, AVALANCHE_URL = local.avalanche_target, NUM_TARGETS = var.num_avalanche_targets, SCRAPE_INTERVAL = var.prom_scrape_interval })
+    content      = templatefile("cos-lite.tpl.conf", { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.cos_lite_appliance_resource_name, AVALANCHE_URL = local.avalanche_target, NUM_TARGETS = var.num_avalanche_targets, SCRAPE_INTERVAL = var.prom_scrape_interval, GRAFANA_ADMIN_PASSWORD = var.grafana_admin_password })
     filename     = "cos_lite.conf"
   }
 }
