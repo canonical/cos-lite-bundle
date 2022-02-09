@@ -71,6 +71,11 @@ class PromTest1(FastHttpUser):
 
         # NOTE: assuming '--series-count=10', so when not specifying the series label, we're
         # actually getting 10 timeseries in one query. See variables.tf file.
-        query_range = 11000. / 10 * ${REFRESH_INTERVAL}
+        query_range = int(11000. / 10 * ${REFRESH_INTERVAL})
         range_vector = f"[{query_range}s:${REFRESH_INTERVAL}s]"  #  renders as e.g. [16500s:15s]
-        self.client.get(f"/api/v1/query?query=rate(avalanche_metric_mmmmm_0_0[5m]){range_vector}")
+        metric_num = random.randint(0, ASSUMED_NUM_WORKERS - 1)
+        self.client.get(
+            "/api/v1/query?query=rate(avalanche_metric_mmmmm_0_{}[5m]){}".format(
+                metric_num, range_vector
+            )
+        )

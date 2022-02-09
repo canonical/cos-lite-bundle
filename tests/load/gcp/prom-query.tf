@@ -21,7 +21,7 @@ resource "google_compute_instance" "vm_prom_query" {
   }
 
   provisioner "file" {
-    content     = templatefile("prom-query-locustfile.tpl.py", { USERS = var.prom_query_locust_users, REFRESH_INTERVAL = var.prom_scrape_interval })
+    content     = templatefile("prom-query-locustfile.tpl.py", { USERS = var.prom_query_locust_users, REFRESH_INTERVAL = var.prom_scrape_interval, GRAFANA_ADMIN_PASSWORD = var.grafana_admin_password })
     destination = "/home/ubuntu/prom-query-locustfile.py"
 
     connection {
@@ -33,7 +33,7 @@ resource "google_compute_instance" "vm_prom_query" {
   }
 
   metadata = {
-    user-data = "${data.cloudinit_config.prom_query.rendered}"
+    user-data = data.cloudinit_config.prom_query.rendered
   }
 
   network_interface {
