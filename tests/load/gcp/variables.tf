@@ -90,6 +90,16 @@ variable "prom_query_locust_users" {
   }
 }
 
+variable "num_virtual_sres" {
+    type = number
+    description = "Number of virtual SREs that reopen a dashboard - as many splinter instances will be started."
+    default = 20
+
+    validation {
+    condition     = can(regex("[0-9][0-9]*", var.num_virtual_sres))
+    error_message = "The num_virtual_sres variable must be an integer."
+  }
+}
 
 #######################
 # Locust (loki_log)   #

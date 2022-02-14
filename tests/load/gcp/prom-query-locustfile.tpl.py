@@ -3,12 +3,10 @@
 # Copyright 2021 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-import json
-import random
-from datetime import datetime
-from time import time_ns
 
-from locust import HttpUser, TaskSet, constant_pacing, task
+import random
+
+from locust import constant_pacing, task
 from locust.contrib.fasthttp import FastHttpUser
 
 
@@ -62,20 +60,20 @@ class PromTest1(FastHttpUser):
             "{series_id='0'}" + "[{}s]".format(incremental_period)
         )
 
-    @task(weight=entire_panel_fetch_weight)
-    def query_panel_startup(self):
-        """"Get lots of data, representing a query for a newly loaded panel."""
-        # Sensible timeseries resolution is 11k points
-        # "This is sufficient for 60s resolution for a week or 1h resolution for a year."
-        # Ref: https://www.robustperception.io/limiting-promql-resource-usage
-
-        # NOTE: assuming '--series-count=10', so when not specifying the series label, we're
-        # actually getting 10 timeseries in one query. See variables.tf file.
-        query_range = int(11000. / 10 * ${REFRESH_INTERVAL})
-        range_vector = f"[{query_range}s:${REFRESH_INTERVAL}s]"  #  renders as e.g. [16500s:15s]
-        metric_num = random.randint(0, ASSUMED_NUM_WORKERS - 1)
-        self.client.get(
-            "/api/v1/query?query=rate(avalanche_metric_mmmmm_0_{}[5m]){}".format(
-                metric_num, range_vector
-            )
-        )
+    # @task(weight=entire_panel_fetch_weight)
+    # def query_panel_startup(self):
+    #     """Get lots of data, representing a query for a newly loaded panel."""
+    #     # Sensible timeseries resolution is 11k points
+    #     # "This is sufficient for 60s resolution for a week or 1h resolution for a year."
+    #     # Ref: https://www.robustperception.io/limiting-promql-resource-usage
+    #
+    #     # NOTE: assuming '--series-count=10', so when not specifying the series label, we're
+    #     # actually getting 10 timeseries in one query. See variables.tf file.
+    #     query_range = int(11000. / 10 * GRAFANA_DASHBOARD_REFRESH_PERIOD)
+    #     range_vector = f"[{query_range}s:{GRAFANA_DASHBOARD_REFRESH_PERIOD}s]"  #  renders as e.g. [16500s:15s]
+    #     metric_num = random.randint(0, ASSUMED_NUM_WORKERS - 1)
+    #     self.client.get(
+    #         "/api/v1/query?query=rate(avalanche_metric_mmmmm_0_{}[5m]){}".format(
+    #             metric_num, range_vector
+    #         )
+    #     )
