@@ -73,7 +73,7 @@ def main():
                 log_in.click()
 
                 print("Opening dashboard...", flush=True)
-                dashboard = WebDriverWait(driver, timeout=30).until(
+                dashboard = WebDriverWait(driver, timeout=120).until(
                     lambda d: d.find_element(By.XPATH, "//*[text()='sre mock 6 panels - rates']"))
                 dashboard.click()
 

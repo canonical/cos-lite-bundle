@@ -22,8 +22,10 @@ resource "google_compute_instance" "vm_prom_query" {
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2104-hirsute-v20211119"
+      image = "ubuntu-os-cloud/ubuntu-2004-focal-v20220204"
       # ubuntu-2110-impish-v20220204
+      # ubuntu-2004-focal-v20220204
+      # ubuntu-2104-hirsute-v20211119
     }
   }
 
@@ -44,12 +46,24 @@ resource "google_compute_instance" "vm_prom_query" {
   }
 
   provisioner "file" {
-      content     = templatefile("prom-query-grafana-dashboards.tpl.py", {
+      content     = templatefile("prom-query-grafana-dashboards.tpl.ts", {
           GRAFANA_URL = local.grafana_url,
           REFRESH_INTERVAL       = var.prom_scrape_interval,
           GRAFANA_ADMIN_PASSWORD = var.grafana_admin_password
       })
-      destination = "/home/ubuntu/prom-query-grafana-dashboards.py"
+      destination = "/home/ubuntu/prom-query-grafana-dashboards.ts"
+
+      connection {
+          type        = "ssh"
+          user        = "ubuntu"
+          host        = google_compute_instance.vm_prom_query.network_interface.0.access_config.0.nat_ip
+          private_key = local.file_provisioner_ssh_key
+      }
+  }
+
+  provisioner "file" {
+      content     = file("prom-query-grafana-dashboards.config.js")
+      destination = "/home/ubuntu/prom-query-grafana-dashboards.config.js"
 
       connection {
           type        = "ssh"
