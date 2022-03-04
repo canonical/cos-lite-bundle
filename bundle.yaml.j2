@@ -5,6 +5,16 @@ name: cos-lite
 description: >
   COS Lite is a light-weight, highly-integrated, observability stack running on Kubernetes
 applications:
+  traefik:
+    charm: {{ traefik|default('traefik-k8s', true) }}
+    scale: 1
+    trust: true
+    {%- if traefik is defined and traefik.endswith('.charm') %}
+    resources:
+        traefik-image: "jnsgruk/traefik"
+    {%- else %}
+    channel: {{ channel|default('edge', true) }}
+    {%- endif %}
   alertmanager:
     charm: {{ alertmanager|default('alertmanager-k8s', true) }}
     scale: 1
@@ -62,6 +72,8 @@ applications:
   {%- endif %}
 
 relations:
+- - prometheus:ingress
+  - traefik
 - - prometheus:alertmanager
   - alertmanager:alerting
 - - grafana:grafana-source
@@ -74,7 +86,9 @@ relations:
 - - prometheus:metrics-endpoint
   - avalanche:metrics-endpoint
 {% endif -%}
-
+# COS-monitoring
+- - traefik:metrics-endpoint
+  - prometheus
 {% if testing -%}
 --- # overlay.yaml
 applications:

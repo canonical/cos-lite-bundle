@@ -4,6 +4,7 @@
 
 def pytest_addoption(parser):
     # not providing the "default" arg to addoption: the bundle template already specifies defaults
+    parser.addoption("--traefik", action="store")
     parser.addoption("--alertmanager", action="store")
     parser.addoption("--prometheus", action="store")
     parser.addoption("--grafana", action="store")

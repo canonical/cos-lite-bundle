@@ -53,11 +53,12 @@ Optionally, you may render the template with local charms, for example:
 
 ```shell
 ./render_bundle.py bundle.yaml --testing=yes --channel=edge \
-  --prometheus=$(pwd)/../prometheus-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
-  --alertmanager=$(pwd)/../alertmanager-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
-  --grafana=$(pwd)/../grafana-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
-  --loki=$(pwd)/../loki-operator/loki-k8s_ubuntu-20.04-amd64.charm \
-  --avalanche=$(pwd)/../avalanche-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
+  --traefik=$(pwd)/../traefik-k8s-operator/traefik-k8s_ubuntu-20.04-amd64.charm \
+  --prometheus=$(pwd)/../prometheus-k8s-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
+  --alertmanager=$(pwd)/../alertmanager-k8s-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
+  --grafana=$(pwd)/../grafana-k8s-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
+  --loki=$(pwd)/../loki-operator/loki-k8s-operator_ubuntu-20.04-amd64.charm \
+  --avalanche=$(pwd)/../avalanche-k8s-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
 ```
 
 #### Render template using tox
@@ -65,11 +66,12 @@ You can render and deploy the template in a single tox command:
 
 ```shell
 tox -e integration -- --keep-models -k test_build_and_deploy \
-  --prometheus=$(pwd)/../prometheus-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
-  --alertmanager=$(pwd)/../alertmanager-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
-  --grafana=$(pwd)/../grafana-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
-  --loki=$(pwd)/../loki-operator/loki-k8s_ubuntu-20.04-amd64.charm \
-  --avalanche=$(pwd)/../avalanche-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
+  --traefik=$(pwd)/../traefik-k8s-operator/traefik-k8s_ubuntu-20.04-amd64.charm \
+  --prometheus=$(pwd)/../prometheus-k8s-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
+  --alertmanager=$(pwd)/../alertmanager-k8s-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
+  --grafana=$(pwd)/../grafana-k8s-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
+  --loki=$(pwd)/../loki-operator/loki-k8s-operator_ubuntu-20.04-amd64.charm \
+  --avalanche=$(pwd)/../avalanche-k8s-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
 ```
 
 Now `juju switch` into the newly created model (or use `--model=MODEL` in
@@ -98,7 +100,8 @@ You can also specify the channel:
 tox -e integration -- --channel=edge
 ```
 
-To keep the model and applications running after the tests completes,
+To keep the model and applications running after the tests completes:
+
 ```shell
 tox -e integration -- --keep-models
 ```
@@ -108,9 +111,10 @@ To have all charms deployed from local files:
 
 ```shell
 tox -e integration -- \
-  --prometheus=$(pwd)/../prometheus-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
-  --alertmanager=$(pwd)/../alertmanager-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
-  --grafana=$(pwd)/../grafana-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
-  --loki=$(pwd)/../loki-operator/loki-k8s_ubuntu-20.04-amd64.charm \
-  --avalanche=$(pwd)/../avalanche-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
+  --traefik=$(pwd)/../traefik-k8s-operator/traefik-k8s_ubuntu-20.04-amd64.charm \
+  --prometheus=$(pwd)/../prometheus-k8s-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
+  --alertmanager=$(pwd)/../alertmanager-k8s-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
+  --grafana=$(pwd)/../grafana-k8s-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
+  --loki=$(pwd)/../loki-operator/loki-k8s-operator_ubuntu-20.04-amd64.charm \
+  --avalanche=$(pwd)/../avalanche-k8s-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
 ```

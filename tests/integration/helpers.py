@@ -7,10 +7,24 @@ import logging
 import urllib.request
 from pathlib import Path
 from typing import List
+from urllib.parse import urlparse
 
 from pytest_operator.plugin import OpsTest
 
 log = logging.getLogger(__name__)
+
+
+async def enable_metallb(ops_test: OpsTest, ip_range: str):
+    run_args = [
+        "microk8s",
+        "enable",
+        "metallb",
+        ip_range,
+    ]
+
+    retcode, stdout, stderr = await ops_test.run(*run_args)
+    assert retcode == 0, f"Metallb setup failed: {(stderr or stdout).strip()}"
+    log.info(stdout)
 
 
 async def cli_deploy_bundle(ops_test: OpsTest, name: str, channel: str = "edge"):
@@ -30,6 +44,29 @@ async def cli_deploy_bundle(ops_test: OpsTest, name: str, channel: str = "edge")
     assert retcode == 0, f"Deploy failed: {(stderr or stdout).strip()}"
     log.info(stdout)
     await ops_test.model.wait_for_idle(timeout=1000)
+
+
+async def get_proxied_unit_url(ops_test: OpsTest, app_name: str, unit_num: int) -> str:
+    """Returns the URL assigned by Traefik over the ingress_per_unit relation interface."""
+    show_proxied_endpoints_action = (
+        await ops_test.model.applications["traefik"].units[0].run_action("show-proxied-endpoints")
+    )
+    await show_proxied_endpoints_action.wait()
+    proxied_endpoints = json.loads(show_proxied_endpoints_action.results["proxied-endpoints"])
+
+    logging.debug(f"Endpoints proxied by Traefik/0: {proxied_endpoints}")
+
+    unit_url = proxied_endpoints[f"{app_name}/{unit_num}"]["url"]
+
+    # Replace the external, metallb URL with the one of traefik, to skip a lot of
+    # routing "fun"
+    traefik_0_address = await get_unit_address(ops_test, "traefik", 0)
+    url = urlparse(unit_url)
+
+    final_url = f"{url.scheme}://{traefik_0_address}:{url.port}{url.path}"
+    logging.debug(f"Routing over traefik/0 using: {final_url}")
+
+    return final_url
 
 
 async def get_unit_address(ops_test: OpsTest, app_name: str, unit_num: int) -> str:
