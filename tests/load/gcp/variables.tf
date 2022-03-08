@@ -6,7 +6,7 @@ variable "project" {
   type        = string
   description = "Name of GCP project"
   # TODO: rename to "cos-lite-load-testing"
-  default     = "lma-light-load-testing"
+  default = "lma-light-load-testing"
 }
 
 variable "credentials_file" {
@@ -91,11 +91,11 @@ variable "prom_query_locust_users" {
 }
 
 variable "num_virtual_sres" {
-    type = number
-    description = "Number of virtual SREs that reopen a dashboard - as many splinter instances will be started."
-    default = 20
+  type        = number
+  description = "Number of virtual SREs that reopen a dashboard - as many splinter instances will be started."
+  default     = 20
 
-    validation {
+  validation {
     condition     = can(regex("[0-9][0-9]*", var.num_virtual_sres))
     error_message = "The num_virtual_sres variable must be an integer."
   }
@@ -108,7 +108,7 @@ variable "num_virtual_sres" {
 variable "loki_log_locust_users" {
   type        = number
   description = "Number of locust users to log logs to loki"
-  default = 200
+  default     = 200
 
   validation {
     condition     = can(regex("[0-9][0-9]*", var.loki_log_locust_users))
@@ -169,12 +169,4 @@ variable "prom_scrape_interval" {
     condition     = can(regex("[0-9][0-9]*", var.prom_scrape_interval))
     error_message = "The prom_scrape_interval variable must be an integer."
   }
-}
-
-variable "grafana_admin_password" {
-  type        = string
-  description = "Grafana admin password for logging into web UI"
-  # If password is set to "admin" then grafana will ask to set a new password.
-  # To avoid the extra interactions via selenium/splinter, a non-default password is used.
-  default     = "password"
 }

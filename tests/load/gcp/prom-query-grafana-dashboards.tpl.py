@@ -4,6 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 import time
+import urllib.request
 
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from webdriver_manager.firefox import GeckoDriverManager
@@ -52,6 +53,8 @@ def main():
         # systemd will restart the process
         return
 
+    GRAFANA_ADMIN_PASSWORD = urllib.request.urlopen("${COS_URL}:8081/helper/grafana/password", data=None, timeout=10.0).read().decode()
+
     while True:
         try:
             print("Opening up a browser instance...", flush=True)
@@ -69,7 +72,7 @@ def main():
                     lambda d: d.find_element(By.XPATH, "//*[text()='Log in']"))
 
                 user.send_keys("admin")
-                password.send_keys("${GRAFANA_ADMIN_PASSWORD}")
+                password.send_keys(GRAFANA_ADMIN_PASSWORD)
                 log_in.click()
 
                 print("Opening dashboard...", flush=True)

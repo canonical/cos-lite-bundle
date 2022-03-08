@@ -14,6 +14,9 @@ export const settings: TestSettings = {
   ],
 }
 
+const grafana_admin_password_response = await fetch('${COS_URL}:8081/helper/grafana/password');
+const grafana_admin_password = await grafana_admin_password_response.text()
+
 export default () => {
   step('1. Log in', async browser => {
     await browser.visit('${GRAFANA_URL}/dashboards')
@@ -27,7 +30,7 @@ export default () => {
     await browser.wait(Until.elementIsVisible(button))
 
     await browser.type(user, 'admin')
-    await browser.type(password, '${GRAFANA_ADMIN_PASSWORD}')
+    await browser.type(password, grafana_admin_password)
     await browser.click(button)
   })
 

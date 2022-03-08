@@ -29,7 +29,7 @@ resource "google_compute_firewall" "internal_all_to_all" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80", "9001-${9000 + var.num_avalanche_targets}", "9090"]
+    ports    = ["22", "80", "8081", "9001-${9000 + var.num_avalanche_targets}", "9090"]
   }
 
   target_tags = ["load-test-traffic"]

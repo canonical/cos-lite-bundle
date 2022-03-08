@@ -1,6 +1,7 @@
 locals {
   # avalanhe_url: e.g. vm_prom_scrape.c.cos-lite-load-testing.internal
   avalanche_target = "${google_compute_instance.vm_prom_scrape.name}.${var.zone}.c.${var.project}.internal"
+  cos_lite_url     = "http://${google_compute_instance.vm_cos_lite_appliance.name}.${var.zone}.c.${var.project}.internal"
   prom_url         = "http://${google_compute_instance.vm_cos_lite_appliance.name}.${var.zone}.c.${var.project}.internal/prom"
   loki_url         = "http://${google_compute_instance.vm_cos_lite_appliance.name}.${var.zone}.c.${var.project}.internal/loki"
   grafana_url      = "http://${google_compute_instance.vm_cos_lite_appliance.name}.${var.zone}.c.${var.project}.internal/grafana"
@@ -18,8 +19,15 @@ data "cloudinit_config" "cos_lite" {
 
   part {
     content_type = "text/cloud-config"
-    content      = templatefile("cos-lite.tpl.conf", { PROJECT = var.project, ZONE = var.zone, INSTANCE = local.cos_lite_appliance_resource_name, AVALANCHE_URL = local.avalanche_target, NUM_TARGETS = var.num_avalanche_targets, SCRAPE_INTERVAL = var.prom_scrape_interval, GRAFANA_ADMIN_PASSWORD = var.grafana_admin_password })
-    filename     = "cos_lite.conf"
+    content = templatefile("cos-lite.tpl.conf", {
+      PROJECT         = var.project,
+      ZONE            = var.zone,
+      INSTANCE        = local.cos_lite_appliance_resource_name,
+      AVALANCHE_URL   = local.avalanche_target,
+      NUM_TARGETS     = var.num_avalanche_targets,
+      SCRAPE_INTERVAL = var.prom_scrape_interval,
+    })
+    filename = "cos_lite.conf"
   }
 }
 
