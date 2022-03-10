@@ -157,3 +157,14 @@ async def test_alerts_are_grouped(ops_test):
 
     assert i >= 0  # should have at least one group listed (the "AlwaysFiring" alarm rule)
     log.info("juju topology grouping test passed for %s groups", i + 1)
+
+
+async def test_alerts_are_fired_from_non_leader_units_too(ops_test):
+    """The list of alerts must include an "AlwaysFiring" alert from each avalanche unit."""
+    alerts = await get_alertmanager_alerts(ops_test, "alertmanager", 0, retries=100)
+
+    alerts = list(filter(
+        lambda itm: itm["labels"]["alertname"] == "AlwaysFiringDueToNumericValue", alerts
+    ))
+    units_firing = sorted([alert["labels"]["juju_unit"] for alert in alerts])
+    assert units_firing == ["avalanche/0", "avalanche/1"]
