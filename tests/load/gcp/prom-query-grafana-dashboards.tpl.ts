@@ -14,9 +14,6 @@ export const settings: TestSettings = {
   ],
 }
 
-const grafana_admin_password_response = await fetch('${COS_URL}:8081/helper/grafana/password');
-const grafana_admin_password = await grafana_admin_password_response.text()
-
 export default () => {
   step('1. Log in', async browser => {
     await browser.visit('${GRAFANA_URL}/dashboards')
@@ -25,12 +22,17 @@ export default () => {
     const password = By.nameAttr('password')
     const button = By.visibleText('Log in')
 
+    // const grafana_admin_password_response = await fetch('${COS_URL}:8081/helper/grafana/password');
+    // const grafana_admin_password = await grafana_admin_password_response.text()
+    
+    // const grafana_admin_password = await browser.evaluate(async () => { const data = await (await fetch('http://pd-ssd-4cpu-16gb.us-central1-a.c.lma-light-load-testing.internal:8081/helper/grafana/password')).json(); return data })
+
     await browser.wait(Until.elementIsVisible(user))
     await browser.wait(Until.elementIsVisible(password))
     await browser.wait(Until.elementIsVisible(button))
 
     await browser.type(user, 'admin')
-    await browser.type(password, grafana_admin_password)
+    await browser.type(password, 'GRAFANA_ADMIN_PASSWORD_TO_SUBSTITUTE_BY_CLOUD_INIT')
     await browser.click(button)
   })
 
