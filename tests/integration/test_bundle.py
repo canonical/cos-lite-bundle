@@ -134,23 +134,6 @@ async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
     )
 
 
-async def test_alerts_fire_within_expected_time(ops_test: OpsTest):
-    async def wait_until_all_alerts_fire():
-        alerts = await get_alertmanager_alerts(ops_test, "alertmanager", 0, retries=100)
-        num_alerts = len(
-            {
-                itm["labels"]["alertname"]
-                for itm in alerts
-                if "AlwaysFiring" in itm["labels"]["alertname"]
-            }
-        )
-        return num_alerts == 2
-
-    await juju.utils.block_until_with_coroutine(
-        wait_until_all_alerts_fire, timeout=300, wait_period=15
-    )
-
-
 async def test_juju_topology_labels_in_alerts(ops_test: OpsTest):
     alerts = await get_alertmanager_alerts(ops_test, "alertmanager", 0, retries=100)
 
@@ -180,10 +163,16 @@ async def test_alerts_are_grouped(ops_test: OpsTest):
 
 async def test_alerts_are_fired_from_non_leader_units_too(ops_test: OpsTest):
     """The list of alerts must include an "AlwaysFiring" alert from each avalanche unit."""
-    alerts = await get_alertmanager_alerts(ops_test, "alertmanager", 0, retries=100)
 
-    alerts = list(
-        filter(lambda itm: itm["labels"]["alertname"] == "AlwaysFiringDueToNumericValue", alerts)
-    )
-    units_firing = sorted([alert["labels"]["juju_unit"] for alert in alerts])
-    assert units_firing == ["avalanche/0", "avalanche/1"]
+    async def all_alerts_fire():
+        alerts = await get_alertmanager_alerts(ops_test, "alertmanager", 0, retries=100)
+        alerts = list(
+            filter(
+                lambda itm: itm["labels"]["alertname"] == "AlwaysFiringDueToNumericValue", alerts
+            )
+        )
+        units_firing = sorted([alert["labels"]["juju_unit"] for alert in alerts])
+        log.info("Units firing as of this moment: %s", units_firing)
+        return units_firing == ["avalanche/0", "avalanche/1"]
+
+    await juju.utils.block_until_with_coroutine(all_alerts_fire, timeout=300, wait_period=15)
