@@ -146,7 +146,9 @@ async def test_alerts_fire_within_expected_time(ops_test: OpsTest):
         )
         return num_alerts == 2
 
-    juju.utils.block_until_with_coroutine(wait_until_all_alerts_fire, timeout=300, wait_period=15)
+    await juju.utils.block_until_with_coroutine(
+        wait_until_all_alerts_fire, timeout=300, wait_period=15
+    )
 
 
 async def test_juju_topology_labels_in_alerts(ops_test: OpsTest):
