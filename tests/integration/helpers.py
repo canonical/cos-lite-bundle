@@ -8,10 +8,12 @@ import urllib.request
 from pathlib import Path
 from typing import List
 
+from pytest_operator.plugin import OpsTest
+
 log = logging.getLogger(__name__)
 
 
-async def cli_deploy_bundle(ops_test, name: str, channel: str = "edge"):
+async def cli_deploy_bundle(ops_test: OpsTest, name: str, channel: str = "edge"):
     # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
     run_args = [
         "juju",
@@ -30,13 +32,13 @@ async def cli_deploy_bundle(ops_test, name: str, channel: str = "edge"):
     await ops_test.model.wait_for_idle(timeout=1000)
 
 
-async def get_unit_address(ops_test, app_name: str, unit_num: int) -> str:
+async def get_unit_address(ops_test: OpsTest, app_name: str, unit_num: int) -> str:
     # return ops_test.model.applications[app_name].units[unit_num].data["private-address"]
     status = await ops_test.model.get_status()  # noqa: F821
     return status["applications"][app_name]["units"][f"{app_name}/{unit_num}"]["address"]
 
 
-async def get_alertmanager_alerts(ops_test, unit_name, unit_num, retries=3) -> List[dict]:
+async def get_alertmanager_alerts(ops_test: OpsTest, unit_name, unit_num, retries=3) -> List[dict]:
     """Get a list of alerts.
 
     Response looks like this:
@@ -75,7 +77,7 @@ async def get_alertmanager_alerts(ops_test, unit_name, unit_num, retries=3) -> L
     return alerts
 
 
-async def get_alertmanager_groups(ops_test, unit_name, unit_num, retries=3) -> List[dict]:
+async def get_alertmanager_groups(ops_test: OpsTest, unit_name, unit_num, retries=3) -> List[dict]:
     """Get a list of groups of alerts.
 
     Response looks like this:
