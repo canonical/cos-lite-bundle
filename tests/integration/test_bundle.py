@@ -20,6 +20,7 @@ import os
 import urllib.request
 from pathlib import Path
 
+import juju
 import pytest
 from helpers import (
     cli_deploy_bundle,
@@ -27,6 +28,7 @@ from helpers import (
     get_alertmanager_groups,
     get_unit_address,
 )
+from pytest_operator.plugin import OpsTest
 
 log = logging.getLogger(__name__)
 juju_topology_keys = {"juju_model_uuid", "juju_model", "juju_application"}
@@ -39,7 +41,7 @@ def get_this_script_dir() -> Path:
 
 
 @pytest.mark.abort_on_fail
-async def test_build_and_deploy(ops_test, pytestconfig):
+async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
     """Build the charm-under-test and deploy it together with related charms.
 
     Assert on the unit status before any relations/configurations take place.
@@ -92,7 +94,7 @@ async def test_build_and_deploy(ops_test, pytestconfig):
 
 
 @pytest.mark.abort_on_fail
-async def test_alertmanager_is_up(ops_test):
+async def test_alertmanager_is_up(ops_test: OpsTest):
     address = await get_unit_address(ops_test, "alertmanager", 0)
     url = f"http://{address}:9093"
     log.info("am public address: %s", url)
@@ -103,7 +105,7 @@ async def test_alertmanager_is_up(ops_test):
 
 
 @pytest.mark.abort_on_fail
-async def test_prometheus_is_up(ops_test):
+async def test_prometheus_is_up(ops_test: OpsTest):
     address = await get_unit_address(ops_test, "prometheus", 0)
     url = f"http://{address}:9090"
     log.info("prom public address: %s", url)
@@ -113,7 +115,7 @@ async def test_prometheus_is_up(ops_test):
 
 
 @pytest.mark.abort_on_fail
-async def test_prometheus_sees_alertmanager(ops_test):
+async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
     am_address = await get_unit_address(ops_test, "alertmanager", 0)
     prom_address = await get_unit_address(ops_test, "prometheus", 0)
 
@@ -132,7 +134,7 @@ async def test_prometheus_sees_alertmanager(ops_test):
     )
 
 
-async def test_juju_topology_labels_in_alerts(ops_test):
+async def test_juju_topology_labels_in_alerts(ops_test: OpsTest):
     alerts = await get_alertmanager_alerts(ops_test, "alertmanager", 0, retries=100)
 
     i = -1
@@ -148,7 +150,7 @@ async def test_juju_topology_labels_in_alerts(ops_test):
     log.info("juju topology test passed for %s alerts", i + 1)
 
 
-async def test_alerts_are_grouped(ops_test):
+async def test_alerts_are_grouped(ops_test: OpsTest):
     groups = await get_alertmanager_groups(ops_test, "alertmanager", 0, retries=100)
     i = -1
     for i, group in enumerate(groups):
@@ -157,3 +159,20 @@ async def test_alerts_are_grouped(ops_test):
 
     assert i >= 0  # should have at least one group listed (the "AlwaysFiring" alarm rule)
     log.info("juju topology grouping test passed for %s groups", i + 1)
+
+
+async def test_alerts_are_fired_from_non_leader_units_too(ops_test: OpsTest):
+    """The list of alerts must include an "AlwaysFiring" alert from each avalanche unit."""
+
+    async def all_alerts_fire():
+        alerts = await get_alertmanager_alerts(ops_test, "alertmanager", 0, retries=100)
+        alerts = list(
+            filter(
+                lambda itm: itm["labels"]["alertname"] == "AlwaysFiringDueToNumericValue", alerts
+            )
+        )
+        units_firing = sorted([alert["labels"]["juju_unit"] for alert in alerts])
+        log.info("Units firing as of this moment: %s", units_firing)
+        return units_firing == ["avalanche/0", "avalanche/1"]
+
+    await juju.utils.block_until_with_coroutine(all_alerts_fire, timeout=300, wait_period=15)
