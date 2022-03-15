@@ -117,12 +117,12 @@ class ModelConfigChange:
         self.change_to = kwargs
 
     async def __aenter__(self):
-        """On entry, the update status interval is set to the minimum 10s."""
+        """On entry, the config is set to the user provided custom values."""
         config = await self.ops_test.model.get_config()
         self.revert_to = {k: config[k] for k in self.change_to.keys()}
         await self.ops_test.model.set_config(self.change_to)
         return self
 
     async def __aexit__(self, exc_type, exc_value, exc_traceback):
-        """On exit, the update status interval is reverted to its original value."""
+        """On exit, the modified config options are reverted to their original values."""
         await self.ops_test.model.set_config(self.revert_to)
