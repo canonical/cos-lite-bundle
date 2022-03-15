@@ -13,6 +13,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import asyncio
 import inspect
 import json
 import logging
@@ -27,6 +28,7 @@ from helpers import (
     get_alertmanager_alerts,
     get_alertmanager_groups,
     get_unit_address,
+    ModelConfigChange,
 )
 from pytest_operator.plugin import OpsTest
 
@@ -80,17 +82,7 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 
     # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
     await cli_deploy_bundle(ops_test, str(rendered_bundle))
-
-    # due to a juju bug, occasionally some charms finish a startup sequence with "waiting for IP
-    # address"
-    # issuing dummy update_status just to trigger an event
-    await ops_test.model.set_config({"update-status-hook-interval": "10s"})
-
     await ops_test.model.wait_for_idle(status="active", timeout=1000)
-    assert ops_test.model.applications["alertmanager"].units[0].workload_status == "active"
-
-    # effectively disable the update status from firing
-    await ops_test.model.set_config({"update-status-hook-interval": "60m"})
 
 
 @pytest.mark.abort_on_fail
@@ -176,3 +168,24 @@ async def test_alerts_are_fired_from_non_leader_units_too(ops_test: OpsTest):
         return units_firing == ["avalanche/0", "avalanche/1"]
 
     await juju.utils.block_until_with_coroutine(all_alerts_fire, timeout=300, wait_period=15)
+
+
+async def test_bundle_charms_can_handle_frequent_update_status(ops_test: OpsTest):
+    async with ModelConfigChange(ops_test, **{"update-status-hook-interval": "10s"}):
+        # Wait for a considerable amount of time to make sure charms can repeatedly handle this.
+        # If all goes well, `wait_for_idle` would raise a timeout error
+        soak_time = 5 * 60  # 5 min
+        try:
+            await ops_test.model.wait_for_idle(
+                status="active",
+                raise_on_error=True,
+                timeout=soak_time,
+                idle_period=soak_time,
+                check_freq=0.5
+            )
+        except asyncio.TimeoutError:
+            # Good, this means no error during the soak time
+            pass
+
+    # After update-status frequency is restored to default, make sure all charms settle into active
+    await ops_test.model.wait_for_idle(status="active")
