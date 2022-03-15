@@ -181,7 +181,7 @@ async def test_bundle_charms_can_handle_frequent_update_status(ops_test: OpsTest
                 raise_on_error=True,
                 timeout=soak_time,
                 idle_period=soak_time,
-                check_freq=0.5
+                check_freq=0.5,
             )
         except asyncio.TimeoutError:
             # Good, this means no error during the soak time
