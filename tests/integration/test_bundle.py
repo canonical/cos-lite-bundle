@@ -24,11 +24,11 @@ from pathlib import Path
 import juju
 import pytest
 from helpers import (
+    ModelConfigChange,
     cli_deploy_bundle,
     get_alertmanager_alerts,
     get_alertmanager_groups,
     get_unit_address,
-    ModelConfigChange,
 )
 from pytest_operator.plugin import OpsTest
 
