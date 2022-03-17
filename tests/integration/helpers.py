@@ -107,3 +107,22 @@ async def get_alertmanager_groups(ops_test: OpsTest, unit_name, unit_num, retrie
             break
 
     return groups
+
+
+class ModelConfigChange:
+    """Context manager for temporarily changing a model config option."""
+
+    def __init__(self, ops_test: OpsTest, **kwargs):
+        self.ops_test = ops_test
+        self.change_to = kwargs
+
+    async def __aenter__(self):
+        """On entry, the config is set to the user provided custom values."""
+        config = await self.ops_test.model.get_config()
+        self.revert_to = {k: config[k] for k in self.change_to.keys()}
+        await self.ops_test.model.set_config(self.change_to)
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, exc_traceback):
+        """On exit, the modified config options are reverted to their original values."""
+        await self.ops_test.model.set_config(self.revert_to)
