@@ -19,3 +19,6 @@ applications:
       prometheus-scrape:
         endpoints:
         - metrics-endpoint
+      prometheus-receive-remote-write:
+        endpoints:
+        - receive-remote-write
