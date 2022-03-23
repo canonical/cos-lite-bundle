@@ -16,6 +16,7 @@ log = logging.getLogger(__name__)
 
 async def enable_metallb(ops_test: OpsTest, ip_range: str):
     run_args = [
+        "sudo",
         "microk8s",
         "enable",
         "metallb",
