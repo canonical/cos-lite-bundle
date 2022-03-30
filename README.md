@@ -76,6 +76,8 @@ curl -L https://raw.githubusercontent.com/canonical/cos-lite-bundle/main/overlay
 juju deploy cos-lite --channel=edge --trust --overlay ./offers-overlay.yaml
 ```
 
+To use COS-Lite with machine charms, see [cos-proxy](https://charmhub.io/cos-proxy) ([source](https://github.com/canonical/cos-proxy-operator)).
+
 ## Publishing
 ```shell
 ./render_bundle.py bundle.yaml --channel=edge
