@@ -92,14 +92,14 @@ curl localhost:9001/metrics | grep -v '^#' | wc -l
 #### Locust (prom_query)
 ```shell
 # check service status
-systemctl status locust
+systemctl status flood-element-grafana
 
 # check COS appliance and prom are reachable
-ping http://pd-ssd-4cpu-8gb.us-central1-a.c.cos-lite-load-testing.internal
-curl http://pd-ssd-4cpu-8gb.us-central1-a.c.cos-lite-load-testing.internal/prom/api/v1/labels
+ping pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal
+curl http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal/prom/api/v1/labels
 
 # follow the progress of the load test
-journalctl -u locust -f
+journalctl -u flood-element-grafana -f
 ```
 
 #### COS appliance
@@ -120,5 +120,8 @@ systemctl status pod-top-logger
 
 # check ingress is working
 curl localhost/prom/api/v1/targets
+
+# check helper app is exposing grafana admin password
+curl localhost:8081/helper/grafana/password
 ```
 

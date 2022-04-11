@@ -30,21 +30,6 @@ resource "google_compute_instance" "vm_prom_query" {
   }
 
   provisioner "file" {
-    content = templatefile("prom-query-locustfile.tpl.py", {
-      USERS            = var.prom_query_locust_users,
-      REFRESH_INTERVAL = var.prom_scrape_interval,
-    })
-    destination = "/home/ubuntu/prom-query-locustfile.py"
-
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      host        = google_compute_instance.vm_prom_query.network_interface.0.access_config.0.nat_ip
-      private_key = local.file_provisioner_ssh_key
-    }
-  }
-
-  provisioner "file" {
     content = templatefile("prom-query-grafana-dashboards.tpl.ts", {
       COS_URL          = local.cos_lite_url,
       GRAFANA_URL      = local.grafana_url,

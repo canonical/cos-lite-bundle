@@ -47,7 +47,7 @@ output "prom_heavy_query_range_in_sec" {
   # This calculation is using the scrape interval to avoid needing data interpolation on
   # prometheus side with queries such as:
   # "/api/v1/query?query=rate(avalanche_metric_mmmmm_0_0[5m])[3300s:300ms]"
-  # See the prom-query-locustfile.tpl.py file.
+  # See the prom-query-grafana-dashboards.tpl.ts file.
   value = 11000 / 10 * var.prom_scrape_interval
 }
 
