@@ -1,0 +1,11 @@
+[Unit]
+Description="Flood element runner for loading an entire grafana dashboard from scratch"
+After=network.target multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStartPre=wget https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz -P /run
+ExecStartPre=tar -xzvf /run/geckodriver-v0.31.0-linux64.tar.gz -C /run
+ExecStartPre=mv /run/geckodriver /usr/bin
+ExecStart=element run /home/ubuntu/prom-query-grafana-dashboards.ts --config /home/ubuntu/prom-query-grafana-dashboards.config.js --mu

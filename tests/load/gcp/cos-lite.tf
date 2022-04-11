@@ -1,14 +1,14 @@
 locals {
-  # avalanhe_url: e.g. vm_prom_scrape.c.cos-lite-load-testing.internal
-  avalanche_target = "${google_compute_instance.vm_prom_scrape.name}.${var.zone}.c.${var.project}.internal"
-  cos_lite_url     = "http://${google_compute_instance.vm_cos_lite_appliance.name}.${var.zone}.c.${var.project}.internal"
-  prom_url         = "http://${google_compute_instance.vm_cos_lite_appliance.name}.${var.zone}.c.${var.project}.internal/prom"
-  loki_url         = "http://${google_compute_instance.vm_cos_lite_appliance.name}.${var.zone}.c.${var.project}.internal/loki"
-  grafana_url      = "http://${google_compute_instance.vm_cos_lite_appliance.name}.${var.zone}.c.${var.project}.internal/grafana"
-
-  file_provisioner_ssh_key = file(var.ssh_key_private_path)
-
   cos_lite_appliance_resource_name = "${var.disk_type}-${var.ncpus}cpu-${var.gbmem}gb"
+
+  cos_appliance_hostname = "${local.cos_lite_appliance_resource_name}.${var.zone}.c.${var.project}.internal"
+  cos_lite_url           = "http://${local.cos_appliance_hostname}"
+  prom_url               = "http://${local.cos_appliance_hostname}/${var.juju_model_name}-prometheus-0"
+  loki_url               = "http://${local.cos_appliance_hostname}/${var.juju_model_name}-loki-0"
+  grafana_url            = "http://${local.cos_appliance_hostname}/${var.juju_model_name}-grafana"
+
+  # avalanche_url: e.g. vm_prom_scrape.c.cos-lite-load-testing.internal
+  avalanche_target = "${google_compute_instance.vm_prom_scrape.name}.${var.zone}.c.${var.project}.internal"
 }
 
 data "cloudinit_config" "cos_lite" {
@@ -20,12 +20,16 @@ data "cloudinit_config" "cos_lite" {
   part {
     content_type = "text/cloud-config"
     content = templatefile("cos-lite.tpl.conf", {
-      PROJECT         = var.project,
-      ZONE            = var.zone,
-      INSTANCE        = local.cos_lite_appliance_resource_name,
-      AVALANCHE_URL   = local.avalanche_target,
-      NUM_TARGETS     = var.num_avalanche_targets,
-      SCRAPE_INTERVAL = var.prom_scrape_interval,
+      PROJECT                = var.project,
+      ZONE                   = var.zone,
+      INSTANCE               = local.cos_lite_appliance_resource_name,
+      AVALANCHE_URL          = local.avalanche_target,
+      NUM_TARGETS            = var.num_avalanche_targets,
+      SCRAPE_INTERVAL        = var.prom_scrape_interval,
+      COS_APPLIANCE_HOSTNAME = local.cos_appliance_hostname,
+      PROM_EXTERNAL_URL      = local.prom_url,
+      GRAFANA_EXTERNAL_URL   = local.grafana_url,
+      JUJU_MODEL_NAME        = var.juju_model_name,
     })
     filename = "cos_lite.conf"
   }
@@ -38,14 +42,14 @@ resource "google_compute_instance" "vm_cos_lite_appliance" {
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2104-hirsute-v20211119"
+      image = "ubuntu-os-cloud/ubuntu-minimal-2204-lts"
       type  = var.disk_type
-      size  = "50"
+      size  = "100"
     }
   }
 
   metadata = {
-    user-data = "${data.cloudinit_config.cos_lite.rendered}"
+    user-data = data.cloudinit_config.cos_lite.rendered
   }
 
   network_interface {

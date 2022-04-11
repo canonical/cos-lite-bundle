@@ -26,6 +26,8 @@ jobs:
       run: python3 -m pip install tox
     - name: Run linters
       run: tox -vve lint
+    - name: Static analysis
+      run: tox -vve static-bundle
   integration-test-microk8s:
     name: Integration tests (microk8s)
     runs-on: ubuntu-latest

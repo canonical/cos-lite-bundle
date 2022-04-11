@@ -1,0 +1,9 @@
+[Unit]
+Description=logi log locust
+After=network.target
+PartOf=locust-loggers.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=python3 -m locust -f /home/ubuntu/loki-log-locustfile.py --host ${LOKI_URL} --users 1 --spawn-rate 10 --headless --num-logging-sources ${LOGGING_SOURCES} --log-lines ${LOG_LINES_PER_SEC}
