@@ -51,11 +51,6 @@ def _(parser):
     parser.add_argument("--log-lines", type=int, help="Log lines per seconds to post to loki")
 
 
-# Ideally locust would expose the worker id, but rolling my own since it doesn't
-# https://github.com/locustio/locust/issues/1601
-NUM_WORKERS = ${USERS}
-
-
 class LokiTest1(FastHttpUser):
     # equivalent to promtail's `[batchwait: <duration> | default = 1s]`
     # https://grafana.com/docs/loki/latest/clients/promtail/configuration/#clients
@@ -67,7 +62,11 @@ class LokiTest1(FastHttpUser):
 
     @task
     def logfile1(self):
-        filenum = random.randint(0, NUM_WORKERS - 1)
+        # Ideally locust would expose the worker id, but rolling my own since it doesn't
+        # https://github.com/locustio/locust/issues/1601
+        num_logging_targets = self.environment.parsed_options.num_users
+
+        filenum = random.randint(0, num_logging_targets - 1)
         data = {
             "streams": [
                 {

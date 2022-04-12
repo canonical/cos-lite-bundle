@@ -89,7 +89,7 @@ pgrep avalanche | wc -l
 curl localhost:9001/metrics | grep -v '^#' | wc -l
 ```
 
-#### Locust (prom_query)
+#### Flood element (prom_query)
 ```shell
 # check service status
 systemctl status flood-element-grafana
@@ -103,6 +103,12 @@ journalctl -u flood-element-grafana -f
 
 # check network rates
 sudo iftop -i ens4 -f "host pd-ssd-4cpu-8gb.c.lma-light-load-testing.internal"
+```
+
+### Locust (loki_log)
+```shell
+# check service status
+systemctl status locust
 ```
 
 #### COS appliance
@@ -126,5 +132,10 @@ curl localhost/prom/api/v1/targets
 
 # check helper app is exposing grafana admin password
 curl localhost:8081/helper/grafana/password
+
+# check number of logs Logi processed
+curl -s 10.152.183.24:3100/metrics | grep log_messages_total
+curl -s 10.152.183.24:3100/metrics | grep loki_ingester_wal_records_logged_total
+curl -s 10.152.183.24:3100/metrics | grep -v '^# ' | grep -v '^go_' | sort -k 2 -g
 ```
 

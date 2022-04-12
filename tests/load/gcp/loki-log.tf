@@ -4,7 +4,11 @@ data "cloudinit_config" "loki_log" {
 
   part {
     content_type = "text/cloud-config"
-    content      = templatefile("loki-log-locust.tpl.conf", { LOKI_URL = local.loki_url, USERS = var.loki_log_locust_users })
+    content      = templatefile("loki-log-locust.tpl.conf", {
+        LOKI_URL = local.loki_url,
+        USERS = var.num_avalanche_targets,
+        LOG_LINES_PER_SEC = var.loki_log_lines_per_sec,
+    })
     filename     = "locust.conf"
   }
 }
@@ -26,7 +30,7 @@ resource "google_compute_instance" "vm_loki_log" {
   }
 
   provisioner "file" {
-    content     = templatefile("loki-log-locustfile.tpl.py", { USERS = var.loki_log_locust_users })
+    content     = templatefile("loki-log-locustfile.tpl.py", { USERS = var.num_avalanche_targets })
     destination = "/home/ubuntu/loki-log-locustfile.py"
 
     connection {

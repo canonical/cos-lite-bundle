@@ -8,8 +8,6 @@ data "cloudinit_config" "prom_query" {
       COS_URL          = local.cos_lite_url,
       PROM_URL         = local.prom_url,
       GRAFANA_URL      = local.grafana_url,
-      USERS            = var.prom_query_locust_users,
-      NUM_VIRTUAL_SRES = var.num_virtual_sres,
     })
     filename = "locust.conf"
   }
@@ -35,6 +33,7 @@ resource "google_compute_instance" "vm_prom_query" {
       COS_URL          = local.cos_lite_url,
       GRAFANA_URL      = local.grafana_url,
       REFRESH_INTERVAL = var.prom_scrape_interval,
+      NUM_VIRTUAL_SRES = var.num_virtual_sres,
     })
     destination = "/home/ubuntu/prom-query-grafana-dashboards.ts"
 

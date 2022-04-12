@@ -49,7 +49,7 @@ variable "ssh_key_private_path" {
 
 variable "num_avalanche_targets" {
   type        = number
-  description = "Number of avalanche scrape targets to launch and for COS appliance to scrape."
+  description = "Number of avalanche scrape targets to launch and for COS appliance to scrape. The same value is used for num of loggers to Loki."
 }
 
 variable "avalanche_metric_count" {
@@ -78,18 +78,6 @@ variable "avalanche_value_interval" {
 # Locust (prom_query) #
 #######################
 
-variable "prom_query_locust_users" {
-  type        = number
-  description = "Number of locust users to query prometheus"
-  # Assume grafana would have (20 SREs * 10 panels) = 200 panels, so 200 locust users
-  default = 200
-
-  validation {
-    condition     = can(regex("[0-9][0-9]*", var.prom_query_locust_users))
-    error_message = "The prom_query_locust_users variable must be an integer."
-  }
-}
-
 variable "num_virtual_sres" {
   type        = number
   description = "Number of virtual SREs that reopen a dashboard - as many splinter instances will be started."
@@ -104,17 +92,6 @@ variable "num_virtual_sres" {
 #######################
 # Locust (loki_log)   #
 #######################
-
-variable "loki_log_locust_users" {
-  type        = number
-  description = "Number of locust users to log logs to loki"
-  default     = 200
-
-  validation {
-    condition     = can(regex("[0-9][0-9]*", var.loki_log_locust_users))
-    error_message = "The loki_log_locust_users variable must be an integer."
-  }
-}
 
 variable "loki_log_lines_per_sec" {
   type        = number

@@ -8,9 +8,8 @@ export const settings: TestSettings = {
   description: "Simulate N SREs load up a dashboard from scratch at the same time",
   stages: [
     { duration: '2m', target: 5 },
-    { duration: '2m', target: 10 },
-    { duration: '2m', target: 20 },
-    { duration: '5d', target: 20 },
+    { duration: '2m', target: ${NUM_VIRTUAL_SRES} },
+    { duration: '5d', target: ${NUM_VIRTUAL_SRES} },
   ],
 }
 
@@ -24,7 +23,7 @@ export default () => {
 
     // const grafana_admin_password_response = await fetch('${COS_URL}:8081/helper/grafana/password');
     // const grafana_admin_password = await grafana_admin_password_response.text()
-    
+
     // const grafana_admin_password = await browser.evaluate(async () => { const data = await (await fetch('http://pd-ssd-4cpu-16gb.us-central1-a.c.lma-light-load-testing.internal:8081/helper/grafana/password')).json(); return data })
 
     await browser.wait(Until.elementIsVisible(user))
