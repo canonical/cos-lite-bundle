@@ -17,7 +17,8 @@ data "cloudinit_config" "prom_query" {
 
 resource "google_compute_instance" "vm_prom_query" {
   name         = "locust"
-  machine_type = "custom-4-8192"
+  # 4-cpu is not enough for 20 workers (load average: 13.29, 12.20, 9.56, and rising)
+  machine_type = "custom-8-16384"
   tags         = ["load-test-traffic", "vm-prom-query"]
 
   boot_disk {

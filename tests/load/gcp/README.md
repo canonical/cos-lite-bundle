@@ -100,6 +100,9 @@ curl http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal/prom
 
 # follow the progress of the load test
 journalctl -u flood-element-grafana -f
+
+# check network rates
+sudo iftop -i ens4 -f "host pd-ssd-4cpu-8gb.c.lma-light-load-testing.internal"
 ```
 
 #### COS appliance
