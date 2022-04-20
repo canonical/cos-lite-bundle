@@ -36,7 +36,7 @@ export default () => {
   })
 
   step('2. Open dashboard', async browser => {
-    let dashboard = By.visibleText('sre mock 6 panels - rates')
+    let dashboard = By.visibleText('sre mock 2 panels - 6 lines and 6 log sources')
     await browser.wait(Until.elementIsVisible(dashboard))
     await browser.click(dashboard)
   })

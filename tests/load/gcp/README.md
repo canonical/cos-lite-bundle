@@ -93,13 +93,11 @@ curl localhost:9001/metrics | grep -v '^#' | wc -l
 ```shell
 # check service status
 systemctl status flood-element-grafana
+journalctl -u flood-element-grafana -f
 
 # check COS appliance and prom are reachable
 ping pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal
 curl http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal/prom/api/v1/labels
-
-# follow the progress of the load test
-journalctl -u flood-element-grafana -f
 
 # check network rates
 sudo iftop -i ens4 -f "host pd-ssd-4cpu-8gb.c.lma-light-load-testing.internal"
@@ -120,7 +118,7 @@ cat /var/log/cloud-init-output.log
 juju status
 
 # check avalanche vm is reachable
-curl http://avalanche.us-central1-a.c.cos-lite-load-testing.internal:9001/metrics | wc -l
+curl http://avalanche.us-central1-a.c.lma-light-load-testing.internal:9001/metrics | wc -l
 
 # check service status
 systemctl status node-exporter
@@ -128,14 +126,14 @@ systemctl status prometheus-stdout-logger
 systemctl status pod-top-logger
 
 # check ingress is working
-curl localhost/prom/api/v1/targets
+curl localhost/prom/api/v1/targets | jq ".data.activeTargets[].scrapeUrl"
 
 # check helper app is exposing grafana admin password
 curl localhost:8081/helper/grafana/password
 
 # check number of logs Logi processed
-curl -s 10.152.183.24:3100/metrics | grep log_messages_total
-curl -s 10.152.183.24:3100/metrics | grep loki_ingester_wal_records_logged_total
-curl -s 10.152.183.24:3100/metrics | grep -v '^# ' | grep -v '^go_' | sort -k 2 -g
+loki_ip=$(juju status "loki" --format=json | jq -r ".applications.\"loki\".address")
+curl -s "$loki_ip:3100/metrics" | grep log_messages_total
+curl -s "$loki_ip:3100/metrics" | grep loki_ingester_wal_records_logged_total
+curl -s "$loki_ip:3100/metrics" | grep -v '^# ' | grep -v '^go_' | sort -k 2 -g
 ```
-
