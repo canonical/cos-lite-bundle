@@ -12,6 +12,12 @@ operating as a standalone appliance, for the following resource matrix:
 |  standard |   2   |    8    |
 |  standard |   4   |    8    |
 
+The very first time you run terraform,
+
+```shell
+terraform init
+```
+
 To start a load test:
 
 ```shell

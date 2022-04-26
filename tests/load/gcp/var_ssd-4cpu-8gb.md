@@ -1,7 +1,80 @@
 ## Results
-- 96,000 datapoints per minute / 0 log lines per second (12 targets, 200 metrics per target)
+- (previously, with locust querying prom directly) 96,000 datapoints per minute
+  / 0 log lines per second (12 targets, 200 metrics per target)
+- (with flood element) TBD
 
-## Record
+## Record (using flood element)
+| Identifier                    | 2022-04-22 | 2022-00-00 | 2022-00-00 | 2022-00-00 | 2022-00-00 | 2022-00-00 | 2022-00-00 |
+|-------------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
+| Metrics per target            |    200     |    200     |    200     |    200     |    200     |    200     |    200     |
+| Avalanche value interval      |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
+| Prom scrape interval          |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
+| Num virtual SREs              |     20     |     20     |     20     |     20     |     20     |     20     |     20     |
+| Dashboard reload period [min] |     5      |     5      |     5      |     5      |     5      |     5      |     5      |
+| Scrape/logging targets        |     12     |            |            |            |            |            |            |
+| Loki log lines [1/sec]        |     2      |            |            |            |            |            |            |
+| Datapoints/min                |   96000    |            |            |            |            |            |            |
+| % CPU (p50, p95, p99)         | 20, 24, 24 |            |            |            |            |            |            |
+| % mem (p50, p95, p99)         |     29     |            |            |            |            |            |            |
+| HTTP request times (p99) [ms] |    24.5    |            |            |            |            |            |            |
+| Failed HTTP requests [%]      |    0.09    |            |            |            |            |            |            |
+| Storage [GiB/day]             |    1.1     |            |            |            |            |            |            |
+| Network tx (avg, max) [MiB/s] |  0.8, 8.5  |            |            |            |            |            |            |
+| Network rx [MiB/s]            |    0.07    |            |            |            |            |            |            |
+| Disk write [MiB/s] (avg, max) |  0.8, 3.0  |            |            |            |            |            |            |
+| Disk write IOPS (avg, max)    |  65, 259   |            |            |            |            |            |            |
+| Disk read [MiB/s]             |    0.09    |            |            |            |            |            |            |
+| Disk read IOPS                |    4.5     |            |            |            |            |            |            |
+
+### Calculation method
+Using node exporter:
+- Grafana query success rate [%]: TODO needed? already have % failed
+- % cpu: `sum by (instance) (1 - irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100 / (sum by (instance) (count without(cpu, mode) (node_cpu_seconds_total{mode="idle"})))`
+  - p99: `quantile_over_time(0.99, (sum by (instance) (1 - irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100 / (sum by (instance) (count without(cpu, mode) (node_cpu_seconds_total{mode="idle"}))))[1h:])`
+- % mem: `(node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Cached_bytes - node_memory_Slab_bytes - node_memory_Buffers_bytes) / node_memory_MemTotal_bytes * 100`
+  - p99: `quantile_over_time(0.99, ((node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Cached_bytes - node_memory_Slab_bytes - node_memory_Buffers_bytes)/ node_memory_MemTotal_bytes * 100)[1h:])`
+- HTTP request times (p99) [ms]: `histogram_quantile(0.99, sum by (job, le) (rate(grafana_http_request_duration_seconds_bucket[10m]))) * 1000`
+- % failed HTTP requests: `((sum (grafana_page_response_status_total{code=~"5.*"})) / (sum (grafana_page_response_status_total))) * 100`
+- Storage [GiB/day]: `clamp_max(deriv(node_filesystem_free_bytes{mountpoint=~".*/prometheus/.*"}[30m]), 0)/1e9*24*60*60`
+- Network tx [MiB/s]: `rate(node_network_transmit_bytes_total{device!="lo"}[30s]) / 1e6`
+- Network rx [MiB/s]: `rate(node_network_receive_bytes_total{device!="lo"}[30s]) / 1e6`
+- Disk write [MiB/s]: `rate(node_disk_written_bytes_total[30s]) / 1e6`
+- Disk write [IOPS]: `irate(node_disk_writes_completed_total[30s])`
+- Disk read [MiB/s]: `rate(node_disk_read_bytes_total[30s]) / 1e6`
+- Disk read [IOPS]: `irate(node_disk_reads_completed_total[30s])`
+
+```yaml
+# > $ cat /var/snap/prometheus/53/prometheus.yml
+# my global config
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'cos-lite-load-test'
+    static_configs:
+    - targets: ['34.72.72.223:9100']
+  - job_name: 'grafana-self'
+    static_configs:
+    - targets: ['34.72.72.223:80']
+    metrics_path: '/grafana/metrics'
+```
+## Previous record (using locust)
 
 | Identifier                  | 2021-12-08 | 2021-12-10 | 2021-12-13 | 2021-12-14 | 2021-12-15 |  2021-12-15  | 2021-12-16 |
 |-----------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:------------:|:----------:|
@@ -41,7 +114,6 @@
 | Disk write [MiB/s] ~ IOPS   |  0.33 ~ 25 |  0.32 ~ 27 |            |  0.34 ~ 25 |            |  0.3 ~ 26  |   0.6 ~ 50  |
 | Disk read [MiB/s] ~ IOPS    |  0 ~ 0.05  |  0 ~ 0.01  |            | 0 ~ 0.05-3 |            |  0 ~ 0.04  | 0.005 ~ 0.2 |
 
-## Comments
 ### 2021-12-08
 Occasionally (2-2.5hrs) the VM would hang and prom get oomkilled.
 With the latest prom/prometheus image, encountered a 2-hour hang.
@@ -86,4 +158,4 @@ This probably means that prom has some optimizations in place when data doesn't 
 Using 15 sec for avalanche from now on.
 
 ### 2022-01-07
-Occasional (every ~2-3hrs) short-lived %mem spikes 70-85%. 
+Occasional (every ~2-3hrs) short-lived %mem spikes 70-85%.
