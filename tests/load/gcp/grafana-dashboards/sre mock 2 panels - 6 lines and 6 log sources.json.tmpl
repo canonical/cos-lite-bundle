@@ -143,6 +143,38 @@
           "interval": "",
           "legendFormat": "metric_mmmmm_0_5",
           "refId": "F"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_6{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_6",
+          "refId": "G"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_7{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_7",
+          "refId": "H"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_8{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_8",
+          "refId": "I"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_9{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_9",
+          "refId": "J"
         }
       ],
       "title": "Avalanche metrics",
