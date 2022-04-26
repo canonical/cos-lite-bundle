@@ -39,6 +39,12 @@ export default () => {
     let dashboard = By.visibleText('sre mock 2 panels - 6 lines and 6 log sources')
     await browser.wait(Until.elementIsVisible(dashboard))
     await browser.click(dashboard)
+
+    // Make sure the dashboard is indeed loaded. If it is not, the iteration will fail with:
+    // frame.waitForFunction: Timeout 30000ms exceeded.
+    // name: 'TimeoutError'
+    const panel_header = By.visibleText('Avalanche metrics')
+    await browser.wait(Until.elementIsVisible(panel_header))
   })
 
   step('3. Look at dashboard', async browser => {
