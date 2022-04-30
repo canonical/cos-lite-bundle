@@ -4,27 +4,28 @@
 - (with flood element) TBD
 
 ## Record (using flood element)
-| Identifier                    | 2022-04-22 | 2022-00-00 | 2022-00-00 | 2022-00-00 | 2022-00-00 | 2022-00-00 | 2022-00-00 |
+| Identifier                    | 2022-04-22 | 2022-04-25 | 2022-04-29 | 2022-00-00 | 2022-00-00 | 2022-00-00 | 2022-00-00 |
 |-------------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
 | Metrics per target            |    200     |    200     |    200     |    200     |    200     |    200     |    200     |
 | Avalanche value interval      |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
 | Prom scrape interval          |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
 | Num virtual SREs              |     20     |     20     |     20     |     20     |     20     |     20     |     20     |
 | Dashboard reload period [min] |     5      |     5      |     5      |     5      |     5      |     5      |     5      |
-| Scrape/logging targets        |     12     |            |            |            |            |            |            |
-| Loki log lines [1/sec]        |     2      |            |            |            |            |            |            |
-| Datapoints/min                |   96000    |            |            |            |            |            |            |
-| % CPU (p50, p95, p99)         | 20, 24, 24 |            |            |            |            |            |            |
-| % mem (p50, p95, p99)         |     29     |            |            |            |            |            |            |
-| HTTP request times (p99) [ms] |    24.5    |            |            |            |            |            |            |
-| Failed HTTP requests [%]      |    0.09    |            |            |            |            |            |            |
-| Storage [GiB/day]             |    1.1     |            |            |            |            |            |            |
-| Network tx (avg, max) [MiB/s] |  0.8, 8.5  |            |            |            |            |            |            |
-| Network rx [MiB/s]            |    0.07    |            |            |            |            |            |            |
-| Disk write [MiB/s] (avg, max) |  0.8, 3.0  |            |            |            |            |            |            |
-| Disk write IOPS (avg, max)    |  65, 259   |            |            |            |            |            |            |
-| Disk read [MiB/s]             |    0.09    |            |            |            |            |            |            |
-| Disk read IOPS                |    4.5     |            |            |            |            |            |            |
+| Datapoints on dashboard       |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |
+| Scrape/logging targets        |     12     |     40     |     80     |            |            |            |            |
+| Loki log lines [1/sec]        |     2      |     0      |     0      |            |            |            |            |
+| Scraped datapoints/min        |   96,000   |  320,000   |  640,000   |            |            |            |            |
+| % CPU (p50, p95, p99)         | 20, 24, 24 | 24, 26, 27 | 25, 27, 27 |            |            |            |            |
+| % mem (p50, p95, p99)         |     29     | 31, 32, 32 | 37, 37, 38 |            |            |            |            |
+| HTTP request times (p99) [ms] |    24.5    |     90     |    157     |            |            |            |            |
+| Failed HTTP requests [%]      |    0.09    |    0.01    |    0.01    |            |            |            |            |
+| Storage [GiB/day]             |    1.1     |    3.4     |    6.8     |            |            |            |            |
+| Network tx (avg, max) [MiB/s] |  0.8, 8.5  |  0.7, 1.9  |  0.4, 2.4  |            |            |            |            |
+| Network rx [MiB/s]            |    0.07    |    0.13    |    0.19    |            |            |            |            |
+| Disk write [MiB/s] (avg, max) |  0.8, 3.0  |  0.4, 0.5  |  0.5, 0.8  |            |            |            |            |
+| Disk write IOPS (avg, max)    |  65, 259   |   26, 36   |   29, 55   |            |            |            |            |
+| Disk read [MiB/s]             |    0.09    |   0.009    |   0.027    |            |            |            |            |
+| Disk read IOPS (max)          |    4.5     |    0.4     |    0.0     |            |            |            |            |
 
 ### Calculation method
 Using node exporter:
@@ -68,7 +69,7 @@ scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: 'cos-lite-load-test'
     static_configs:
-    - targets: ['34.72.72.223:9100']
+    - targets: ['34.72.72.223:29100']
   - job_name: 'grafana-self'
     static_configs:
     - targets: ['34.72.72.223:80']
