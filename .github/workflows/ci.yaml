@@ -39,9 +39,9 @@ jobs:
     - name: Run tests (edge channel)
       if: ${{ github.event_name != 'schedule' }}
       run: tox -e integration -- --channel=edge
-    - name: Run scheduled tests (stable channel)
+    - name: Run scheduled tests (beta channel)
       if: ${{ github.event_name == 'schedule' }}
-      run: tox -e integration -- --channel=stable
+      run: tox -e integration -- --channel=beta
     - name: Run scheduled tests (edge channel)
       if: ${{ github.event_name == 'schedule' }}
       run: tox -e integration -- --channel=edge
