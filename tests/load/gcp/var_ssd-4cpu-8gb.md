@@ -4,7 +4,7 @@
 - (with flood element) TBD
 
 ## Record (using flood element)
-| Identifier                    | 2022-04-22 | 2022-04-25 | 2022-04-29 | 2022-00-00 | 2022-00-00 | 2022-00-00 | 2022-00-00 |
+| Identifier                    | 2022-04-22 | 2022-04-25 | 2022-04-29 | 2022-05-09 | 2022-00-00 | 2022-00-00 | 2022-00-00 |
 |-------------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
 | Metrics per target            |    200     |    200     |    200     |    200     |    200     |    200     |    200     |
 | Avalanche value interval      |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
@@ -12,20 +12,34 @@
 | Num virtual SREs              |     20     |     20     |     20     |     20     |     20     |     20     |     20     |
 | Dashboard reload period [min] |     5      |     5      |     5      |     5      |     5      |     5      |     5      |
 | Datapoints on dashboard       |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |
-| Scrape/logging targets        |     12     |     40     |     80     |            |            |            |            |
-| Loki log lines [1/sec]        |     2      |     0      |     0      |            |            |            |            |
-| Scraped datapoints/min        |   96,000   |  320,000   |  640,000   |            |            |            |            |
-| % CPU (p50, p95, p99)         | 20, 24, 24 | 24, 26, 27 | 25, 27, 27 |            |            |            |            |
-| % mem (p50, p95, p99)         |     29     | 31, 32, 32 | 37, 37, 38 |            |            |            |            |
-| HTTP request times (p99) [ms] |    24.5    |     90     |    157     |            |            |            |            |
-| Failed HTTP requests [%]      |    0.09    |    0.01    |    0.01    |            |            |            |            |
-| Storage [GiB/day]             |    1.1     |    3.4     |    6.8     |            |            |            |            |
-| Network tx (avg, max) [MiB/s] |  0.8, 8.5  |  0.7, 1.9  |  0.4, 2.4  |            |            |            |            |
-| Network rx [MiB/s]            |    0.07    |    0.13    |    0.19    |            |            |            |            |
-| Disk write [MiB/s] (avg, max) |  0.8, 3.0  |  0.4, 0.5  |  0.5, 0.8  |            |            |            |            |
-| Disk write IOPS (avg, max)    |  65, 259   |   26, 36   |   29, 55   |            |            |            |            |
-| Disk read [MiB/s]             |    0.09    |   0.009    |   0.027    |            |            |            |            |
-| Disk read IOPS (max)          |    4.5     |    0.4     |    0.0     |            |            |            |            |
+| Scrape/logging targets        |     12     |     40     |     80     |    300     |    200     |    250     |            |
+| Loki log lines [1/sec]        |     2      |     0      |     0      |     0      |     0      |     0      |            |
+| Scraped datapoints/min        |   96,000   |  320,000   |  640,000   | 2,400,000  | 1,600,000  | 2,000,000  |            |
+| % CPU (p50, p95, p99)         | 20, 24, 24 | 24, 26, 27 | 25, 27, 27 |    100     | 45, 33, 30 |            |            |
+| % mem (p50, p95, p99)         |     29     | 31, 32, 32 | 37, 37, 38 |    OOM     | 58, 58, 57 |            |            |
+| HTTP request times (p99) [ms] |    24.5    |     90     |    157     |            |    150     |            |            |
+| Failed HTTP requests [%]      |    0.09    |    0.01    |    0.01    |            |   0.008    |            |            |
+| Storage [GiB/day]             |    1.1     |    3.4     |    6.8     |            |     14     |            |            |
+| Network tx (avg, max) [MiB/s] |  0.8, 8.5  |  0.7, 1.9  |  0.4, 2.4  |            |  0.7, 3.2  |            |            |
+| Network rx [MiB/s]            |    0.07    |    0.13    |    0.19    |            |    0.3     |            |            |
+| Disk write [MiB/s] (avg, max) |  0.8, 3.0  |  0.4, 0.5  |  0.5, 0.8  |            | 1.8, 50.3  |            |            |
+| Disk write IOPS (avg, max)    |  65, 259   |   26, 36   |   29, 55   |            |  53, 229   |            |            |
+| Disk read [MiB/s]             |    0.09    |   0.009    |   0.027    |            |    0.3     |            |            |
+| Disk read IOPS (max)          |    4.5     |    0.4     |    0.0     |            |     1      |            |            |
+
+### Comments
+#### 2022-05-09
+Mem and cpu spiked 12 hours into the test and prometheus got OOM-killed soon
+after.
+```
+May 10 04:19:27 pd-ssd-4cpu-8gb kernel: [  pid  ]   uid  tgid     total_vm   rss       pgtables_bytes   swapents   oom_score_adj   name
+May 10 04:19:29 pd-ssd-4cpu-8gb kernel: [1045698]     0  1045698  3109296    1512300   12566528         0          1000            prometheus
+```
+
+Typical `kubectl top` entry for prom:
+```
+cos-lite-pod-top.sh[1114021]: prometheus-0                    527m   3463Mi
+```
 
 ### Calculation method
 Using node exporter:
