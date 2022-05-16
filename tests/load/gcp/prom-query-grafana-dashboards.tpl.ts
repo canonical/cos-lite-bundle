@@ -48,9 +48,10 @@ export default () => {
   })
 
   step('3. Look at dashboard', async browser => {
-    // await browser.wait(2 * ${REFRESH_INTERVAL})
+    // The `entire_dashboard_reload_period` simulates full reload of the dashboard as if the SREs
+    // just opened their browsers.
     const entire_dashboard_reload_period = 5 * 60  // 5 minutes [sec]
-    const min_delay_to_encounter_a_refresh = 2 * ${REFRESH_INTERVAL}  // [sec]
+    const min_delay_to_encounter_a_refresh = 2 * ${REFRESH_INTERVAL}  // [sec] (double the prom scrape interval)
     const time_to_sleep = Math.max(min_delay_to_encounter_a_refresh, entire_dashboard_reload_period - min_delay_to_encounter_a_refresh)  // [sec]
 
     await new Promise(f => setTimeout(f, time_to_sleep * 1000));

@@ -37,7 +37,13 @@ which will create three vm instances:
 - locust
 - pd-ssd-2cpu-8gb
 
-Similarly, to destroy,
+Similarly, to force a replacement of a certain vm,
+
+```shell
+terraform apply -var-file="var_ssd-2cpu-8gb.tfvars" -replace=google_compute_instance.vm_loki_log
+```
+
+To destroy,
 
 ```shell
 terraform destroy -var-file="var_ssd-2cpu-8gb.tfvars"
@@ -124,7 +130,7 @@ cat /var/log/cloud-init-output.log
 juju status
 
 # check avalanche vm is reachable
-curl http://avalanche.us-central1-a.c.lma-light-load-testing.internal:9001/metrics | wc -l
+curl http://avalanche.us-central1-a.c.lma-light-load-testing.internal:9001/metrics | grep -v '^#' | wc -l
 
 # check service status
 systemctl status node-exporter
@@ -138,8 +144,7 @@ curl localhost/prom/api/v1/targets | jq ".data.activeTargets[].scrapeUrl"
 curl localhost:8081/helper/grafana/password
 
 # check number of logs Logi processed
-loki_ip=$(juju status "loki" --format=json | jq -r ".applications.\"loki\".address")
-curl -s "$loki_ip:3100/metrics" | grep log_messages_total
-curl -s "$loki_ip:3100/metrics" | grep loki_ingester_wal_records_logged_total
-curl -s "$loki_ip:3100/metrics" | grep -v '^# ' | grep -v '^go_' | sort -k 2 -g
+curl -s "localhost/loki/metrics" | grep log_messages_total
+curl -s "localhost/loki/metrics" | grep loki_ingester_wal_records_logged_total
+curl -s "localhost/loki/metrics" | grep -v '^# ' | grep -v '^go_' | sort -k 2 -g
 ```

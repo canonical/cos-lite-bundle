@@ -4,28 +4,55 @@
 - (with flood element) TBD
 
 ## Record (using flood element)
-| Identifier                    | 2022-04-22 | 2022-04-25 | 2022-04-29 | 2022-05-09 | 2022-00-00 | 2022-00-00 | 2022-00-00 |
+| Identifier                    | 2022-04-22 | 2022-04-25 | 2022-04-29 | 2022-05-09 | 2022-05-10 | 2022-05-11 | 2022-05-14 |
 |-------------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
 | Metrics per target            |    200     |    200     |    200     |    200     |    200     |    200     |    200     |
 | Avalanche value interval      |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
 | Prom scrape interval          |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
+| Loki log post interval        |     1      |    N/A     |    N/A     |    N/A     |    N/A     |    N/A     |    N/A     |
 | Num virtual SREs              |     20     |     20     |     20     |     20     |     20     |     20     |     20     |
 | Dashboard reload period [min] |     5      |     5      |     5      |     5      |     5      |     5      |     5      |
 | Datapoints on dashboard       |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |
-| Scrape/logging targets        |     12     |     40     |     80     |    300     |    200     |    250     |            |
-| Loki log lines [1/sec]        |     2      |     0      |     0      |     0      |     0      |     0      |            |
-| Scraped datapoints/min        |   96,000   |  320,000   |  640,000   | 2,400,000  | 1,600,000  | 2,000,000  |            |
-| % CPU (p50, p95, p99)         | 20, 24, 24 | 24, 26, 27 | 25, 27, 27 |    100     | 45, 33, 30 |            |            |
-| % mem (p50, p95, p99)         |     29     | 31, 32, 32 | 37, 37, 38 |    OOM     | 58, 58, 57 |            |            |
-| HTTP request times (p99) [ms] |    24.5    |     90     |    157     |            |    150     |            |            |
-| Failed HTTP requests [%]      |    0.09    |    0.01    |    0.01    |            |   0.008    |            |            |
-| Storage [GiB/day]             |    1.1     |    3.4     |    6.8     |            |     14     |            |            |
-| Network tx (avg, max) [MiB/s] |  0.8, 8.5  |  0.7, 1.9  |  0.4, 2.4  |            |  0.7, 3.2  |            |            |
-| Network rx [MiB/s]            |    0.07    |    0.13    |    0.19    |            |    0.3     |            |            |
-| Disk write [MiB/s] (avg, max) |  0.8, 3.0  |  0.4, 0.5  |  0.5, 0.8  |            | 1.8, 50.3  |            |            |
-| Disk write IOPS (avg, max)    |  65, 259   |   26, 36   |   29, 55   |            |  53, 229   |            |            |
-| Disk read [MiB/s]             |    0.09    |   0.009    |   0.027    |            |    0.3     |            |            |
-| Disk read IOPS (max)          |    4.5     |    0.4     |    0.0     |            |     1      |            |            |
+| Scrape/logging targets        |     12     |     40     |     80     |    300     |    200     |    250     |    275     |
+| Loki log lines [1/sec]        |     2      |     0      |     0      |     0      |     0      |     0      |     0      |
+| Scraped datapoints/min        |   96,000   |  320,000   |  640,000   | 2,400,000  | 1,600,000  | 2,000,000  | 2,200,000  |
+| % CPU (p50, p95, p99)         | 20, 24, 24 | 24, 26, 27 | 25, 27, 27 |    100     | 30, 33, 45 | 23, 30, 31 | 27, 36, 42 |
+| % mem (p50, p95, p99)         |     29     | 31, 32, 32 | 37, 37, 38 |    OOM     | 57, 58, 58 | 65, 67, 68 | 70, 71, 71 |
+| HTTP request times (p99) [ms] |    24.5    |     90     |    157     |            |    150     |    200     |     81     |
+| Failed HTTP requests [%]      |    0.09    |    0.01    |    0.01    |            |   0.008    |    0.01    |     0      |
+| Storage [GiB/day]             |    1.1     |    3.4     |    6.8     |            |     14     |     17     |     20     |
+| Network tx (avg, max) [MiB/s] |  0.8, 8.5  |  0.7, 1.9  |  0.4, 2.4  |            |  0.7, 3.2  |  0.5, 6.5  |  0.7, 2.1  |
+| Network rx [MiB/s] (max)      |    0.07    |    0.13    |    0.19    |            |    0.3     |    0.4     |    0.4     |
+| Disk write [MiB/s] (avg, max) |  0.8, 3.0  |  0.4, 0.5  |  0.5, 0.8  |            | 1.8, 50.3  |  0.6, 0.9  |  0.7, 8.4  |
+| Disk write IOPS (avg, max)    |  65, 259   |   26, 36   |   29, 55   |            |  53, 229   |   23, 44   |   25, 59   |
+| Disk read [MiB/s] (max)       |    0.09    |   0.009    |   0.027    |            |    0.3     |    0.4     |    70.4    |
+| Disk read IOPS (max)          |    4.5     |    0.4     |    0.0     |            |     1      |     22     |    429     |
+
+| Identifier                    | 2022-05-16 | 2022-05-00 | 2022-05-00 | 2022-05-00 | 2022-05-00 | 2022-05-00 | 2022-05-00 |
+|-------------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
+| Metrics per target            |     10     |            |            |            |            |            |            |
+| Avalanche value interval      |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
+| Prom scrape interval          |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
+| Loki log post interval        |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
+| Num virtual SREs              |     20     |     20     |     20     |     20     |     20     |     20     |     20     |
+| Dashboard reload period [min] |     5      |     5      |     5      |     5      |     5      |     5      |     5      |
+| Datapoints on dashboard       |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |
+| Scrape targets                |     1      |            |            |            |            |            |            |
+| Logging sources               |     1      |            |            |            |            |            |            |
+| Log lines per target [1/sec]  |     1      |            |            |            |            |            |            |
+| Scraped datapoints/min        |    400     |            |            |            |            |            |            |
+| Logged lines/min              |     60     |            |            |            |            |            |            |
+| % CPU (p50, p95, p99)         |            |            |            |            |            |            |            |
+| % mem (p50, p95, p99)         |            |            |            |            |            |            |            |
+| HTTP request times (p99) [ms] |            |            |            |            |            |            |            |
+| Failed HTTP requests [%]      |            |            |            |            |            |            |            |
+| Storage [GiB/day]             |            |            |            |            |            |            |            |
+| Network tx (avg, max) [MiB/s] |            |            |            |            |            |            |            |
+| Network rx [MiB/s] (max)      |            |            |            |            |            |            |            |
+| Disk write [MiB/s] (avg, max) |            |            |            |            |            |            |            |
+| Disk write IOPS (avg, max)    |            |            |            |            |            |            |            |
+| Disk read [MiB/s] (max)       |            |            |            |            |            |            |            |
+| Disk read IOPS (max)          |            |            |            |            |            |            |            |
 
 ### Comments
 #### 2022-05-09
@@ -40,6 +67,10 @@ Typical `kubectl top` entry for prom:
 ```
 cos-lite-pod-top.sh[1114021]: prometheus-0                    527m   3463Mi
 ```
+
+#### 2022-05-14
+The "disk read" spikes every two hours to ~500 IOPS, which is near the max
+(520). Assuming this (2.2M datapoints/min) to be the max performance.
 
 ### Calculation method
 Using node exporter:

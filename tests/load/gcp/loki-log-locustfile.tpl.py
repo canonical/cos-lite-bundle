@@ -13,6 +13,10 @@ from locust import constant_pacing, events, task
 from locust.contrib.fasthttp import FastHttpUser
 from faker import Faker
 from logfmter import Logfmter
+from math import ceil
+
+# Convert terraform template variable to int. Initially placing inside quotes so linting passes.
+posting_period = float("${POSTING_PERIOD}")
 
 fake = Faker(['en_US', 'zh_CN', 'hi_IN', 'es_ES', 'fr_FR', 'ar_SA', 'uk_UA'])
 
@@ -37,12 +41,13 @@ def _(parser):
     """Add custom command line to be passed to the locustfile."""
     # num log lines is analogous to promtail's `[batchsize: <int> | default = 1048576]`
     parser.add_argument("--log-lines", type=int, help="Log lines per seconds to post to loki")
+    parser.add_argument("--num-logging-sources", type=int, help="Num of (virtual) logging sources")
 
 
 class LokiTest1(FastHttpUser):
     # equivalent to promtail's `[batchwait: <duration> | default = 1s]`
     # https://grafana.com/docs/loki/latest/clients/promtail/configuration/#clients
-    wait_time = constant_pacing(1.0)
+    wait_time = constant_pacing(posting_period)
 
     HEADERS = {
         "Content-Type": "application/json",
@@ -52,15 +57,17 @@ class LokiTest1(FastHttpUser):
     def logfile1(self):
         # Ideally locust would expose the worker id, but rolling my own since it doesn't
         # https://github.com/locustio/locust/issues/1601
-        num_logging_targets = self.environment.parsed_options.num_users
+        # num_logging_sources = self.environment.parsed_options.num_users
+        num_logging_sources = self.environment.parsed_options.num_logging_sources
 
-        filenum = random.randint(0, num_logging_targets - 1)
+        num_logs_per_period = ceil(posting_period * self.environment.parsed_options.log_lines)
         data = {
             "streams": [
                 {
                     "stream": {"filename": f"/var/log/pepetest_{filenum}"},
-                    "values": generate(self.environment.parsed_options.log_lines),
+                    "values": generate(num_logs_per_period),
                 }
+                for filenum in range(num_logging_sources)
             ]
         }
 
