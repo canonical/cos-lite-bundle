@@ -29,10 +29,38 @@ resource "google_compute_firewall" "internal_all_to_all" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80", "8081", "9001-${9000 + var.num_avalanche_targets}", "9090"]
+    ports    = ["22", "80", "8081"]
   }
 
   target_tags = ["load-test-traffic"]
+  source_tags = ["load-test-traffic"]
+}
+
+resource "google_compute_firewall" "internal_scrape_targets" {
+  name    = "internal-scrape-targets"
+  network = google_compute_network.net_cos_lite_load_test_net.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["9001-${9000 + var.num_avalanche_targets}"]
+  }
+
+  target_tags = ["vm-prom-scrape"]
+  source_tags = ["load-test-traffic"]
+}
+
+resource "google_compute_firewall" "internal_appliance_helper" {
+  # Expose port 8081, where the helper webserver serves the grafana password, and potentially more
+  # things in the future, if the need arises.
+  name    = "internal-appliance-helper"
+  network = google_compute_network.net_cos_lite_load_test_net.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["8081"]
+  }
+
+  target_tags = ["vm-cos-lite-appliance"]
   source_tags = ["load-test-traffic"]
 }
 

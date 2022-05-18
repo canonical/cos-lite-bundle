@@ -147,4 +147,7 @@ curl localhost:8081/helper/grafana/password
 curl -s "localhost/loki/metrics" | grep log_messages_total
 curl -s "localhost/loki/metrics" | grep loki_ingester_wal_records_logged_total
 curl -s "localhost/loki/metrics" | grep -v '^# ' | grep -v '^go_' | sort -k 2 -g
+
+# make sure cardinality is low
+curl -G -s  "localhost/loki/loki/api/v1/labels" | jq
 ```

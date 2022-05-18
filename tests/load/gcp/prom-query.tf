@@ -14,7 +14,7 @@ data "cloudinit_config" "prom_query" {
 }
 
 resource "google_compute_instance" "vm_prom_query" {
-  name         = "locust"
+  name         = "prom-query"
   # 4-cpu is not enough for 20 workers (load average: 13.29, 12.20, 9.56, and rising)
   # 8-cpu is not enough for 20 workers (load average: 25.09, 22.40, 22.26)
   # 10-cpu is not enough for 20 workers (load average: 25.87, 24.18, 20.75)

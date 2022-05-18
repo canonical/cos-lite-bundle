@@ -44,7 +44,7 @@ resource "google_compute_instance" "vm_loki_log" {
   }
 
   metadata = {
-    user-data = "${data.cloudinit_config.loki_log.rendered}"
+    user-data = data.cloudinit_config.loki_log.rendered
   }
 
   network_interface {

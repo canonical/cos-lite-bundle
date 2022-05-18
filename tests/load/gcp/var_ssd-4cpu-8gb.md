@@ -37,22 +37,22 @@
 | Num virtual SREs              |     20     |     20     |     20     |     20     |     20     |     20     |     20     |
 | Dashboard reload period [min] |     5      |     5      |     5      |     5      |     5      |     5      |     5      |
 | Datapoints on dashboard       |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |
-| Scrape targets                |     1      |            |            |            |            |            |            |
-| Logging sources               |     1      |            |            |            |            |            |            |
-| Log lines per target [1/sec]  |     1      |            |            |            |            |            |            |
-| Scraped datapoints/min        |    400     |            |            |            |            |            |            |
-| Logged lines/min              |     60     |            |            |            |            |            |            |
-| % CPU (p50, p95, p99)         |            |            |            |            |            |            |            |
-| % mem (p50, p95, p99)         |            |            |            |            |            |            |            |
-| HTTP request times (p99) [ms] |            |            |            |            |            |            |            |
-| Failed HTTP requests [%]      |            |            |            |            |            |            |            |
-| Storage [GiB/day]             |            |            |            |            |            |            |            |
-| Network tx (avg, max) [MiB/s] |            |            |            |            |            |            |            |
-| Network rx [MiB/s] (max)      |            |            |            |            |            |            |            |
-| Disk write [MiB/s] (avg, max) |            |            |            |            |            |            |            |
-| Disk write IOPS (avg, max)    |            |            |            |            |            |            |            |
-| Disk read [MiB/s] (max)       |            |            |            |            |            |            |            |
-| Disk read IOPS (max)          |            |            |            |            |            |            |            |
+| Scrape targets                |     1      |     1      |            |            |            |            |            |
+| Logging sources               |     1      |    100     |            |            |            |            |            |
+| Log lines per target [1/sec]  |     1      |     1      |            |            |            |            |            |
+| Scraped datapoints/min        |    400     |    400     |            |            |            |            |            |
+| Logged lines/min              |     60     |    600     |            |            |            |            |            |
+| % CPU (p50, p95, p99)         | 20, 21, 22 |            |            |            |            |            |            |
+| % mem (p50, p95, p99)         | 23, 23, 23 |            |            |            |            |            |            |
+| HTTP request times (p99) [ms] |    23.6    |            |            |            |            |            |            |
+| Failed HTTP requests [%]      |     0      |            |            |            |            |            |            |
+| Storage [GiB/day]             |    0.25    |            |            |            |            |            |            |
+| Network tx (avg, max) [MiB/s] |  0.7, 1.5  |            |            |            |            |            |            |
+| Network rx [MiB/s] (max)      |    0.09    |            |            |            |            |            |            |
+| Disk write [MiB/s] (avg, max) |  0.3, 0.4  |            |            |            |            |            |            |
+| Disk write IOPS (avg, max)    |   23, 35   |            |            |            |            |            |            |
+| Disk read [MiB/s] (max)       |     0      |            |            |            |            |            |            |
+| Disk read IOPS (max)          |    0.07    |            |            |            |            |            |            |
 
 ### Comments
 #### 2022-05-09

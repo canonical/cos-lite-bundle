@@ -1,6 +1,6 @@
 avalanche_metric_count = 10
 num_avalanche_targets  = 1
-num_logging_sources = 1
+num_logging_sources = 10
 
 loki_log_lines_per_sec = 1
 
