@@ -6,14 +6,13 @@
 """A locustfile for posting fake log data directly to loki, using fmtlog format."""
 
 import json
-import random
+from math import ceil
 from time import time_ns
 
+from faker import Faker
 from locust import constant_pacing, events, task
 from locust.contrib.fasthttp import FastHttpUser
-from faker import Faker
 from logfmter import Logfmter
-from math import ceil
 
 # Convert terraform template variable to int. Initially placing inside quotes so linting passes.
 posting_period = float("${POSTING_PERIOD}")
