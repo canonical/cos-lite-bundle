@@ -5,16 +5,16 @@ data "cloudinit_config" "prom_query" {
   part {
     content_type = "text/cloud-config"
     content = templatefile("prom-query-locust.tpl.conf", {
-      COS_URL          = local.cos_lite_url,
-      PROM_URL         = local.prom_url,
-      GRAFANA_URL      = local.grafana_url,
+      COS_URL     = local.cos_lite_url,
+      PROM_URL    = local.prom_url,
+      GRAFANA_URL = local.grafana_url,
     })
     filename = "locust.conf"
   }
 }
 
 resource "google_compute_instance" "vm_prom_query" {
-  name         = "prom-query"
+  name = "prom-query"
   # 4-cpu is not enough for 20 workers (load average: 13.29, 12.20, 9.56, and rising)
   # 8-cpu is not enough for 20 workers (load average: 25.09, 22.40, 22.26)
   # 10-cpu is not enough for 20 workers (load average: 25.87, 24.18, 20.75)

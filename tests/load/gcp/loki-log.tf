@@ -4,12 +4,12 @@ data "cloudinit_config" "loki_log" {
 
   part {
     content_type = "text/cloud-config"
-    content      = templatefile("loki-log-locust.tpl.conf", {
-        LOKI_URL = local.loki_url,
-        LOGGING_SOURCES = var.num_logging_sources,
-        LOG_LINES_PER_SEC = var.loki_log_lines_per_sec,
+    content = templatefile("loki-log-locust.tpl.conf", {
+      LOKI_URL          = local.loki_url,
+      LOGGING_SOURCES   = var.num_logging_sources,
+      LOG_LINES_PER_SEC = var.loki_log_lines_per_sec,
     })
-    filename     = "locust.conf"
+    filename = "locust.conf"
   }
 }
 
@@ -30,8 +30,8 @@ resource "google_compute_instance" "vm_loki_log" {
   }
 
   provisioner "file" {
-    content     = templatefile("loki-log-locustfile.tpl.py", {
-        POSTING_PERIOD = var.loki_log_post_period
+    content = templatefile("loki-log-locustfile.tpl.py", {
+      POSTING_PERIOD = var.loki_log_post_period
     })
     destination = "/home/ubuntu/loki-log-locustfile.py"
 
