@@ -26,8 +26,10 @@ import pytest
 from helpers import (
     ModelConfigChange,
     cli_deploy_bundle,
+    enable_metallb,
     get_alertmanager_alerts,
     get_alertmanager_groups,
+    get_proxied_unit_url,
     get_unit_address,
 )
 from pytest_operator.plugin import OpsTest
@@ -48,6 +50,14 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 
     Assert on the unit status before any relations/configurations take place.
     """
+    # FIXME? Maybe we should check which local address can be routed?
+    # IPADDR=$(ip -4 -j route | jq -r '.[] | select(.dst | contains("default")) | .prefsrc')
+    # microk8s.enable metallb:$IPADDR-$IPADDR
+
+    log.info("Setting up MicroK8s' metallb")
+
+    await enable_metallb(ops_test, "192.168.1.10-192.168.1.20")
+
     log.info("Rendering bundle %s", get_this_script_dir() / ".." / ".." / "bundle.yaml.j2")
 
     async def build_charm_if_is_dir(option: str) -> str:
@@ -57,6 +67,7 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
         return str(option)
 
     charms = dict(
+        traefik=pytestconfig.getoption("traefik"),
         alertmanager=pytestconfig.getoption("alertmanager"),
         prometheus=pytestconfig.getoption("prometheus"),
         grafana=pytestconfig.getoption("grafana"),
@@ -84,9 +95,20 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
     await cli_deploy_bundle(ops_test, str(rendered_bundle))
     await ops_test.model.wait_for_idle(status="active", timeout=1000)
 
+    prometheus_0_url = await get_proxied_unit_url(ops_test, app_name="prometheus", unit_num="0")
+
+    logging.info(f"Trying to connect to Prometheus over 'traefik/0': {prometheus_0_url}")
+
+    response = urllib.request.urlopen(prometheus_0_url, data=None, timeout=2.0)
+    assert response.code == 200
+
+    # effectively disable the update status from firing
+    await ops_test.model.set_config({"update-status-hook-interval": "60m"})
+
 
 @pytest.mark.abort_on_fail
 async def test_alertmanager_is_up(ops_test: OpsTest):
+    # TODO Change this when AM is exposed over the ingress
     address = await get_unit_address(ops_test, "alertmanager", 0)
     url = f"http://{address}:9093"
     log.info("am public address: %s", url)
@@ -98,9 +120,9 @@ async def test_alertmanager_is_up(ops_test: OpsTest):
 
 @pytest.mark.abort_on_fail
 async def test_prometheus_is_up(ops_test: OpsTest):
-    address = await get_unit_address(ops_test, "prometheus", 0)
-    url = f"http://{address}:9090"
-    log.info("prom public address: %s", url)
+    url = await get_proxied_unit_url(ops_test, "prometheus", 0)
+
+    log.info("Prometheus public address: %s", url)
 
     response = urllib.request.urlopen(f"{url}/-/ready", data=None, timeout=2.0)
     assert response.code == 200
@@ -109,11 +131,9 @@ async def test_prometheus_is_up(ops_test: OpsTest):
 @pytest.mark.abort_on_fail
 async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
     am_address = await get_unit_address(ops_test, "alertmanager", 0)
-    prom_address = await get_unit_address(ops_test, "prometheus", 0)
+    prom_url = await get_proxied_unit_url(ops_test, "prometheus", 0)
 
-    response = urllib.request.urlopen(
-        f"http://{prom_address}:9090/api/v1/alertmanagers", data=None, timeout=2.0
-    )
+    response = urllib.request.urlopen(f"{prom_url}/api/v1/alertmanagers", data=None, timeout=2.0)
     assert response.code == 200
     alertmanagers = json.loads(response.read())
     # an empty response looks like this:
