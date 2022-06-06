@@ -150,4 +150,7 @@ curl -s "localhost/loki/metrics" | grep -v '^# ' | grep -v '^go_' | sort -k 2 -g
 
 # make sure cardinality is low
 curl -G -s  "localhost/loki/loki/api/v1/labels" | jq
+
+# visual inspection of the load-test dashboard
+# - metrics and logs are displayed?
 ```
