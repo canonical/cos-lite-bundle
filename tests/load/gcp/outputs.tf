@@ -16,11 +16,11 @@ output "ip_nat_vm_prom_scrape" {
 
 
 output "ip_vm_prom_query" {
-  value = google_compute_instance.vm_prom_query.network_interface.0.network_ip
+  value = google_compute_instance.vm_prom_query.*.network_interface.0.network_ip
 }
 
 output "ip_nat_vm_prom_query" {
-  value = google_compute_instance.vm_prom_query.network_interface.0.access_config.0.nat_ip
+  value = google_compute_instance.vm_prom_query.*.network_interface.0.access_config.0.nat_ip
 }
 
 output "ip_vm_loki_log" {
@@ -42,4 +42,9 @@ output "logged_lines_per_minute" {
   # The number of log lines per minute is equal to:
   # num_logging_sources * loki_log_lines_per_sec * 60
   value = var.num_logging_sources * var.loki_log_lines_per_sec * 60
+}
+
+output "num_virtual_sres" {
+  # Total number of virtual SREs
+  value = var.num_querying_nodes * var.num_virtual_sres_per_node
 }

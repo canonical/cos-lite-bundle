@@ -78,14 +78,25 @@ variable "avalanche_value_interval" {
 # Locust (prom_query) #
 #######################
 
-variable "num_virtual_sres" {
+variable "num_querying_nodes" {
   type        = number
-  description = "Number of virtual SREs that reopen a dashboard - as many splinter instances will be started."
-  default     = 20
+  description = "Number of querying nodes fetching data from grafana."
+  default     = 2
 
   validation {
-    condition     = can(regex("[0-9][0-9]*", var.num_virtual_sres))
-    error_message = "The num_virtual_sres variable must be an integer."
+    condition     = can(regex("[0-9][0-9]*", var.num_querying_nodes))
+    error_message = "The num_querying_nodes variable must be an integer."
+  }
+}
+
+variable "num_virtual_sres_per_node" {
+  type        = number
+  description = "Number of virtual SREs per node that reopen a dashboard - as many flood element instances will be started."
+  default     = 10
+
+  validation {
+    condition     = can(regex("[0-9][0-9]*", var.num_virtual_sres_per_node))
+    error_message = "The num_virtual_sres_per_node variable must be an integer."
   }
 }
 
@@ -96,6 +107,11 @@ variable "num_virtual_sres" {
 variable "num_logging_sources" {
   type        = number
   description = "Number of logging sources posting logs to Loki."
+
+  validation {
+    condition     = can(regex("[0-9][0-9]*", var.num_logging_sources))
+    error_message = "The num_logging_sources variable must be an integer."
+  }
 }
 
 variable "loki_log_lines_per_sec" {
