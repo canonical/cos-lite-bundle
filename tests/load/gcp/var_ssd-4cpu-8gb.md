@@ -42,17 +42,17 @@
 | Log lines per target [1/sec]  |     1      |     10     |     10     |            |            |            |            |
 | Scraped datapoints/min        |    400     |    400     |    400     |            |            |            |            |
 | Logged lines/min              |     60     |    600     |    6000    |            |            |            |            |
-| % CPU (p50, p95, p99)         | 20, 21, 22 | 26, 28, 29 |            |            |            |            |            |
-| % mem (p50, p95, p99)         | 23, 23, 23 |   22-40    |            |            |            |            |            |
-| HTTP request times (p99) [ms] |    23.6    |    49.5    |            |            |            |            |            |
-| Failed HTTP requests [%]      |     0      |     0      |            |            |            |            |            |
-| Storage [GiB/day]             |    0.25    |    0.35    |            |            |            |            |            |
-| Network tx (avg, max) [MiB/s] |  0.7, 1.5  |  0.9, 2.1  |            |            |            |            |            |
-| Network rx [MiB/s] (max)      |    0.09    |    0.1     |            |            |            |            |            |
-| Disk write [MiB/s] (avg, max) |  0.3, 0.4  |  0.4, 0.5  |            |            |            |            |            |
-| Disk write IOPS (avg, max)    |   23, 35   |   28, 38   |            |            |            |            |            |
-| Disk read [MiB/s] (max)       |     0      |     0      |            |            |            |            |            |
-| Disk read IOPS (max)          |    0.07    |    0.3     |            |            |            |            |            |
+| % CPU (p50, p95, p99)         | 20, 21, 22 | 26, 28, 29 | 38, 40, 41 |            |            |            |            |
+| % mem (p50, p95, p99)         | 23, 23, 23 |   22-40    | 50, 50, 50 |            |            |            |            |
+| HTTP request times (p99) [ms] |    23.6    |    49.5    |    109     |            |            |            |            |
+| Failed HTTP requests [%]      |     0      |     0      |     0      |            |            |            |            |
+| Storage [GiB/day]             |    0.25    |    0.35    |    1.9     |            |            |            |            |
+| Network tx (avg, max) [MiB/s] |  0.7, 1.5  |  0.9, 2.1  |  1.8, 4.0  |            |            |            |            |
+| Network rx [MiB/s] (max)      |    0.09    |    0.1     |    0.13    |            |            |            |            |
+| Disk write [MiB/s] (avg, max) |  0.3, 0.4  |  0.4, 0.5  |  0.4, 0.8  |            |            |            |            |
+| Disk write IOPS (avg, max)    |   23, 35   |   28, 38   |   24, 38   |            |            |            |            |
+| Disk read [MiB/s] (max)       |     0      |     0      |    0.05    |            |            |            |            |
+| Disk read IOPS (max)          |    0.07    |    0.3     |    1.4     |            |            |            |            |
 
 ### Comments
 #### 2022-05-24

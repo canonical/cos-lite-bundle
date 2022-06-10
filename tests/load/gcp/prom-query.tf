@@ -47,7 +47,7 @@ resource "google_compute_instance" "vm_prom_query" {
     connection {
       type        = "ssh"
       user        = "ubuntu"
-      host        = google_compute_instance.vm_prom_query[count.index].network_interface.0.access_config.0.nat_ip
+      host        = self.network_interface.0.access_config.0.nat_ip
       private_key = local.file_provisioner_ssh_key
     }
   }
@@ -59,7 +59,7 @@ resource "google_compute_instance" "vm_prom_query" {
     connection {
       type        = "ssh"
       user        = "ubuntu"
-      host        = google_compute_instance.vm_prom_query[count.index].network_interface.0.access_config.0.nat_ip
+      host        = self.network_interface.0.access_config.0.nat_ip
       private_key = local.file_provisioner_ssh_key
     }
   }
