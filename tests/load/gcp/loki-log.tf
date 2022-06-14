@@ -7,7 +7,8 @@ data "cloudinit_config" "loki_log" {
     content = templatefile("loki-log-locust.tpl.conf", {
       LOKI_URL          = local.loki_url,
       LOGGING_SOURCES   = var.num_logging_sources,
-      LOG_LINES_PER_SEC = var.loki_log_lines_per_sec,
+      LOG_LINES_PER_SEC = var.loki_log_lines_per_source_per_sec,
+      NUM_USERS         = var.loki_log_num_locust_users,
     })
     filename = "locust.conf"
   }
@@ -17,10 +18,10 @@ data "cloudinit_config" "loki_log" {
 resource "google_compute_instance" "vm_loki_log" {
 
   # provision this vm only if it is needed for the load test
-  count = var.loki_log_lines_per_sec > 0 ? 1 : 0
+  count = var.loki_log_lines_per_source_per_sec > 0 ? 1 : 0
 
   name         = "loki-log"
-  machine_type = "e2-standard-2"
+  machine_type = "custom-4-4096"
   tags         = ["load-test-traffic", "vm-loki-log"]
 
   boot_disk {

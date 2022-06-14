@@ -57,7 +57,7 @@ class LokiTest1(FastHttpUser):
         # Ideally locust would expose the worker id, but rolling my own since it doesn't
         # https://github.com/locustio/locust/issues/1601
         # num_logging_sources = self.environment.parsed_options.num_users
-        num_logging_sources = self.environment.parsed_options.num_logging_sources
+        num_logging_sources = self.environment.parsed_options.num_logging_sources  # a.k.a. streams
 
         num_logs_per_period = ceil(posting_period * self.environment.parsed_options.log_lines)
         data = {

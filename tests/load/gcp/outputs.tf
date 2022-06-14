@@ -40,8 +40,8 @@ output "data_points_per_minute" {
 
 output "logged_lines_per_minute" {
   # The number of log lines per minute is equal to:
-  # num_logging_sources * loki_log_lines_per_sec * 60
-  value = var.num_logging_sources * var.loki_log_lines_per_sec * 60
+  # loki_log_num_locust_users * num_logging_sources * loki_log_lines_per_source_per_sec * 60
+  value = var.loki_log_num_locust_users * var.num_logging_sources * var.loki_log_lines_per_source_per_sec * 60
 }
 
 output "num_virtual_sres" {

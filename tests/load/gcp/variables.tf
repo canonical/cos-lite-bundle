@@ -114,24 +114,35 @@ variable "num_logging_sources" {
   }
 }
 
-variable "loki_log_lines_per_sec" {
+variable "loki_log_lines_per_source_per_sec" {
   type        = number
   description = "Number of log lines pers second per (virtual) logging source to post to loki"
 
   validation {
-    condition     = can(regex("[0-9][0-9]*", var.loki_log_lines_per_sec))
-    error_message = "The loki_log_lines_per_sec variable must be an integer."
+    condition     = can(regex("[0-9][0-9]*", var.loki_log_lines_per_source_per_sec))
+    error_message = "The loki_log_lines_per_source_per_sec variable must be an integer."
   }
 }
 
 variable "loki_log_post_period" {
   type        = number
   description = "Loki log posting interval (sec) between consecutive posts to /loki/api/v1/push"
-  default     = 15
+  default     = 5
 
   validation {
     condition     = can(regex("[0-9][0-9]*", var.loki_log_post_period))
     error_message = "The loki_log_post_period variable must be an integer."
+  }
+}
+
+variable "loki_log_num_locust_users" {
+  type        = number
+  description = "Number of locus users (note: multiple users writing to the same stream...)"
+  default     = 3
+
+  validation {
+    condition     = can(regex("[0-9][0-9]*", var.loki_log_num_locust_users))
+    error_message = "The loki_log_num_locust_users variable must be an integer."
   }
 }
 
