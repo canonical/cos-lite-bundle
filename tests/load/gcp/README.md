@@ -118,7 +118,8 @@ sudo iftop -i ens4 -f "host pd-ssd-4cpu-8gb.c.lma-light-load-testing.internal"
 ### Locust (loki_log)
 ```shell
 # check service status
-systemctl status locust
+systemctl status locust-loggers.target
+journalctl -u locust@0 -f
 ```
 
 #### COS appliance
@@ -150,6 +151,9 @@ curl -s "localhost/loki/metrics" | grep -v '^# ' | grep -v '^go_' | sort -k 2 -g
 
 # make sure cardinality is low
 curl -G -s  "localhost/loki/loki/api/v1/labels" | jq
+
+# check how much space prometheus is taking
+kubectl exec -n cos-lite-load-test prometheus-0 -c prometheus -- du -d 1 -h /var/lib/prometheus | sort -h
 
 # visual inspection of the load-test dashboard
 # - metrics and logs are displayed?
