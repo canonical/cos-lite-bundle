@@ -6,6 +6,7 @@
   - 100 logging streams, 30 loglines per target per second
     (10 loglines per target, 3 processes)
   - 200 logging streams, 15 loglines/target/second (5/target, 3 proc)
+- Prom + Loki: 1.2M samples / min (150 targets) + 135k logs / min (150 streams)
 
 ## Record (using flood element)
 | Identifier                    | 2022-04-22 | 2022-04-25 | 2022-04-29 | 2022-05-09 | 2022-05-10 | 2022-05-11 | 2022-05-14 |
@@ -59,7 +60,7 @@
 | Disk read [MiB/s] (max)       |     0      |     0      |    0.05    |    0.34    |    0.36    |    0.08    |    0.47    |
 | Disk read IOPS (max)          |    0.07    |    0.3     |    1.4     |     19     |     12     |     13     |     19     |
 
-| Identifier                    | 2022-06-19 | 2022-06-20 | 2022-06-21 | 2022-06-00 | 2022-06-00 | 2022-06-00 | 2022-06-00 |
+| Identifier                    | 2022-06-19 | 2022-06-20 | 2022-06-21 | 2022-06-23 | 2022-06-24 | 2022-06-27 | 2022-06-00 |
 |-------------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
 | Metrics per target            |     10     |    200     |     10     |     10     |     10     |     10     |     10     |
 | Avalanche value interval      |     15     |     15     |     15     |     15     |     15     |     15     |     15     |
@@ -68,25 +69,29 @@
 | Num virtual SREs              |     20     |     20     |     20     |     20     |     20     |     20     |     20     |
 | Dashboard reload period [min] |     5      |     5      |     5      |     5      |     5      |     5      |     5      |
 | Datapoints on dashboard       |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |    10k+    |
-| Scrape targets                |     1      |    200     |    100     |     1      |     1      |     1      |     1      |
-| Logging streams               |    200     |    200     |    100     |            |            |            |            |
-| Locust processes (users=1)    |     3      |            |            |            |            |            |            |
-| Log lines per target [1/sec]  |     5      |            |            |            |            |            |            |
-| Scraped datapoints/min        |    400     | 1,600,000  |  800,000   |            |            |            |            |
-| Logged lines/min              |  180,000   |  180,000   |   90,000   |            |            |            |            |
-| % CPU (p50, p95, p99)         | 49, 51, 52 |    100     |            |            |            |            |            |
-| % mem (p50, p95, p99)         | 59, 61, 61 |    OOM     |            |            |            |            |            |
-| HTTP request times (p99) [ms] |    227     |            |            |            |            |            |            |
-| Failed HTTP requests [%]      |     0      |            |            |            |            |            |            |
-| Storage [GiB/day]             |     54     |            |            |            |            |            |            |
-| Network tx (avg, max) [MiB/s] |  1.2, 1.2  |            |            |            |            |            |            |
-| Network rx [MiB/s] (max)      |    1.2     |            |            |            |            |            |            |
-| Disk write [MiB/s] (avg, max) |  3.6, 8.1  |            |            |            |            |            |            |
-| Disk write IOPS (avg, max)    |   50, 99   |            |            |            |            |            |            |
-| Disk read [MiB/s] (max)       |    0.5     |            |            |            |            |            |            |
-| Disk read IOPS (max)          |     10     |            |            |            |            |            |            |
+| Scrape targets                |     1      |    200     |    100     |    150     |    175     |    160     |     1      |
+| Logging streams               |    200     |    200     |    100     |    150     |    175     |    160     |            |
+| Locust processes (users=1)    |     3      |            |     3      |     3      |     3      |     3      |            |
+| Log lines per target [1/sec]  |     5      |            |     5      |     5      |     5      |     5      |            |
+| Scraped datapoints/min        |    400     | 1,600,000  |  800,000   | 1,200,000  | 1,400,000  | 1,280,000  |            |
+| Logged lines/min              |  180,000   |  180,000   |   90,000   |  135,000   |  157,500   |  144,000   |            |
+| % CPU (p50, p95, p99)         | 49, 51, 52 |    100     | 57, 63, 65 | 56, 59, 60 |    100     |     *      |            |
+| % mem (p50, p95, p99)         | 59, 61, 61 |    OOM     | 72, 73, 73 | 82, 83, 84 |    OOM     |     *      |            |
+| HTTP request times (p99) [ms] |    227     |            |    402     |    312     |    430+    |            |            |
+| Failed HTTP requests [%]      |     0      |            |     0      |     0      |            |            |            |
+| Storage [GiB/day]             |     54     |            |     34     |     50     |            |            |            |
+| Network tx (avg, max) [MiB/s] |  1.2, 1.2  |            |  1.9, 4.3  |  1.6, 3.5  |            |            |            |
+| Network rx [MiB/s] (max)      |    1.2     |            |    0.8     |    1.1     |            |            |            |
+| Disk write [MiB/s] (avg, max) |  3.6, 8.1  |            |  1.2, 3.0  |  1.6, 4.2  |            |            |            |
+| Disk write IOPS (avg, max)    |   50, 99   |            |   28, 43   |   32, 56   |            |            |            |
+| Disk read [MiB/s] (max)       |    0.5     |            |    0.6     |    3.5     |            |            |            |
+| Disk read IOPS (max)          |     10     |            |     32     |     85     |    565     |            |            |
 
 ### Comments
+#### 2022-06-27
+Every 2 hours (prom flush to disk) the load on the system is too high.
+Deemed as "out of resources".
+
 #### 2022-06-18
 COS appliance VM disk load was pretty high: 190 IOPS. This is probably the
 practical max.
