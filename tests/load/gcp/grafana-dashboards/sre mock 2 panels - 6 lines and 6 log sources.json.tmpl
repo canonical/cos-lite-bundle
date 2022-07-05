@@ -1,0 +1,492 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 4,
+  "iteration": 1650466885270,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "${prometheusds}",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_0{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_0",
+          "refId": "A"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_1{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_1",
+          "queryType": "randomWalk",
+          "refId": "B"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_2{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_2",
+          "refId": "C"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_3{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_3",
+          "refId": "D"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_4{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_4",
+          "refId": "E"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_5{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_5",
+          "refId": "F"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_6{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_6",
+          "refId": "G"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_7{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_7",
+          "refId": "H"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_8{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_8",
+          "refId": "I"
+        },
+        {
+          "exemplar": false,
+          "expr": "rate(avalanche_metric_mmmmm_0_9{series_id=~\"${series_filter}\", instance=~\"${instance_filter}\"}[$__rate_interval])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "metric_mmmmm_0_9",
+          "refId": "J"
+        }
+      ],
+      "title": "Avalanche metrics",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "${lokids}",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 14,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [
+        {
+          "expr": "{filename=\"/var/log/pepetest_0\"}",
+          "instant": false,
+          "legendFormat": "file0",
+          "maxLines": 100,
+          "queryType": "randomWalk",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "expr": "{filename=\"/var/log/pepetest_1\"}",
+          "hide": false,
+          "legendFormat": "file1",
+          "maxLines": 100,
+          "refId": "B"
+        },
+        {
+          "expr": "{filename=\"/var/log/pepetest_2\"}",
+          "hide": false,
+          "legendFormat": "file2",
+          "maxLines": 100,
+          "refId": "C"
+        },
+        {
+          "expr": "{filename=\"/var/log/pepetest_3\"}",
+          "hide": false,
+          "maxLines": 100,
+          "refId": "D"
+        },
+        {
+          "expr": "{filename=\"/var/log/pepetest_4\"}",
+          "hide": false,
+          "maxLines": 100,
+          "refId": "E"
+        },
+        {
+          "expr": "{filename=\"/var/log/pepetest_5\"}",
+          "hide": false,
+          "maxLines": 100,
+          "refId": "F"
+        }
+      ],
+      "title": "Logs from locust",
+      "type": "logs"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "${prometheusds}",
+        "definition": "label_values(up{juju_model=\"$juju_model\",juju_model_uuid=\"$juju_model_uuid\",juju_application=\"$juju_application\"},juju_unit)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "Juju unit",
+        "multi": false,
+        "name": "juju_unit",
+        "options": [],
+        "query": {
+          "query": "label_values(up{juju_model=\"$juju_model\",juju_model_uuid=\"$juju_model_uuid\",juju_application=\"$juju_application\"},juju_unit)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "${prometheusds}",
+        "definition": "label_values(up{juju_model=\"$juju_model\",juju_model_uuid=\"$juju_model_uuid\"},juju_application)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "Juju application",
+        "multi": false,
+        "name": "juju_application",
+        "options": [],
+        "query": {
+          "query": "label_values(up{juju_model=\"$juju_model\",juju_model_uuid=\"$juju_model_uuid\"},juju_application)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "${prometheusds}",
+        "definition": "label_values(up{juju_model=\"$juju_model\"},juju_model_uuid)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "Juju model uuid",
+        "multi": false,
+        "name": "juju_model_uuid",
+        "options": [],
+        "query": {
+          "query": "label_values(up{juju_model=\"$juju_model\"},juju_model_uuid)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "${prometheusds}",
+        "definition": "label_values(up,juju_model)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "Juju model",
+        "multi": false,
+        "name": "juju_model",
+        "options": [],
+        "query": {
+          "query": "label_values(up,juju_model)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "avalanche.us-central1-a.c.lma-light-load-testing.internal:9001",
+          "value": "avalanche.us-central1-a.c.lma-light-load-testing.internal:9001"
+        },
+        "datasource": "${prometheusds}",
+        "definition": "label_values(up, instance)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "instance",
+        "multi": true,
+        "name": "instance_filter",
+        "options": [],
+        "query": {
+          "query": "label_values(up, instance)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": [
+            "0"
+          ],
+          "value": [
+            "0"
+          ]
+        },
+        "datasource": "${prometheusds}",
+        "definition": "label_values(avalanche_metric_mmmmm_0_1, series_id)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": true,
+        "name": "series_filter",
+        "options": [],
+        "query": {
+          "query": "label_values(avalanche_metric_mmmmm_0_1, series_id)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "juju_cos-lite-load-test_68d48205-a346-48ff-83ea-5fc48ccfbbd8_prometheus_0",
+          "value": "juju_cos-lite-load-test_68d48205-a346-48ff-83ea-5fc48ccfbbd8_prometheus_0"
+        },
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "prometheusds",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "juju_cos-lite-load-test_68d48205-a346-48ff-83ea-5fc48ccfbbd8_loki_0",
+          "value": "juju_cos-lite-load-test_68d48205-a346-48ff-83ea-5fc48ccfbbd8_loki_0"
+        },
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "lokids",
+        "options": [],
+        "query": "loki",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "sre mock 2 panels - 6 lines and 6 log sources",
+  "uid": "acBcuo-7m4",
+  "version": 1
+}

@@ -40,7 +40,7 @@ resource "google_compute_instance" "vm_cos_lite_appliance" {
     initialize_params {
       image = "ubuntu-os-cloud/ubuntu-2104-hirsute-v20211119"
       type  = var.disk_type
-      size  = "50"
+      size  = "100"
     }
   }
 

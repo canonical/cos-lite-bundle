@@ -54,7 +54,7 @@ allow_redefinition = true
 
 # Ignore libraries that do not have type hint nor stubs
 [[tool.mypy.overrides]]
-module = ["locust.*"]
+module = ["ops.*", "pytest.*", "pytest_operator.*", "juju.*", "locust.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
