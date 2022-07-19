@@ -90,7 +90,7 @@ relations:
 {% endif -%}
 # COS-monitoring
 - - traefik:metrics-endpoint
-  - prometheus
+  - prometheus:metrics-endpoint
 - - alertmanager:self-metrics-endpoint
   - prometheus:metrics-endpoint
 - - loki:metrics-endpoint
