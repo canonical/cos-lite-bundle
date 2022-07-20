@@ -130,7 +130,6 @@ async def test_prometheus_is_up(ops_test: OpsTest):
 
 @pytest.mark.abort_on_fail
 async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
-    am_address = await get_unit_address(ops_test, "alertmanager", 0)
     prom_url = await get_proxied_unit_url(ops_test, "prometheus", 0)
 
     response = urllib.request.urlopen(f"{prom_url}/api/v1/alertmanagers", data=None, timeout=2.0)
@@ -139,10 +138,9 @@ async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
     # an empty response looks like this:
     # {"status":"success","data":{"activeAlertmanagers":[],"droppedAlertmanagers":[]}}
     # a jsonified activeAlertmanagers looks like this:
-    # [{'url': 'http://10.1.179.124:9093/api/v1/alerts'}]
+    # [{'url': 'http://FQDN:9093/api/v2/alerts'}]
     assert any(
-        f"http://{am_address}:9093" in am["url"]
-        for am in alertmanagers["data"]["activeAlertmanagers"]
+        ":9093/api/v2/alerts" in am["url"] for am in alertmanagers["data"]["activeAlertmanagers"]
     )
 
 
