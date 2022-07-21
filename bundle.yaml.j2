@@ -72,23 +72,22 @@ applications:
   {%- endif %}
 
 relations:
-- - prometheus:ingress
-  - traefik
-- - prometheus:alertmanager
-  - alertmanager:alerting
-- - grafana:grafana-source
-  - prometheus:grafana-source
-- - grafana:grafana-source
-  - loki:grafana-source
-- - loki:alertmanager
-  - alertmanager:alerting
+- [prometheus:ingress, traefik]
+- [prometheus:alertmanager, alertmanager:alerting]
+- [grafana:grafana-source, prometheus:grafana-source]
+- [grafana:grafana-source, loki:grafana-source]
+- [grafana:grafana-source, alertmanager:grafana-source]
+- [loki:alertmanager, alertmanager:alerting]
 {% if testing -%}
-- - prometheus:metrics-endpoint
-  - avalanche:metrics-endpoint
+- [prometheus:metrics-endpoint, avalanche:metrics-endpoint]
 {% endif -%}
 # COS-monitoring
-- - traefik:metrics-endpoint
-  - prometheus
+- [traefik:metrics-endpoint, prometheus:metrics-endpoint]
+- [alertmanager:self-metrics-endpoint, prometheus:metrics-endpoint]
+- [loki:metrics-endpoint, prometheus:metrics-endpoint]
+- [loki:grafana-dashboard, grafana:grafana-dashboard]
+- [prometheus:grafana-dashboard, grafana:grafana-dashboard]
+- [alertmanager:grafana-dashboard, grafana:grafana-dashboard]
 {% if testing -%}
 --- # overlay.yaml
 applications:
