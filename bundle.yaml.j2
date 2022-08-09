@@ -72,7 +72,8 @@ applications:
   {%- endif %}
 
 relations:
-- [prometheus:ingress, traefik]
+- [traefik, prometheus:ingress]
+- [traefik, loki:ingress]
 - [prometheus:alertmanager, alertmanager:alerting]
 - [grafana:grafana-source, prometheus:grafana-source]
 - [grafana:grafana-source, loki:grafana-source]
