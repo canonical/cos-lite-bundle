@@ -52,8 +52,8 @@ async def get_proxied_unit_url(ops_test: OpsTest, app_name: str, unit_num: int) 
     show_proxied_endpoints_action = (
         await ops_test.model.applications["traefik"].units[0].run_action("show-proxied-endpoints")
     )
-    await show_proxied_endpoints_action.wait()
-    proxied_endpoints = json.loads(show_proxied_endpoints_action.results["proxied-endpoints"])
+    proxied_endpoints = (await show_proxied_endpoints_action.wait())["proxied-endpoints"]
+    proxied_endpoints = json.loads(proxied_endpoints)
 
     logging.debug(f"Endpoints proxied by Traefik/0: {proxied_endpoints}")
 

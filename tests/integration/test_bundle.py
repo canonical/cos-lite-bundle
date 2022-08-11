@@ -95,7 +95,7 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
     await cli_deploy_bundle(ops_test, str(rendered_bundle))
     await ops_test.model.wait_for_idle(status="active", timeout=1000)
 
-    prometheus_0_url = await get_proxied_unit_url(ops_test, app_name="prometheus", unit_num="0")
+    prometheus_0_url = await get_proxied_unit_url(ops_test, app_name="prometheus", unit_num=0)
 
     logging.info(f"Trying to connect to Prometheus over 'traefik/0': {prometheus_0_url}")
 
