@@ -22,6 +22,7 @@ import urllib.request
 from pathlib import Path
 
 import juju
+import juju.utils
 import pytest
 from helpers import (
     ModelConfigChange,
@@ -32,9 +33,7 @@ from helpers import (
     get_proxied_unit_url,
     get_unit_address,
 )
-import juju.utils
 from pytest_operator.plugin import OpsTest
-
 
 log = logging.getLogger(__name__)
 juju_topology_keys = {"juju_model_uuid", "juju_model", "juju_application"}
