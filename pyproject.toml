@@ -39,7 +39,7 @@ copyright-regexp = "Copyright\\s\\d{4}([-,]\\d{4})*\\s+%(author)s"
 [tool.mypy]
 pretty = true
 python_version = 3.8
-mypy_path = "$MYPY_CONFIG_FILE_DIR/tests/integration"
+mypy_path = "./tests/integration"
 exclude = "\\.tpl\\.py$|/\\.terraform/"
 follow_imports = "normal"
 warn_redundant_casts = true
@@ -52,10 +52,6 @@ explicit_package_bases = true
 check_untyped_defs = true
 allow_redefinition = true
 
-# Ignore libraries that do not have type hint nor stubs
-[[tool.mypy.overrides]]
-module = ["locust.*"]
-ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"

@@ -49,11 +49,11 @@ async def cli_deploy_bundle(ops_test: OpsTest, name: str, channel: str = "edge")
 
 async def get_proxied_unit_url(ops_test: OpsTest, app_name: str, unit_num: int) -> str:
     """Returns the URL assigned by Traefik over the ingress_per_unit relation interface."""
-    show_proxied_endpoints_action = (
+    action = (
         await ops_test.model.applications["traefik"].units[0].run_action("show-proxied-endpoints")
     )
-    await show_proxied_endpoints_action.wait()
-    proxied_endpoints = json.loads(show_proxied_endpoints_action.results["proxied-endpoints"])
+    action = await action.wait()
+    proxied_endpoints = json.loads(action.results["proxied-endpoints"])
 
     logging.debug(f"Endpoints proxied by Traefik/0: {proxied_endpoints}")
 
