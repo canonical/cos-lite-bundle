@@ -45,6 +45,16 @@ applications:
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
+  catalogue:
+    charm: {{ catalogue|default('catalogue-k8s', true) }}
+    scale: 1
+    trust: true
+    {%- if catalogue is defined and catalogue.endswith('.charm') %}
+    resources:
+      catalogue-image: "ghcr.io/canonical/catalogue-k8s"
+    {%- else %}
+    channel: {{ channel|default('edge', true) }}
+    {%- endif %}
   loki:
     charm: {{ loki|default('loki-k8s', true) }}
     scale: 1
@@ -89,6 +99,12 @@ relations:
 - [loki:grafana-dashboard, grafana:grafana-dashboard]
 - [prometheus:grafana-dashboard, grafana:grafana-dashboard]
 - [alertmanager:grafana-dashboard, grafana:grafana-dashboard]
+# Service Catalogue
+- [catalogue:ingress, traefik:ingress],
+- [catalogue:catalogue, grafana:catalogue]
+- [catalogue:catalogue, prometheus:catalogue]
+- [catalogue:catalogue, alertmanager:catalogue]
+
 {% if testing -%}
 --- # overlay.yaml
 applications:
