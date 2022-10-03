@@ -81,8 +81,8 @@ To use COS Lite with machine charms, see [cos-proxy](https://charmhub.io/cos-pro
 
 ## Publishing
 ```shell
-./render_bundle.py bundle.yaml --channel=edge
+tox -e render-edge  # creates bundle.yaml
 charmcraft pack
 charmcraft upload cos-lite.zip
-charmcraft release cos-lite --channel=beta --revision=4
+charmcraft release cos-lite --channel=edge --revision=4
 ```
