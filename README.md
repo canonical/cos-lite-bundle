@@ -1,6 +1,7 @@
 # COS Lite bundle
 
-Canonical Observability Stack Lite, or COS Lite, is a light-weight, highly-integrated, Juju-based observability suite running on Kubernetes. 
+Canonical Observability Stack Lite, or COS Lite, is a light-weight, highly-integrated, Juju-based observability suite running on Kubernetes.
+
 This Juju bundle deploys the stack, consisting of the following interrelated charms:
 
 - [Prometheus](https://charmhub.io/prometheus-k8s) ([source](https://github.com/canonical/prometheus-operator))
@@ -50,7 +51,7 @@ source .tox/integration/bin/activate
 juju deploy ./bundle.yaml --trust
 ```
 
-Currently the bundle is available only on the `edge` channel, using `edge` charms.
+Currently, the bundle is available only on the `edge` channel, using `edge` charms.
 When the charms graduate to `beta`, `candidate` and `stable`, we will issue the bundle in the same channels.
 
 The `--trust` option is needed by the charms in the `cos-lite` bundle to be able to patch their K8s services to use the right ports (see this [Juju limitation](https://bugs.launchpad.net/juju/+bug/1936260)).
