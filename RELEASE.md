@@ -1,6 +1,6 @@
 ## Quality gates
 
-| Risk level                    | Edge                            | Beta                         | Candidate                                                                                    | Stable                                                                                                                                            |
+| [Risk level]                  | Edge                            | Beta                         | Candidate                                                                                    | Stable                                                                                                                                            |
 |-------------------------------|---------------------------------|------------------------------|----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
 | Meaning                       | Bleeding edge developer version | Most new features stabilized | Feature-ready, currently in testing                                                          | Well-tested, production-ready                                                                                                                     |
 | Preconditions (quality gates) | Code review, CI                 |                              | Load tests                                                                                   |                                                                                                                                                   |
@@ -10,7 +10,7 @@
 
 ## Publishing
 ```shell
-./render_bundle.py bundle.yaml --channel=edge
+tox -e render-edge
 charmcraft pack
 charmcraft upload cos-lite.zip
 charmcraft release cos-lite --channel=edge --revision=N
