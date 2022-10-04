@@ -4,3 +4,4 @@
 .tox/
 .mypy_cache/
 build/
+cos-lite.yaml
