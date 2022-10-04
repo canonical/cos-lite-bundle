@@ -17,9 +17,19 @@ charmcraft release cos-lite --channel=edge --revision=N
 ```
 
 ### Promoting a revision to a lower risk level
+Unlike charms, bundles revisions must not be promoted, because the per-charm channel is hard-coded
+in the bundle's yaml. For this reason, "promotion" of a bundle consists of rendering with the
+correct channel, uploading, and releasing directly into the matching channel. For example:
+
 ```shell
+tox -e render-beta
+charmcraft pack
+charmcraft upload cos-lite.zip
 charmcraft release cos-lite --channel=beta --revision=N
 ```
+
+Typically, bundles themselves are very stable as the list of charms or relations are unlikely to
+change frequently.
 
 ## A note on granularity of revisions
 
