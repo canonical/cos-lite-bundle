@@ -4,6 +4,7 @@
 import asyncio
 import json
 import logging
+import subprocess
 import urllib.request
 from pathlib import Path
 from typing import List
@@ -11,21 +12,40 @@ from urllib.parse import urlparse
 
 from pytest_operator.plugin import OpsTest
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
-async def enable_metallb(ops_test: OpsTest, ip_range: str):
-    run_args = [
-        "sudo",
-        "microk8s",
-        "enable",
-        "metallb",
-        ip_range,
+async def reenable_metallb() -> str:
+    # Set up microk8s metallb addon, needed by traefik
+    logger.info("(Re)-enabling metallb")
+    cmd = [
+        "sh",
+        "-c",
+        "ip -4 -j route get 2.2.2.2 | jq -r '.[] | .prefsrc'",
     ]
+    result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    ip = result.stdout.decode("utf-8").strip()
 
-    retcode, stdout, stderr = await ops_test.run(*run_args)
-    assert retcode == 0, f"Metallb setup failed: {(stderr or stdout).strip()}"
-    log.info(stdout)
+    logger.info("First, disable metallb, just in case")
+    try:
+        cmd = ["sg", "microk8s", "-c", "microk8s disable metallb"]
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    except Exception as e:
+        print(e)
+        raise
+
+    await asyncio.sleep(30)  # why? just because, for now
+
+    logger.info("Now enable metallb")
+    try:
+        cmd = ["sg", "microk8s", "-c", f"microk8s enable metallb:{ip}-{ip}"]
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    except Exception as e:
+        print(e)
+        raise
+
+    await asyncio.sleep(30)  # why? just because, for now
+    return ip
 
 
 async def cli_deploy_bundle(ops_test: OpsTest, name: str, channel: str = "edge"):
@@ -43,7 +63,7 @@ async def cli_deploy_bundle(ops_test: OpsTest, name: str, channel: str = "edge")
 
     retcode, stdout, stderr = await ops_test.run(*run_args)
     assert retcode == 0, f"Deploy failed: {(stderr or stdout).strip()}"
-    log.info(stdout)
+    logger.info(stdout)
     await ops_test.model.wait_for_idle(timeout=1000)
 
 
@@ -106,7 +126,7 @@ async def get_alertmanager_alerts(ops_test: OpsTest, unit_name, unit_num, retrie
     url = f"http://{address}:9093/api/v2/alerts"
     while not (alerts := json.loads(urllib.request.urlopen(url, data=None, timeout=2).read())):
         retries -= 1
-        log.warning("no alerts")
+        logger.warning("no alerts")
         if retries > 0:
             await asyncio.sleep(2)
         else:
@@ -138,7 +158,7 @@ async def get_alertmanager_groups(ops_test: OpsTest, unit_name, unit_num, retrie
     url = f"http://{address}:9093/api/v2/alerts/groups"
     while not (groups := json.loads(urllib.request.urlopen(url, data=None, timeout=2).read())):
         retries -= 1
-        log.warning("no alerts")
+        logger.warning("no alerts")
         if retries > 0:
             await asyncio.sleep(2)
         else:

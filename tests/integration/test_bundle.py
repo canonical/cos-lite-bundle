@@ -1,18 +1,8 @@
 #!/usr/bin/env python3
 
-#  Copyright 2021 Canonical Ltd.
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+# Copyright 2021 Canonical Ltd.
+# See LICENSE file for licensing details.
+
 import asyncio
 import inspect
 import json
@@ -27,15 +17,15 @@ import pytest
 from helpers import (
     ModelConfigChange,
     cli_deploy_bundle,
-    enable_metallb,
     get_alertmanager_alerts,
     get_alertmanager_groups,
     get_proxied_unit_url,
     get_unit_address,
+    reenable_metallb,
 )
 from pytest_operator.plugin import OpsTest
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 juju_topology_keys = {"juju_model_uuid", "juju_model", "juju_application"}
 
 
@@ -51,19 +41,13 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 
     Assert on the unit status before any relations/configurations take place.
     """
-    # FIXME? Maybe we should check which local address can be routed?
-    # IPADDR=$(ip -4 -j route | jq -r '.[] | select(.dst | contains("default")) | .prefsrc')
-    # microk8s.enable metallb:$IPADDR-$IPADDR
+    await reenable_metallb(ops_test)
 
-    log.info("Setting up MicroK8s' metallb")
-
-    await enable_metallb(ops_test, "192.168.1.10-192.168.1.20")
-
-    log.info("Rendering bundle %s", get_this_script_dir() / ".." / ".." / "bundle.yaml.j2")
+    logger.info("Rendering bundle %s", get_this_script_dir() / ".." / ".." / "bundle.yaml.j2")
 
     async def build_charm_if_is_dir(option: str) -> str:
         if Path(option).is_dir():
-            logging.info("Building charm from source: %s", option)
+            logger.info("Building charm from source: %s", option)
             option = await ops_test.build_charm(option)
         return str(option)
 
@@ -86,7 +70,7 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
     # set the "testing" template variable so the template renders for testing
     context["testing"] = "true"
 
-    logging.debug("context: %s", context)
+    logger.debug("context: %s", context)
 
     rendered_bundle = ops_test.render_bundle(
         get_this_script_dir() / ".." / ".." / "bundle.yaml.j2", context=context
@@ -98,7 +82,7 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 
     prometheus_0_url = await get_proxied_unit_url(ops_test, app_name="prometheus", unit_num=0)
 
-    logging.info(f"Trying to connect to Prometheus over 'traefik/0': {prometheus_0_url}")
+    logger.info(f"Trying to connect to Prometheus over 'traefik/0': {prometheus_0_url}")
 
     response = urllib.request.urlopen(prometheus_0_url, data=None, timeout=2.0)
     assert response.code == 200
@@ -112,7 +96,7 @@ async def test_alertmanager_is_up(ops_test: OpsTest):
     # TODO Change this when AM is exposed over the ingress
     address = await get_unit_address(ops_test, "alertmanager", 0)
     url = f"http://{address}:9093"
-    log.info("am public address: %s", url)
+    logger.info("am public address: %s", url)
 
     response = urllib.request.urlopen(f"{url}/api/v2/status", data=None, timeout=2.0)
     assert response.code == 200
@@ -123,7 +107,7 @@ async def test_alertmanager_is_up(ops_test: OpsTest):
 async def test_prometheus_is_up(ops_test: OpsTest):
     url = await get_proxied_unit_url(ops_test, "prometheus", 0)
 
-    log.info("Prometheus public address: %s", url)
+    logger.info("Prometheus public address: %s", url)
 
     response = urllib.request.urlopen(f"{url}/-/ready", data=None, timeout=2.0)
     assert response.code == 200
@@ -158,7 +142,7 @@ async def test_juju_topology_labels_in_alerts(ops_test: OpsTest):
         assert all(alert["labels"][key] for key in juju_topology_keys)
 
     assert i >= 0  # should have at least one alarms listed (the "AlwaysFiring" alarm rule)
-    log.info("juju topology test passed for %s alerts", i + 1)
+    logger.info("juju topology test passed for %s alerts", i + 1)
 
 
 async def test_alerts_are_grouped(ops_test: OpsTest):
@@ -169,7 +153,7 @@ async def test_alerts_are_grouped(ops_test: OpsTest):
         assert group["labels"].keys() == juju_topology_keys
 
     assert i >= 0  # should have at least one group listed (the "AlwaysFiring" alarm rule)
-    log.info("juju topology grouping test passed for %s groups", i + 1)
+    logger.info("juju topology grouping test passed for %s groups", i + 1)
 
 
 async def test_alerts_are_fired_from_non_leader_units_too(ops_test: OpsTest):
@@ -183,7 +167,7 @@ async def test_alerts_are_fired_from_non_leader_units_too(ops_test: OpsTest):
             )
         )
         units_firing = sorted([alert["labels"]["juju_unit"] for alert in alerts])
-        log.info("Units firing as of this moment: %s", units_firing)
+        logger.info("Units firing as of this moment: %s", units_firing)
         return units_firing == ["avalanche/0", "avalanche/1"]
 
     await juju.utils.block_until_with_coroutine(all_alerts_fire, timeout=300, wait_period=15)
