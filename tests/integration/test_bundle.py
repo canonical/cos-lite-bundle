@@ -41,7 +41,7 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 
     Assert on the unit status before any relations/configurations take place.
     """
-    await reenable_metallb(ops_test)
+    await reenable_metallb()
 
     logger.info("Rendering bundle %s", get_this_script_dir() / ".." / ".." / "bundle.yaml.j2")
 
