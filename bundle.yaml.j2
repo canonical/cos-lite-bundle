@@ -90,6 +90,7 @@ applications:
 relations:
 - [traefik:ingress-per-unit, prometheus:ingress]
 - [traefik:ingress-per-unit, loki:ingress]
+- [traefik:traefik-route, grafana:ingress]
 - [prometheus:alertmanager, alertmanager:alerting]
 - [grafana:grafana-source, prometheus:grafana-source]
 - [grafana:grafana-source, loki:grafana-source]
@@ -99,12 +100,13 @@ relations:
 - [prometheus:metrics-endpoint, avalanche:metrics-endpoint]
 {% endif -%}
 # COS-monitoring
-- [traefik:metrics-endpoint, prometheus:metrics-endpoint]
-- [alertmanager:self-metrics-endpoint, prometheus:metrics-endpoint]
-- [loki:metrics-endpoint, prometheus:metrics-endpoint]
-- [loki:grafana-dashboard, grafana:grafana-dashboard]
-- [prometheus:grafana-dashboard, grafana:grafana-dashboard]
-- [alertmanager:grafana-dashboard, grafana:grafana-dashboard]
+- [prometheus:metrics-endpoint, traefik:metrics-endpoint]
+- [prometheus:metrics-endpoint, alertmanager:self-metrics-endpoint]
+- [prometheus:metrics-endpoint, loki:metrics-endpoint]
+- [prometheus:metrics-endpoint, grafana:metrics-endpoint]
+- [grafana:grafana-dashboard, loki:grafana-dashboard]
+- [grafana:grafana-dashboard, prometheus:grafana-dashboard]
+- [grafana:grafana-dashboard, alertmanager:grafana-dashboard]
 # Service Catalogue
 - [catalogue:ingress, traefik:ingress]
 - [catalogue:catalogue, grafana:catalogue]
