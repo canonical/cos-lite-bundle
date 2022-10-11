@@ -26,14 +26,14 @@ subgraph cos_lite["COS Lite"]
   ctlg[Catalogue]
   click ctlg "https://github.com/canonical/catalogue-k8s-operator"
 
-  trfk --- |ipu| loki
+  trfk --- |<a href='https://charmhub.io/traefik-k8s/libraries/ingress_per_unit'>ipu</a>| loki
   trfk --- |ipu| prom
-  trfk --- |route| graf
+  trfk --- |<a href='https://charmhub.io/traefik-route-k8s/libraries/traefik_route'>route</a>| graf
   trfk -.- |<a href='https://charmhub.io/traefik-k8s/libraries/ingress'>ipa</a>| alrt
 
-  prom --- ctlg
-  alrt --- ctlg
-  graf --- ctlg
+  prom --- |<a href='https://charmhub.io/catalogue-k8s/libraries/catalogue'>catalogue</a>| ctlg
+  alrt --- |catalogue| ctlg
+  graf --- |catalogue| ctlg
 
 end
 ```
