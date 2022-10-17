@@ -91,6 +91,7 @@ relations:
 - [traefik:ingress-per-unit, prometheus:ingress]
 - [traefik:ingress-per-unit, loki:ingress]
 - [traefik:traefik-route, grafana:ingress]
+- [traefik:ingress, alertmanager:ingress]
 - [prometheus:alertmanager, alertmanager:alerting]
 - [grafana:grafana-source, prometheus:grafana-source]
 - [grafana:grafana-source, loki:grafana-source]
