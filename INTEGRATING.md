@@ -29,7 +29,7 @@ subgraph cos_lite["COS Lite"]
   trfk --- |<a href='https://charmhub.io/traefik-k8s/libraries/ingress_per_unit'>ipu</a>| loki
   trfk --- |ipu| prom
   trfk --- |<a href='https://charmhub.io/traefik-route-k8s/libraries/traefik_route'>route</a>| graf
-  trfk -.- |<a href='https://charmhub.io/traefik-k8s/libraries/ingress'>ipa</a>| alrt
+  trfk --- |<a href='https://charmhub.io/traefik-k8s/libraries/ingress'>ipa</a>| alrt
 
   prom --- |<a href='https://charmhub.io/catalogue-k8s/libraries/catalogue'>catalogue</a>| ctlg
   alrt --- |catalogue| ctlg
