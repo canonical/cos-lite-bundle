@@ -48,8 +48,8 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
     async def build_charm_if_is_dir(option: str) -> str:
         if Path(option).is_dir():
             logger.info("Building charm from source: %s", option)
-            option = await ops_test.build_charm(option)
-        return str(option)
+            option = str(await ops_test.build_charm(option))
+        return option
 
     charms = dict(
         traefik=pytestconfig.getoption("traefik"),
@@ -196,3 +196,16 @@ async def test_bundle_charms_can_handle_frequent_update_status(ops_test: OpsTest
 
     # After update-status frequency is restored to default, make sure all charms settle into active
     await ops_test.model.wait_for_idle(status="active")
+
+
+async def test_prometheus_scrapes_loki_through_traefik(ops_test: OpsTest):
+    """Prometheus should correctly scrape Loki through its traefik endpoint."""
+    prom_url = await get_proxied_unit_url(ops_test, "prometheus", 0)
+    loki_url = await get_proxied_unit_url(ops_test, "loki", 0)
+
+    response = urllib.request.urlopen(f"{prom_url}/api/v1/targets", data=None, timeout=2.0)
+    assert response.code == 200
+    targets = json.loads(response.read())["data"]["activeTargets"]
+    targets_summary = [(t["scrapeUrl"], t["health"]) for t in targets]
+    assert (loki_url, "up") in targets_summary
+    logger.info("prometheus is successfully scraping loki through traefik")
