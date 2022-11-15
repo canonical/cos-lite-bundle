@@ -209,3 +209,21 @@ async def test_prometheus_scrapes_loki_through_traefik(ops_test: OpsTest):
     targets_summary = [(t["scrapeUrl"], t["health"]) for t in targets]
     assert (loki_url, "up") in targets_summary
     logger.info("prometheus is successfully scraping loki through traefik")
+
+
+async def test_loki_receives_logs_through_traefik(ops_test: OpsTest):
+    """Loki should be able to receive logs through its traefik endpoint."""
+    loki_url = await get_proxied_unit_url(ops_test, "loki", 0)
+
+    ops_test.model.deploy("zinc-k8s", application_name="zinc", channel="stable", trust=True)
+    await ops_test.model.wait_for_idle(status="active")
+    # Create the relation
+    await ops_test.model.add_relation("loki", "zinc")
+    await ops_test.model.wait_for_idle(status="active")
+    # Check that logs are coming in
+    response = urllib.request.urlopen(f"{loki_url}/api/v1/series")
+    assert response.code == 200
+    series = json.loads(response.read())["data"]
+    series_charms = [s["juju_charm"] for s in series]
+    assert "zinc-k8s" in series_charms
+    logger.info("loki is successfully receiving zinc logs through traefik")
