@@ -79,7 +79,7 @@ resource "google_compute_firewall" "external_scrape" {
     ports    = ["29100", "80"]
   }
 
-  target_tags   = ["load-test-traffic"]
+  target_tags = ["load-test-traffic"]
   #source_ranges = ["${chomp(data.http.myip.response_body)}/32"]
   source_tags = ["vm-monitoring"]
 }

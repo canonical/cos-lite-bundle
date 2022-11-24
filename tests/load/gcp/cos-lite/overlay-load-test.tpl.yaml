@@ -1,0 +1,40 @@
+--- # overlay.yaml
+applications:
+  prometheus:
+    storage:
+      database: 1000GiB
+  traefik:
+    options:
+      external_hostname: ${COS_APPLIANCE_HOSTNAME}
+  scrape-target:
+    charm: prometheus-scrape-target-k8s
+    scale: 1
+    trust: true
+    channel: edge
+    options:
+      targets: ${join(",", [for i in range(NUM_TARGETS): "${AVALANCHE_URL}:${9001 + i}"])}
+  scrape-config:
+    charm: prometheus-scrape-config-k8s
+    scale: 1
+    trust: true
+    channel: edge
+    options:
+      scrape_interval: ${SCRAPE_INTERVAL}s
+      scrape_timeout: ${max(SCRAPE_INTERVAL - 1, 1)}s
+  cos-config:
+    charm: cos-configuration-k8s
+    scale: 1
+    trust: true
+    channel: edge
+    options:
+      git_repo: https://github.com/canonical/cos-lite-bundle.git
+      git_branch: feature/load_test_logging
+      grafana_dashboards_path: tests/load/gcp/grafana-dashboards
+
+relations:
+- - scrape-target:metrics-endpoint
+  - scrape-config:configurable-scrape-jobs
+- - scrape-config:metrics-endpoint
+  - prometheus:metrics-endpoint
+- - cos-config:grafana-dashboards
+  - grafana:grafana-dashboard

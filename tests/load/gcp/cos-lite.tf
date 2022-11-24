@@ -19,19 +19,101 @@ data "cloudinit_config" "cos_lite" {
 
   part {
     content_type = "text/cloud-config"
-    content = templatefile("cos-lite.tpl.conf", {
-      PROJECT                = var.project,
-      ZONE                   = var.zone,
-      INSTANCE               = local.cos_lite_appliance_resource_name,
-      AVALANCHE_URL          = local.avalanche_target,
-      NUM_TARGETS            = var.num_avalanche_targets,
-      SCRAPE_INTERVAL        = var.prom_scrape_interval,
-      COS_APPLIANCE_HOSTNAME = local.cos_appliance_hostname,
-      PROM_EXTERNAL_URL      = local.prom_url,
-      GRAFANA_EXTERNAL_URL   = local.grafana_url,
-      JUJU_MODEL_NAME        = var.juju_model_name,
-    })
-    filename = "cos_lite.conf"
+    filename     = "cos_lite.conf"
+    content = yamlencode(
+      {
+        "write_files" : [
+          {
+            "path" : "/etc/systemd/system/node-exporter.service",
+            "content" : file("common/node-exporter.service"),
+          },
+          {
+            "path" : "/run/wait-for-prom-ready.sh",
+            "permissions" : "0755",
+            "content" : templatefile("cos-lite/wait-for-prom-ready.tpl.sh", {
+              PROM_EXTERNAL_URL = local.prom_url,
+            }),
+          },
+          {
+            "path" : "/run/wait-for-grafana-ready.sh",
+            "permissions" : "0755",
+            "content" : templatefile("cos-lite/wait-for-grafana-ready.tpl.sh", {
+              GRAFANA_EXTERNAL_URL = local.grafana_url,
+            }),
+          },
+          {
+            "path" : "/etc/systemd/system/prometheus-stdout-logger.service",
+            "content" : templatefile("cos-lite/prometheus-stdout-logger.tpl.service", {
+              JUJU_MODEL_NAME = var.juju_model_name,
+            }),
+          },
+          {
+            "path" : "/run/cos-lite-pod-top.sh",
+            "permissions" : "0755",
+            "content" : templatefile("cos-lite/cos-lite-pod-top.tpl.sh", {
+              JUJU_MODEL_NAME = var.juju_model_name,
+            }),
+          },
+          {
+            "path" : "/etc/systemd/system/pod-top-logger.service",
+            "content" : file("cos-lite/pod-top-logger.service"),
+          },
+          {
+            "path" : "/run/overlay-load-test.yaml",
+            "content" : templatefile("cos-lite/overlay-load-test.tpl.yaml", {
+              COS_APPLIANCE_HOSTNAME = local.cos_appliance_hostname,
+              NUM_TARGETS            = var.num_avalanche_targets,
+              AVALANCHE_URL          = local.avalanche_target,
+              SCRAPE_INTERVAL        = var.prom_scrape_interval,
+            }),
+          },
+          {
+            "path" : "/run/cos-lite-rest-server.py",
+            "permissions" : "0755",
+            "content" : file("cos-lite/cos-lite-rest-server.py"),
+          },
+          {
+            "path" : "/etc/systemd/system/cos-lite-rest-server.service",
+            "content" : file("cos-lite/cos-lite-rest-server.service"),
+          },
+        ],
+
+        "package_update" : "true",
+
+        "packages" : [
+          "python3-pip",
+          "jq",
+          "iftop",
+          "net-tools",
+          "tcptrack",
+          "kitty-terminfo",
+          "iputils-ping",
+          "sysstat",
+          "python3-flask",
+        ],
+
+        "snap" : {
+          "commands" : [
+            "snap install --classic juju --channel=2.9/stable",
+            "snap install --classic microk8s --channel=1.24/stable",
+            "snap alias microk8s.kubectl kubectl",
+            "snap refresh",
+          ]
+        }
+
+        "runcmd" : [
+          templatefile("cos-lite/runcmd.tpl.sh", {
+            JUJU_MODEL_NAME        = var.juju_model_name,
+            PROM_URL               = local.prom_url,
+            GRAFANA_URL            = local.grafana_url,
+            COS_APPLIANCE_HOSTNAME = local.cos_appliance_hostname,
+            PROJECT                = var.project,
+            ZONE                   = var.zone,
+            INSTANCE               = local.cos_lite_appliance_resource_name,
+          }),
+        ]
+      }
+    )
   }
 }
 
