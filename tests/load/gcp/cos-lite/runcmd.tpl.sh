@@ -28,7 +28,7 @@ systemctl start node-exporter.service
 adduser ubuntu microk8s
 microk8s status --wait-ready
 microk8s enable dns:$(grep nameserver /run/systemd/resolve/resolv.conf | awk '{print $2}')
-microk8s.enable storage ingress
+microk8s.enable hostpath-storage ingress
 # wait for addons to become available
 microk8s.kubectl rollout status deployments/hostpath-provisioner -n kube-system -w --timeout=600s
 
@@ -49,47 +49,36 @@ IPADDR=$(ip -4 -j route | jq -r '.[] | select(.dst | contains("default")) | .pre
 microk8s.enable metallb:$IPADDR-$IPADDR
 microk8s.kubectl rollout status daemonset.apps/speaker -n metallb-system -w --timeout=600s
 
-# workaround for
-# ERROR resolving microk8s credentials: max duration exceeded: secret for service account "juju-credential-microk8s" not found
-# Ref: https://github.com/charmed-kubernetes/actions-operator/blob/main/src/bootstrap/index.ts
-# Not needed for uk8s 1.24
-# microk8s.kubectl create serviceaccount test-sa
-# timeout 600 sh -c "until microk8s.kubectl get secrets | grep -q test-sa-token-; do sleep 5; done"
-# microk8s.kubectl delete serviceaccount test-sa
-
 # prep juju
 sudo -u ubuntu juju bootstrap --no-gui --agent-version=2.9.34 microk8s uk8s
 sudo -u ubuntu juju add-model --config logging-config="<root>=WARNING; unit=DEBUG" --config update-status-hook-interval="5m" ${JUJU_MODEL_NAME}
-sudo -u ubuntu juju deploy --channel=edge cos-lite --trust --overlay /run/overlay-load-test.yaml --overlay /run/prom-latest.yaml --trust
+sudo -u ubuntu juju deploy --channel=edge cos-lite --trust --overlay /run/overlay-load-test.yaml --trust
 
-# Temporary manual ingress setup
-# TODO remove after bundle updates
-#sudo -u ubuntu juju config traefik external_hostname=${COS_APPLIANCE_HOSTNAME}
-# TODO remove after grafana ingress implemented
-sleep 60  # blind sleep to avoid: Error from server (NotFound): statefulsets.apps "grafana" not found
-microk8s.kubectl rollout status statefulset.apps/grafana -n ${JUJU_MODEL_NAME} -w --timeout=600s
-#kubectl -n ${JUJU_MODEL_NAME} expose pod grafana-0 --port=3000 --target-port=3000 --name=grafana-expose-service
-# nohup kubectl -n ${JUJU_MODEL_NAME} port-forward --address 0.0.0.0 grafana-0 3000:3000 &
-
-# install ops agent for observability
-#echo '"projects/${PROJECT}/zones/${ZONE}/instances/${INSTANCE}","[{""type"":""ops-agent""}]"' >> agents_to_install.csv && \
-#curl -sSO https://dl.google.com/cloudagents/mass-provision-google-cloud-ops-agents.py && \
-#python3 mass-provision-google-cloud-ops-agents.py --file agents_to_install.csv
-
-#curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
-#sudo bash add-google-cloud-ops-agent-repo.sh --also-install
 
 # start services
+
+# Temporary workaround for grafana giving 404 (TODO remove when fixed)
+# Need to sleep a bit, otherwise:
+# Error from server (NotFound): statefulsets.apps "grafana" not found
+sleep 120
+microk8s.kubectl rollout status statefulset.apps/grafana -n ${JUJU_MODEL_NAME} -w --timeout=600s
+sudo -u ubuntu juju remove-relation grafana:ingress traefik
+sleep 30
+sudo -u ubuntu juju relate grafana:ingress traefik
+
+# wait for grafana to become active
+/run/wait-for-grafana-ready.sh
+systemctl start cos-lite-rest-server.service
+
+# force reldata reinit in case files appeared on disk after the last hook fired
+sudo -u ubuntu juju run-action cos-config/0 sync-now --wait
+
+# Temporary workaround for prom using fqdn instead of ingress (TODO remove when fixed)
+sudo -u ubuntu juju config prometheus metrics_wal_compression=true
+sudo -u ubuntu juju config prometheus metrics_wal_compression=false
+
 # Waiting for prom here because systemd would timeout waiting for the unit to become active/idle:
 #   Job for prometheus-stdout-logger.service failed because a timeout was exceeded.
 /run/wait-for-prom-ready.sh
 systemctl start prometheus-stdout-logger.service
 systemctl start pod-top-logger.service
-
-# wait for grafana to become active
-# TODO re-enable "wait for grafana" after ingress works again
-# /run/wait-for-grafana-ready.sh
-systemctl start cos-lite-rest-server.service
-
-# force reldata reinit in case files appeared on disk after the last hook fired
-sudo -u ubuntu juju run-action cos-config/0 sync-now --wait
