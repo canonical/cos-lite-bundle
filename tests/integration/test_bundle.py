@@ -120,15 +120,11 @@ async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
 
     response = urllib.request.urlopen(f"{prom_url}/api/v1/alertmanagers", data=None, timeout=2.0)
     assert response.code == 200
-    alertmanagers = json.loads(response.read())
     # an empty response looks like this:
     # {"status":"success","data":{"activeAlertmanagers":[],"droppedAlertmanagers":[]}}
     # a jsonified activeAlertmanagers looks like this:
     # [{'url': 'http://FQDN:9093/api/v2/alerts'}]
-    assert any(
-        f":9093/{ops_test.model_name}-alertmanager/api/v2/alerts" in am["url"]
-        for am in alertmanagers["data"]["activeAlertmanagers"]
-    )
+    assert f":9093/{ops_test.model_name}-alertmanager/api/v2/alerts" in response.read()
 
 
 async def test_juju_topology_labels_in_alerts(ops_test: OpsTest):
