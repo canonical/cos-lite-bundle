@@ -4,10 +4,12 @@ Canonical Observability Stack Lite, or COS Lite, is a light-weight, highly-integ
 
 This Juju bundle deploys the stack, consisting of the following interrelated charms:
 
-- [Prometheus](https://charmhub.io/prometheus-k8s) ([source](https://github.com/canonical/prometheus-operator))
-- [Loki](https://charmhub.io/loki-k8s) ([source](https://github.com/canonical/loki-operator))
-- [Alertmanager](https://charmhub.io/alertmanager-k8s) ([source](https://github.com/canonical/alertmanager-operator))
-- [Grafana](https://charmhub.io/grafana-k8s) ([source](https://github.com/canonical/grafana-operator))
+- [Prometheus](https://charmhub.io/prometheus-k8s) ([source](https://github.com/canonical/prometheus-k8s-operator))
+- [Loki](https://charmhub.io/loki-k8s) ([source](https://github.com/canonical/loki-k8s-operator))
+- [Alertmanager](https://charmhub.io/alertmanager-k8s) ([source](https://github.com/canonical/alertmanager-k8s-operator))
+- [Grafana](https://charmhub.io/grafana-k8s) ([source](https://github.com/canonical/grafana-k8s-operator))
+- [Traefik](https://charmhub.io/traefik-k8s) ([source](https://github.com/canonical/traefik-k8s-operator))
+- [Catalogue](https://charmhub.io/catalogue-k8s) ([source](https://github.com/canonical/catalogue-k8s-operator))
 
 This bundle is under development.
 Join us on [Discourse](https://discourse.charmhub.io/t/canonical-observability-stack/5132) and [MatterMost](https://chat.charmhub.io/charmhub/channels/observability)!
@@ -51,10 +53,18 @@ source .tox/integration/bin/activate
 juju deploy ./bundle.yaml --trust
 ```
 
-Currently, the bundle is available only on the `edge` channel, using `edge` charms.
-When the charms graduate to `beta`, `candidate` and `stable`, we will issue the bundle in the same channels.
+Note: for traefik ingress to work, you may first need to enable the `metallb`
+microk8s addon. See the
+[tutorial](https://charmhub.io/topics/canonical-observability-stack/tutorials/install-microk8s)
+for full details.
 
-The `--trust` option is needed by the charms in the `cos-lite` bundle to be able to patch their K8s services to use the right ports (see this [Juju limitation](https://bugs.launchpad.net/juju/+bug/1936260)).
+The bundle is available on the `edge`, `beta`, `candidate` and `stable`
+channels.
+
+The `--trust` option is needed by the charms in the `cos-lite` bundle to be
+able to patch their K8s services to:
+- use the right ports (see this [Juju limitation](https://bugs.launchpad.net/juju/+bug/1936260))
+- apply resource limits
 
 We also make available some [**overlays**](https://juju.is/docs/sdk/bundle-reference) as convenience.
 A Juju overlay is a set of model-specific modifications, which reduce the amount of commands needed to set up a bundle like COS Lite.
@@ -77,7 +87,9 @@ curl -L https://raw.githubusercontent.com/canonical/cos-lite-bundle/main/overlay
 juju deploy cos-lite --channel=edge --trust --overlay ./offers-overlay.yaml
 ```
 
-To use COS Lite with machine charms, see [cos-proxy](https://charmhub.io/cos-proxy) ([source](https://github.com/canonical/cos-proxy-operator)).
+To use COS Lite with machine charms, see
+[cos-proxy](https://charmhub.io/cos-proxy)
+([source](https://github.com/canonical/cos-proxy-operator)).
 
 ## Publishing
 ```shell
