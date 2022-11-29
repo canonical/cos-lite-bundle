@@ -123,8 +123,8 @@ async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
     # an empty response looks like this:
     # {"status":"success","data":{"activeAlertmanagers":[],"droppedAlertmanagers":[]}}
     # a jsonified activeAlertmanagers looks like this:
-    # [{'url': 'http://FQDN:9093/api/v2/alerts'}]
-    assert f":9093/{ops_test.model_name}-alertmanager/api/v2/alerts" in response.read().decode(
+    # [{'url': 'http://<ingress:80 or fqdn:9093>/api/v2/alerts'}]
+    assert f"/{ops_test.model_name}-alertmanager/api/v2/alerts" in response.read().decode(
         "utf8"
     )
 
