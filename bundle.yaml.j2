@@ -11,7 +11,7 @@ applications:
     trust: true
     {%- if traefik is defined and traefik.endswith('.charm') %}
     resources:
-        traefik-image: "jnsgruk/traefik"
+        traefik-image: "jnsgruk/traefik:2.7.0"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -21,7 +21,7 @@ applications:
     trust: true
     {%- if alertmanager is defined and alertmanager.endswith('.charm') %}
     resources:
-        alertmanager-image: "ubuntu/prometheus-alertmanager"
+        alertmanager-image: "ubuntu/prometheus-alertmanager:0.23-22.04_beta"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -31,7 +31,7 @@ applications:
     trust: true
     {%- if prometheus is defined and prometheus.endswith('.charm') %}
     resources:
-      prometheus-image: "ubuntu/prometheus:latest"
+      prometheus-image: "ubuntu/prometheus:2.33-22.04_beta"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -41,7 +41,8 @@ applications:
     trust: true
     {%- if grafana is defined and grafana.endswith('.charm') %}
     resources:
-      grafana-image: "ubuntu/grafana:latest"
+      grafana-image: "ubuntu/grafana:9.2-22.04_beta"
+      litestream-image: "litestream/litestream:0.4.0-beta.2"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -67,7 +68,7 @@ applications:
     trust: true
     {%- if loki is defined and loki.endswith('.charm') %}
     resources:
-      loki-image: "grafana/loki"
+      loki-image: "grafana/loki:2.4.1"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
