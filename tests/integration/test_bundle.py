@@ -95,7 +95,8 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 async def test_alertmanager_is_up(ops_test: OpsTest):
     # TODO Change this when AM is exposed over the ingress
     address = await get_unit_address(ops_test, "alertmanager", 0)
-    url = f"http://{address}:9093"
+    # With ingress in place, need to use model-app as ingress-per-app subpath
+    url = f"http://{address}:9093/{ops_test.model_name}-alertmanager"
     logger.info("am public address: %s", url)
 
     response = urllib.request.urlopen(f"{url}/api/v2/status", data=None, timeout=2.0)
@@ -125,7 +126,8 @@ async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
     # a jsonified activeAlertmanagers looks like this:
     # [{'url': 'http://FQDN:9093/api/v2/alerts'}]
     assert any(
-        ":9093/api/v2/alerts" in am["url"] for am in alertmanagers["data"]["activeAlertmanagers"]
+        f":9093/{ops_test.model_name}-alertmanager/api/v2/alerts" in am["url"]
+        for am in alertmanagers["data"]["activeAlertmanagers"]
     )
 
 
