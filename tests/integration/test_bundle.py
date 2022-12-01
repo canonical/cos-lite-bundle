@@ -95,7 +95,8 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 async def test_alertmanager_is_up(ops_test: OpsTest):
     # TODO Change this when AM is exposed over the ingress
     address = await get_unit_address(ops_test, "alertmanager", 0)
-    url = f"http://{address}:9093"
+    # With ingress in place, need to use model-app as ingress-per-app subpath
+    url = f"http://{address}:9093/{ops_test.model_name}-alertmanager"
     logger.info("am public address: %s", url)
 
     response = urllib.request.urlopen(f"{url}/api/v2/status", data=None, timeout=2.0)
@@ -119,18 +120,17 @@ async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
 
     response = urllib.request.urlopen(f"{prom_url}/api/v1/alertmanagers", data=None, timeout=2.0)
     assert response.code == 200
-    alertmanagers = json.loads(response.read())
     # an empty response looks like this:
     # {"status":"success","data":{"activeAlertmanagers":[],"droppedAlertmanagers":[]}}
     # a jsonified activeAlertmanagers looks like this:
-    # [{'url': 'http://FQDN:9093/api/v2/alerts'}]
-    assert any(
-        ":9093/api/v2/alerts" in am["url"] for am in alertmanagers["data"]["activeAlertmanagers"]
-    )
+    # [{'url': 'http://<ingress:80 or fqdn:9093>/api/v2/alerts'}]
+    assert f"/{ops_test.model_name}-alertmanager/api/v2/alerts" in response.read().decode("utf8")
 
 
 async def test_juju_topology_labels_in_alerts(ops_test: OpsTest):
-    alerts = await get_alertmanager_alerts(ops_test, "alertmanager", 0, retries=100)
+    alerts = await get_alertmanager_alerts(
+        ops_test, "alertmanager", 0, retries=100, path=f"/{ops_test.model_name}-alertmanager"
+    )
 
     i = -1
     for i, alert in enumerate(alerts):
@@ -146,7 +146,9 @@ async def test_juju_topology_labels_in_alerts(ops_test: OpsTest):
 
 
 async def test_alerts_are_grouped(ops_test: OpsTest):
-    groups = await get_alertmanager_groups(ops_test, "alertmanager", 0, retries=100)
+    groups = await get_alertmanager_groups(
+        ops_test, "alertmanager", 0, retries=100, path=f"/{ops_test.model_name}-alertmanager"
+    )
     i = -1
     for i, group in enumerate(groups):
         # make sure all groups are grouped by juju topology keys
@@ -160,7 +162,9 @@ async def test_alerts_are_fired_from_non_leader_units_too(ops_test: OpsTest):
     """The list of alerts must include an "AlwaysFiring" alert from each avalanche unit."""
 
     async def all_alerts_fire():
-        alerts = await get_alertmanager_alerts(ops_test, "alertmanager", 0, retries=100)
+        alerts = await get_alertmanager_alerts(
+            ops_test, "alertmanager", 0, retries=100, path=f"/{ops_test.model_name}-alertmanager"
+        )
         alerts = list(
             filter(
                 lambda itm: itm["labels"]["alertname"] == "AlwaysFiringDueToNumericValue", alerts

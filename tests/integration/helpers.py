@@ -96,7 +96,9 @@ async def get_unit_address(ops_test: OpsTest, app_name: str, unit_num: int) -> s
     return status["applications"][app_name]["units"][f"{app_name}/{unit_num}"]["address"]
 
 
-async def get_alertmanager_alerts(ops_test: OpsTest, unit_name, unit_num, retries=3) -> List[dict]:
+async def get_alertmanager_alerts(
+    ops_test: OpsTest, unit_name, unit_num, retries=3, path=""
+) -> List[dict]:
     """Get a list of alerts.
 
     Response looks like this:
@@ -123,7 +125,8 @@ async def get_alertmanager_alerts(ops_test: OpsTest, unit_name, unit_num, retrie
     """
     # TODO consume this from alertmanager_client when becomes available
     address = await get_unit_address(ops_test, unit_name, unit_num)
-    url = f"http://{address}:9093/api/v2/alerts"
+    path = "/" + path.lstrip("/").rstrip("/")
+    url = f"http://{address}:9093{path}/api/v2/alerts"
     while not (alerts := json.loads(urllib.request.urlopen(url, data=None, timeout=2).read())):
         retries -= 1
         logger.warning("no alerts")
@@ -135,7 +138,9 @@ async def get_alertmanager_alerts(ops_test: OpsTest, unit_name, unit_num, retrie
     return alerts
 
 
-async def get_alertmanager_groups(ops_test: OpsTest, unit_name, unit_num, retries=3) -> List[dict]:
+async def get_alertmanager_groups(
+    ops_test: OpsTest, unit_name, unit_num, retries=3, path=""
+) -> List[dict]:
     """Get a list of groups of alerts.
 
     Response looks like this:
@@ -155,7 +160,8 @@ async def get_alertmanager_groups(ops_test: OpsTest, unit_name, unit_num, retrie
     """
     # TODO consume this from alertmanager_client when becomes available
     address = await get_unit_address(ops_test, unit_name, unit_num)
-    url = f"http://{address}:9093/api/v2/alerts/groups"
+    path = "/" + path.lstrip("/").rstrip("/")
+    url = f"http://{address}:9093{path}/api/v2/alerts/groups"
     while not (groups := json.loads(urllib.request.urlopen(url, data=None, timeout=2).read())):
         retries -= 1
         logger.warning("no alerts")

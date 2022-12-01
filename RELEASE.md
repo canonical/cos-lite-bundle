@@ -31,6 +31,12 @@ charmcraft release cos-lite --channel=beta --revision=N
 Typically, bundles themselves are very stable as the list of charms or relations are unlikely to
 change frequently.
 
+A new bundle should be published every time when:
+- Charm composition is changed
+- Internal relations network is changed
+- A charm's default workload image (`upstream-source`) is changed
+
+
 ## A note on granularity of revisions
 
 We believe in shipping often and with confidence. It is perfectly acceptable to have a new `latest/stable` release containing just one bug fix or a small new feature with respect to the last one.
