@@ -125,6 +125,7 @@ async def get_alertmanager_alerts(
     """
     # TODO consume this from alertmanager_client when becomes available
     address = await get_unit_address(ops_test, unit_name, unit_num)
+    path = "/" + path.lstrip("/").rstrip("/")
     url = f"http://{address}:9093{path}/api/v2/alerts"
     while not (alerts := json.loads(urllib.request.urlopen(url, data=None, timeout=2).read())):
         retries -= 1
@@ -159,6 +160,7 @@ async def get_alertmanager_groups(
     """
     # TODO consume this from alertmanager_client when becomes available
     address = await get_unit_address(ops_test, unit_name, unit_num)
+    path = "/" + path.lstrip("/").rstrip("/")
     url = f"http://{address}:9093{path}/api/v2/alerts/groups"
     while not (groups := json.loads(urllib.request.urlopen(url, data=None, timeout=2).read())):
         retries -= 1
