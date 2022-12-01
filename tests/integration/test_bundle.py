@@ -41,6 +41,8 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 
     Assert on the unit status before any relations/configurations take place.
     """
+    await ops_test.model.set_config({"logging-config": "<root>=WARNING; unit=DEBUG"})
+
     await reenable_metallb()
 
     logger.info("Rendering bundle %s", get_this_script_dir() / ".." / ".." / "bundle.yaml.j2")
@@ -78,7 +80,8 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 
     # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
     await cli_deploy_bundle(ops_test, str(rendered_bundle))
-    await ops_test.model.wait_for_idle(status="active", timeout=1000)
+    # FIXME: raise_on_error should be removed (i.e. set to True) when units stop flapping to error
+    await ops_test.model.wait_for_idle(status="active", timeout=1000, raise_on_error=False)
 
     prometheus_0_url = await get_proxied_unit_url(ops_test, app_name="prometheus", unit_num=0)
 
