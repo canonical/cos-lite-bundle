@@ -28,7 +28,7 @@ async def reenable_metallb() -> str:
 
     logger.info("First, disable metallb, just in case")
     try:
-        cmd = ["sg", "microk8s", "-c", "microk8s disable metallb"]
+        cmd = ["sg", "snap_microk8s", "-c", "sudo microk8s disable metallb"]
         subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except Exception as e:
         print(e)
@@ -38,7 +38,7 @@ async def reenable_metallb() -> str:
 
     logger.info("Now enable metallb")
     try:
-        cmd = ["sg", "microk8s", "-c", f"microk8s enable metallb:{ip}-{ip}"]
+        cmd = ["sg", "snap_microk8s", "-c", f"sudo microk8s enable metallb:{ip}-{ip}"]
         subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except Exception as e:
         print(e)

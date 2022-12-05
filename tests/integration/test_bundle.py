@@ -210,7 +210,7 @@ async def test_prometheus_scrapes_loki_through_traefik(ops_test: OpsTest):
     assert response.code == 200
     targets = json.loads(response.read())["data"]["activeTargets"]
     targets_summary = [(t["scrapeUrl"], t["health"]) for t in targets]
-    assert (loki_url, "up") in targets_summary
+    assert (f"{loki_url}/metrics", "up") in targets_summary
     logger.info("prometheus is successfully scraping loki through traefik")
 
 
