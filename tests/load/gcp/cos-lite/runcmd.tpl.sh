@@ -73,10 +73,6 @@ systemctl start cos-lite-rest-server.service
 # force reldata reinit in case files appeared on disk after the last hook fired
 sudo -u ubuntu juju run-action cos-config/0 sync-now --wait
 
-# Temporary workaround for prom using fqdn instead of ingress (TODO remove when fixed)
-sudo -u ubuntu juju config prometheus metrics_wal_compression=true
-sudo -u ubuntu juju config prometheus metrics_wal_compression=false
-
 # Waiting for prom here because systemd would timeout waiting for the unit to become active/idle:
 #   Job for prometheus-stdout-logger.service failed because a timeout was exceeded.
 /run/wait-for-prom-ready.sh
