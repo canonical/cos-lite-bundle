@@ -204,13 +204,12 @@ async def test_bundle_charms_can_handle_frequent_update_status(ops_test: OpsTest
 async def test_prometheus_scrapes_loki_through_traefik(ops_test: OpsTest):
     """Prometheus should correctly scrape Loki through its traefik endpoint."""
     prom_url = await get_proxied_unit_url(ops_test, "prometheus", 0)
-    loki_url = await get_proxied_unit_url(ops_test, "loki", 0)
 
     response = urllib.request.urlopen(f"{prom_url}/api/v1/targets", data=None, timeout=2.0)
     assert response.code == 200
     targets = json.loads(response.read())["data"]["activeTargets"]
-    targets_summary = [(t["scrapeUrl"], t["health"]) for t in targets]
-    assert (f"{loki_url}/metrics", "up") in targets_summary
+    targets_summary = [(t["discoveredLabels"]["__metrics_path__"], t["health"]) for t in targets]
+    assert ("cos-lite-loki-0/metrics", "up") in targets_summary
     logger.info("prometheus is successfully scraping loki through traefik")
 
 
