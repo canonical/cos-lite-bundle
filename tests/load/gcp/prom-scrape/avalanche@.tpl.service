@@ -1,0 +1,15 @@
+[Unit]
+Description="Avalanche scrape target at port %i"
+After=network.target
+PartOf=avalanche-targets.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/avalanche --port=%i \
+            --metric-count=${METRIC_COUNT} \
+            --label-count=10 \
+            --series-count=10 \
+            --value-interval=${VALUE_INTERVAL} \
+            --series-interval=36000000 \
+            --metric-interval=36000000

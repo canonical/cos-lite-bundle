@@ -4,12 +4,45 @@ data "cloudinit_config" "avalanche" {
 
   part {
     content_type = "text/cloud-config"
-    content = templatefile("prom-scrape-avalanche.tpl.conf", {
-      METRIC_COUNT   = var.avalanche_metric_count,
-      VALUE_INTERVAL = var.avalanche_value_interval,
-      NUM_TARGETS    = var.num_avalanche_targets
-    })
-    filename = "avalanche.conf"
+    filename     = "avalanche.conf"
+    content = yamlencode(
+      {
+        "write_files" : [
+          {
+            "path" : "/etc/systemd/system/node-exporter.service",
+            "content" : file("common/node-exporter.service"),
+          },
+          {
+            "path" : "/etc/systemd/system/avalanche@.service",
+            "content" : templatefile("prom-scrape/avalanche@.tpl.service", {
+              METRIC_COUNT   = var.avalanche_metric_count,
+              VALUE_INTERVAL = var.avalanche_value_interval,
+            }),
+          },
+          {
+            "path" : "/etc/systemd/system/avalanche-targets.target",
+            "content" : templatefile("prom-scrape/avalanche-targets.tpl.target", {
+              NUM_TARGETS = var.num_avalanche_targets,
+            }),
+          },
+        ],
+        "package_update" : "true",
+
+        "packages" : [
+          "git",
+          "golang-go",
+          "iftop",
+          "net-tools",
+          "tcptrack",
+          "kitty-terminfo",
+          "iputils-ping",
+        ],
+
+        "runcmd" : [
+          file("prom-scrape/runcmd.sh"),
+        ]
+      }
+    )
   }
 }
 

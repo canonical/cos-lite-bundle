@@ -1,0 +1,3 @@
+[Unit]
+Description=A collection of avalanche scrape targets
+Wants=%{ for i in range(NUM_TARGETS) ~}avalanche@${9001 + i}.service %{ endfor ~}
