@@ -78,8 +78,6 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
         get_this_script_dir() / ".." / ".." / "bundle.yaml.j2", context=context
     )
 
-    logger.info("Rendered bundle: %s", rendered_bundle)
-
     # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
     await cli_deploy_bundle(ops_test, str(rendered_bundle))
     # FIXME: raise_on_error should be removed (i.e. set to True) when units stop flapping to error
