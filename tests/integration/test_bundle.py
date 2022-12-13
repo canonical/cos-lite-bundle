@@ -218,7 +218,7 @@ async def test_loki_receives_logs_through_traefik(ops_test: OpsTest):
     """Loki should be able to receive logs through its traefik endpoint."""
     loki_url = await get_proxied_unit_url(ops_test, "loki", 0)
 
-    ops_test.model.deploy("zinc-k8s", application_name="zinc", channel="stable", trust=True)
+    await ops_test.model.deploy("zinc-k8s", application_name="zinc", channel="stable", trust=True)
     await ops_test.model.wait_for_idle(status="active")
     # Create the relation
     await ops_test.model.add_relation("loki", "zinc")
