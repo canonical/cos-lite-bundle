@@ -209,7 +209,7 @@ async def test_prometheus_scrapes_loki_through_traefik(ops_test: OpsTest):
     assert response.code == 200
     targets = json.loads(response.read())["data"]["activeTargets"]
     targets_summary = [(t["discoveredLabels"]["__metrics_path__"], t["health"]) for t in targets]
-    assert ("cos-lite-loki-0/metrics", "up") in targets_summary
+    assert (f"/{ops_test.model.name}-loki-0/metrics", "up") in targets_summary
     logger.info("prometheus is successfully scraping loki through traefik")
 
 
@@ -223,7 +223,7 @@ async def test_loki_receives_logs_through_traefik(ops_test: OpsTest):
     await ops_test.model.add_relation("loki", "zinc")
     await ops_test.model.wait_for_idle(status="active")
     # Check that logs are coming in
-    response = urllib.request.urlopen(f"{loki_url}/api/v1/series")
+    response = urllib.request.urlopen(f"{loki_url}/loki/api/v1/series")
     assert response.code == 200
     series = json.loads(response.read())["data"]
     series_charms = [s["juju_charm"] for s in series]
