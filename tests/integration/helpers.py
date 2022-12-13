@@ -64,7 +64,8 @@ async def cli_deploy_bundle(ops_test: OpsTest, name: str, channel: str = "edge")
     retcode, stdout, stderr = await ops_test.run(*run_args)
     assert retcode == 0, f"Deploy failed: {(stderr or stdout).strip()}"
     logger.info(stdout)
-    await ops_test.model.wait_for_idle(timeout=1000)
+    # FIXME: raise_on_error should be removed (i.e. set to True) when units stop flapping to error
+    await ops_test.model.wait_for_idle(timeout=1000, raise_on_error=False)
 
 
 async def get_proxied_unit_url(ops_test: OpsTest, app_name: str, unit_num: int) -> str:

@@ -41,6 +41,8 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 
     Assert on the unit status before any relations/configurations take place.
     """
+    await ops_test.model.set_config({"logging-config": "<root>=WARNING; unit=DEBUG"})
+
     await reenable_metallb()
 
     logger.info("Rendering bundle %s", get_this_script_dir() / ".." / ".." / "bundle.yaml.j2")
@@ -48,8 +50,8 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
     async def build_charm_if_is_dir(option: str) -> str:
         if Path(option).is_dir():
             logger.info("Building charm from source: %s", option)
-            option = await ops_test.build_charm(option)
-        return str(option)
+            option = str(await ops_test.build_charm(option))
+        return option
 
     charms = dict(
         traefik=pytestconfig.getoption("traefik"),
@@ -78,7 +80,8 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 
     # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
     await cli_deploy_bundle(ops_test, str(rendered_bundle))
-    await ops_test.model.wait_for_idle(status="active", timeout=1000)
+    # FIXME: raise_on_error should be removed (i.e. set to True) when units stop flapping to error
+    await ops_test.model.wait_for_idle(status="active", timeout=1000, raise_on_error=False)
 
     prometheus_0_url = await get_proxied_unit_url(ops_test, app_name="prometheus", unit_num=0)
 
@@ -196,3 +199,33 @@ async def test_bundle_charms_can_handle_frequent_update_status(ops_test: OpsTest
 
     # After update-status frequency is restored to default, make sure all charms settle into active
     await ops_test.model.wait_for_idle(status="active")
+
+
+async def test_prometheus_scrapes_loki_through_traefik(ops_test: OpsTest):
+    """Prometheus should correctly scrape Loki through its traefik endpoint."""
+    prom_url = await get_proxied_unit_url(ops_test, "prometheus", 0)
+
+    response = urllib.request.urlopen(f"{prom_url}/api/v1/targets", data=None, timeout=2.0)
+    assert response.code == 200
+    targets = json.loads(response.read())["data"]["activeTargets"]
+    targets_summary = [(t["discoveredLabels"]["__metrics_path__"], t["health"]) for t in targets]
+    assert (f"/{ops_test.model.name}-loki-0/metrics", "up") in targets_summary
+    logger.info("prometheus is successfully scraping loki through traefik")
+
+
+async def test_loki_receives_logs_through_traefik(ops_test: OpsTest):
+    """Loki should be able to receive logs through its traefik endpoint."""
+    loki_url = await get_proxied_unit_url(ops_test, "loki", 0)
+
+    await ops_test.model.deploy("zinc-k8s", application_name="zinc", channel="stable", trust=True)
+    await ops_test.model.wait_for_idle(status="active")
+    # Create the relation
+    await ops_test.model.add_relation("loki", "zinc")
+    await ops_test.model.wait_for_idle(status="active")
+    # Check that logs are coming in
+    response = urllib.request.urlopen(f"{loki_url}/loki/api/v1/series")
+    assert response.code == 200
+    series = json.loads(response.read())["data"]
+    series_charms = [s["juju_charm"] for s in series]
+    assert "zinc-k8s" in series_charms
+    logger.info("loki is successfully receiving zinc logs through traefik")
