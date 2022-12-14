@@ -1,0 +1,10 @@
+[Unit]
+Description=rest server for making some things easier, such as obtaining the grafana admin password
+After=network.target multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+Environment="FLASK_APP=/run/cos-lite-rest-server.py"
+ExecStart=/usr/bin/flask run -p 8081 --host 0.0.0.0

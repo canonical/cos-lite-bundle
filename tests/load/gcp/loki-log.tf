@@ -4,8 +4,52 @@ data "cloudinit_config" "loki_log" {
 
   part {
     content_type = "text/cloud-config"
-    content      = templatefile("loki-log-locust.tpl.conf", { LOKI_URL = local.loki_url, USERS = var.loki_log_locust_users })
     filename     = "locust.conf"
+    content = yamlencode(
+      {
+        "write_files" : [
+          {
+            "path" : "/etc/systemd/system/node-exporter.service",
+            "content" : file("common/node-exporter.service"),
+          },
+          {
+            "path" : "/etc/systemd/system/locust@.service",
+            "content" : templatefile("loki-log/locust@.tpl.service", {
+              LOKI_URL          = local.loki_url,
+              LOGGING_SOURCES   = var.num_logging_sources,
+              LOG_LINES_PER_SEC = var.loki_log_lines_per_source_per_sec,
+            }),
+          },
+          {
+            "path" : "/etc/systemd/system/locust-loggers.target",
+            "content" : templatefile("loki-log/locust-loggers.tpl.target", {
+              NUM_USERS = var.loki_log_num_locust_users,
+            }),
+          },
+          {
+            "path" : "/home/ubuntu/loki-log-locustfile.py",
+            "content" : templatefile("loki-log/loki-log-locustfile.tpl.py", {
+              POSTING_PERIOD = var.loki_log_post_period
+            }),
+          },
+        ],
+
+        "package_update" : "true",
+
+        "packages" : [
+          "python3-pip",
+          "iftop",
+          "jq",
+          "kitty-terminfo",
+        ],
+
+        "runcmd" : [
+          templatefile("loki-log/runcmd.tpl.sh", {
+            LOKI_URL = local.loki_url,
+          }),
+        ]
+      }
+    )
   }
 }
 
@@ -13,32 +57,22 @@ data "cloudinit_config" "loki_log" {
 resource "google_compute_instance" "vm_loki_log" {
 
   # provision this vm only if it is needed for the load test
-  count = var.loki_log_lines_per_sec > 0 ? 1 : 0
+  count = var.loki_log_lines_per_source_per_sec > 0 ? 1 : 0
 
-  name         = "loki-log"
-  machine_type = "e2-standard-2"
-  tags         = ["load-test-traffic", "vm-loki-log"]
+  name = "loki-log"
+
+  machine_type = "custom-4-4096"
+
+  tags = ["load-test-traffic", "vm-loki-log"]
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2104-hirsute-v20211119"
-    }
-  }
-
-  provisioner "file" {
-    content     = templatefile("loki-log-locustfile.tpl.py", { USERS = var.loki_log_locust_users })
-    destination = "/home/ubuntu/loki-log-locustfile.py"
-
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      host        = google_compute_instance.vm_loki_log[count.index].network_interface.0.access_config.0.nat_ip
-      private_key = local.file_provisioner_ssh_key
+      image = "ubuntu-os-cloud/ubuntu-minimal-2204-lts"
     }
   }
 
   metadata = {
-    user-data = "${data.cloudinit_config.loki_log.rendered}"
+    user-data = data.cloudinit_config.loki_log.rendered
   }
 
   network_interface {
@@ -48,4 +82,3 @@ resource "google_compute_instance" "vm_loki_log" {
     }
   }
 }
-

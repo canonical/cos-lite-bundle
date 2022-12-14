@@ -1,0 +1,11 @@
+[Unit]
+Description=Prometheus stdout logger (to journald)
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+ExecStartPre=/run/wait-for-prom-ready.sh
+# Going through `current` directly because microk8s-kubectl.wrapper creates subprocesses which expect a login session
+ExecStart=/snap/microk8s/current/kubectl --kubeconfig /var/snap/microk8s/current/credentials/client.config logs prometheus-0 prometheus -n ${JUJU_MODEL_NAME} --follow

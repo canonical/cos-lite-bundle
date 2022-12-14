@@ -1,0 +1,24 @@
+[Unit]
+Description=Node exporter
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+ExecStartPre=wget https://github.com/prometheus/node_exporter/releases/download/v1.3.1/node_exporter-1.3.1.linux-amd64.tar.gz -P /run
+ExecStartPre=tar -xzvf /run/node_exporter-1.3.1.linux-amd64.tar.gz -C /run
+ExecStartPre=mv /run/node_exporter-1.3.1.linux-amd64/node_exporter /usr/bin
+ExecStart=/usr/bin/node_exporter \
+            --web.listen-address=":29100" \
+            --web.disable-exporter-metrics \
+            --collector.disable-defaults \
+            --collector.cpu \
+            --collector.diskstats \
+            --collector.ethtool \
+            --collector.filesystem \
+            --collector.hwmon \
+            --collector.loadavg \
+            --collector.meminfo \
+            --collector.netdev \
+            --collector.pressure
