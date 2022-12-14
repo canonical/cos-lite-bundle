@@ -7,11 +7,11 @@ chgrp -R ubuntu /home/ubuntu
 python3 -m pip install locust splinter selenium webdriver_manager
 
 apt remove -y nodejs npm --auto-remove
-snap install --classic node
-npm i -g element-cli
-sudo -u ubuntu npx -y playwright install-deps
+snap install --classic node --channel=16/stable
+npm i -g element-cli@2.0.4
+sudo -u ubuntu npx -y playwright@1.27.1 install-deps
 # sudo -u ubuntu npm install @playwright/test
-sudo -u ubuntu npx -y playwright install
+sudo -u ubuntu npx -y playwright@1.27.1 install
 
 # wait until the cos-lite node is up
 timeout 1800 bash -c "until curl -s --connect-timeout 2.0 --max-time 5 ${PROM_URL}/api/v1/targets; do sleep 5; done"
