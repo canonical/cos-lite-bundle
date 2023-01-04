@@ -80,8 +80,9 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 
     # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
     await cli_deploy_bundle(ops_test, str(rendered_bundle))
+    # Idle period is set to 90 to capture restarts caused by applying resource limits
     # FIXME: raise_on_error should be removed (i.e. set to True) when units stop flapping to error
-    await ops_test.model.wait_for_idle(status="active", timeout=1000, raise_on_error=False)
+    await ops_test.model.wait_for_idle(status="active", timeout=1000, idle_period=90, raise_on_error=False)
 
     prometheus_0_url = await get_proxied_unit_url(ops_test, app_name="prometheus", unit_num=0)
 
