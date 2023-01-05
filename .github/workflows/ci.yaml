@@ -41,11 +41,13 @@ jobs:
         provider: microk8s
         bootstrap-options: "--agent-version 2.9.34"
     - name: Run tests (edge channel)
-      if: ${{ github.event_name != 'schedule' }}
       run: tox -e integration -- --channel=edge
-    - name: Run scheduled tests (beta channel)
+    - name: Run tests (beta channel)
       if: ${{ github.event_name == 'schedule' }}
       run: tox -e integration -- --channel=beta
-    - name: Run scheduled tests (edge channel)
+    - name: Run tests (candidate channel)
       if: ${{ github.event_name == 'schedule' }}
-      run: tox -e integration -- --channel=edge
+      run: tox -e integration -- --channel=candidate
+    - name: Run tests (stable channel)
+      if: ${{ github.event_name == 'schedule' }}
+      run: tox -e integration -- --channel=stable
