@@ -4,12 +4,15 @@ on:
   schedule:
     # every Wednesday at 23:00
     - cron: '0 23 * * WED'
+  workflow_call:
+
 
 jobs:
   integration-test-microk8s-pull-request:
     name: Integration tests (microk8s)
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         charm-channel: [ "edge", "beta", "candidate", "stable" ]
         juju-channel: [ "2.9/stable", "3.0/stable" ]
