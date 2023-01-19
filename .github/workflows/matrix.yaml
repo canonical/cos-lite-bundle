@@ -4,7 +4,7 @@ on:
   schedule:
     # every Wednesday at 23:00
     - cron: '0 23 * * WED'
-  workflow_call:
+  workflow_dispatch:
 
 
 jobs:
