@@ -1,12 +1,10 @@
 name: Test Suite
+
 on:
   pull_request:
   push:
     branches:
       - main
-  schedule:
-    # every Wednesday at 23:00
-    - cron: '0 23 * * WED'
 
 jobs:
   lint:
@@ -42,12 +40,3 @@ jobs:
         bootstrap-options: "--agent-version 2.9.34"
     - name: Run tests (edge channel)
       run: tox -e integration -- --channel=edge
-    - name: Run tests (beta channel)
-      if: ${{ github.event_name == 'schedule' }}
-      run: tox -e integration -- --channel=beta
-    - name: Run tests (candidate channel)
-      if: ${{ github.event_name == 'schedule' }}
-      run: tox -e integration -- --channel=candidate
-    - name: Run tests (stable channel)
-      if: ${{ github.event_name == 'schedule' }}
-      run: tox -e integration -- --channel=stable

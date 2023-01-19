@@ -1,0 +1,34 @@
+name: Periodic integration matrix tests
+
+on:
+  schedule:
+    # every Wednesday at 23:00
+    - cron: '0 23 * * WED'
+
+jobs:
+  integration-test-microk8s-pull-request:
+    name: Integration tests (microk8s)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        charm-channel: [ "edge", "beta", "candidate", "stable" ]
+        juju-channel: [ "2.9/stable", "3.0/stable" ]
+        include:
+          - juju-channel: "2.9/stable"
+            juju-agent-version: "2.9.34"
+            microk8s-channel: "1.25/stable"
+          - juju-channel: "3.0/stable"
+            juju-agent-version: "3.0.2"
+            microk8s-channel: "1.25-strict/stable"
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup operator environment
+      uses: charmed-kubernetes/actions-operator@main
+      with:
+        juju-channel: ${{ matrix.juju-channel }}
+        provider: microk8s
+        channel: ${{ matrix.microk8s-channel }}
+        bootstrap-options: "--agent-version ${{ matrix.juju-agent-version }}"
+    - name: Run tests (${{ matrix.charm-channel }} charms, juju ${{ matrix.juju-channel }}, microk8s ${{ matrix.microk8s-channel }})
+      run: tox -e integration -- --channel=${{ matrix.charm-channel }}
