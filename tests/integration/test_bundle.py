@@ -21,7 +21,6 @@ from helpers import (
     get_alertmanager_groups,
     get_proxied_unit_url,
     get_unit_address,
-    reenable_metallb,
 )
 from pytest_operator.plugin import OpsTest
 
@@ -42,8 +41,6 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
     Assert on the unit status before any relations/configurations take place.
     """
     await ops_test.model.set_config({"logging-config": "<root>=WARNING; unit=DEBUG"})
-
-    await reenable_metallb()
 
     logger.info("Rendering bundle %s", get_this_script_dir() / ".." / ".." / "bundle.yaml.j2")
 

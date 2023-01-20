@@ -2,6 +2,7 @@
 # See LICENSE file for licensing details.
 
 import asyncio
+import grp
 import json
 import logging
 import subprocess
@@ -14,10 +15,26 @@ from pytest_operator.plugin import OpsTest
 
 logger = logging.getLogger(__name__)
 
+try:
+    # In classically-confined microk8s, the group name is "microk8s"
+    microk8s_group = grp.getgrnam("microk8s")
+except KeyError:
+    # In strictly-confined microk8s, the group name is "snap_microk8s"
+    microk8s_group = "snap_microk8s"
 
-async def reenable_metallb() -> str:
-    # Set up microk8s metallb addon, needed by traefik
-    logger.info("(Re)-enabling metallb")
+
+async def disable_metallb():
+    try:
+        cmd = ["sg", microk8s_group, "-c", "microk8s disable metallb"]
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        logger.error(e.stdout.decode())
+        raise
+
+    await asyncio.sleep(30)  # why? just because, for now
+
+
+async def enable_metallb():
     cmd = [
         "sh",
         "-c",
@@ -26,22 +43,11 @@ async def reenable_metallb() -> str:
     result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     ip = result.stdout.decode("utf-8").strip()
 
-    logger.info("First, disable metallb, just in case")
     try:
-        cmd = ["sg", "microk8s", "-c", "microk8s disable metallb"]
+        cmd = ["sg", microk8s_group, "-c", f"microk8s enable metallb:{ip}-{ip}"]
         subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    except Exception as e:
-        print(e)
-        raise
-
-    await asyncio.sleep(30)  # why? just because, for now
-
-    logger.info("Now enable metallb")
-    try:
-        cmd = ["sg", "microk8s", "-c", f"microk8s enable metallb:{ip}-{ip}"]
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    except Exception as e:
-        print(e)
+    except subprocess.CalledProcessError as e:
+        logger.error(e.stdout.decode())
         raise
 
     await asyncio.sleep(30)  # why? just because, for now
