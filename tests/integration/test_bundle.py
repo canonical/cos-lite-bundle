@@ -17,10 +17,10 @@ import pytest
 from helpers import (
     ModelConfigChange,
     cli_deploy_bundle,
+    get_address,
     get_alertmanager_alerts,
     get_alertmanager_groups,
     get_proxied_unit_url,
-    get_address,
 )
 from pytest_operator.plugin import OpsTest
 
