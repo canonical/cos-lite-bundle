@@ -26,12 +26,16 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    - name: Get prefsrc
+      run: |
+        echo "IPADDR=$(ip -4 -j route get 2.2.2.2 | jq -r '.[] | .prefsrc')" >> $GITHUB_ENV
     - name: Setup operator environment
       uses: charmed-kubernetes/actions-operator@main
       with:
         juju-channel: ${{ matrix.juju-channel }}
         provider: microk8s
         channel: ${{ matrix.microk8s-channel }}
+        microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
         bootstrap-options: "--agent-version ${{ matrix.juju-agent-version }}"
     - name: Run tests (${{ matrix.charm-channel }} charms, juju ${{ matrix.juju-channel }}, microk8s ${{ matrix.microk8s-channel }})
       run: tox -e integration -- --channel=${{ matrix.charm-channel }}

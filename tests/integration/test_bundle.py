@@ -20,7 +20,7 @@ from helpers import (
     get_alertmanager_alerts,
     get_alertmanager_groups,
     get_proxied_unit_url,
-    get_unit_address,
+    get_address,
 )
 from pytest_operator.plugin import OpsTest
 
@@ -97,7 +97,7 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
 @pytest.mark.abort_on_fail
 async def test_alertmanager_is_up(ops_test: OpsTest):
     # TODO Change this when AM is exposed over the ingress
-    address = await get_unit_address(ops_test, "alertmanager", 0)
+    address = await get_address(ops_test, "alertmanager", 0)
     # With ingress in place, need to use model-app as ingress-per-app subpath
     url = f"http://{address}:9093/{ops_test.model_name}-alertmanager"
     logger.info("am public address: %s", url)
