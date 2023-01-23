@@ -4,48 +4,14 @@
 import asyncio
 import json
 import logging
-import subprocess
 import urllib.request
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 from urllib.parse import urlparse
 
 from pytest_operator.plugin import OpsTest
 
 logger = logging.getLogger(__name__)
-
-
-async def reenable_metallb() -> str:
-    # Set up microk8s metallb addon, needed by traefik
-    logger.info("(Re)-enabling metallb")
-    cmd = [
-        "sh",
-        "-c",
-        "ip -4 -j route get 2.2.2.2 | jq -r '.[] | .prefsrc'",
-    ]
-    result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    ip = result.stdout.decode("utf-8").strip()
-
-    logger.info("First, disable metallb, just in case")
-    try:
-        cmd = ["sg", "microk8s", "-c", "microk8s disable metallb"]
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    except Exception as e:
-        print(e)
-        raise
-
-    await asyncio.sleep(30)  # why? just because, for now
-
-    logger.info("Now enable metallb")
-    try:
-        cmd = ["sg", "microk8s", "-c", f"microk8s enable metallb:{ip}-{ip}"]
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    except Exception as e:
-        print(e)
-        raise
-
-    await asyncio.sleep(30)  # why? just because, for now
-    return ip
 
 
 async def cli_deploy_bundle(ops_test: OpsTest, name: str, channel: str = "edge"):
@@ -80,21 +46,33 @@ async def get_proxied_unit_url(ops_test: OpsTest, app_name: str, unit_num: int) 
 
     unit_url = proxied_endpoints[f"{app_name}/{unit_num}"]["url"]
 
-    # Replace the external, metallb URL with the one of traefik, to skip a lot of
-    # routing "fun"
-    traefik_0_address = await get_unit_address(ops_test, "traefik", 0)
+    traefik_address = await get_address(ops_test, "traefik")
     url = urlparse(unit_url)
 
-    final_url = f"{url.scheme}://{traefik_0_address}:{url.port}{url.path}"
-    logging.debug(f"Routing over traefik/0 using: {final_url}")
+    final_url = f"{url.scheme}://{traefik_address}:{url.port}{url.path}"
+    logging.debug(f"Routing over traefik using: {final_url}")
 
     return final_url
 
 
-async def get_unit_address(ops_test: OpsTest, app_name: str, unit_num: int) -> str:
-    # return ops_test.model.applications[app_name].units[unit_num].data["private-address"]
-    status = await ops_test.model.get_status()  # noqa: F821
-    return status["applications"][app_name]["units"][f"{app_name}/{unit_num}"]["address"]
+async def get_address(ops_test: OpsTest, app_name: str, unit_num: Optional[int] = None) -> str:
+    """Find unit address for any application.
+
+    Args:
+        ops_test: pytest-operator plugin
+        app_name: string name of application
+        unit_num: integer number of a juju unit
+
+    Returns:
+        unit address as a string
+    """
+    status = await ops_test.model.get_status()
+    app = status["applications"][app_name]
+    return (
+        app.public_address
+        if unit_num is None
+        else app["units"][f"{app_name}/{unit_num}"]["address"]
+    )
 
 
 async def get_alertmanager_alerts(
@@ -125,7 +103,7 @@ async def get_alertmanager_alerts(
     }
     """
     # TODO consume this from alertmanager_client when becomes available
-    address = await get_unit_address(ops_test, unit_name, unit_num)
+    address = await get_address(ops_test, unit_name, unit_num)
     path = "/" + path.lstrip("/").rstrip("/")
     url = f"http://{address}:9093{path}/api/v2/alerts"
     while not (alerts := json.loads(urllib.request.urlopen(url, data=None, timeout=2).read())):
@@ -160,7 +138,7 @@ async def get_alertmanager_groups(
     where "alarm1_dict" etc. are the same object described in `get_alertmanager_alerts`.
     """
     # TODO consume this from alertmanager_client when becomes available
-    address = await get_unit_address(ops_test, unit_name, unit_num)
+    address = await get_address(ops_test, unit_name, unit_num)
     path = "/" + path.lstrip("/").rstrip("/")
     url = f"http://{address}:9093{path}/api/v2/alerts/groups"
     while not (groups := json.loads(urllib.request.urlopen(url, data=None, timeout=2).read())):
