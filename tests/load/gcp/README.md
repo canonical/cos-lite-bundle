@@ -194,6 +194,9 @@ curl http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal/cos-
 sudo iftop -i ens4 -f "host pd-ssd-4cpu-8gb.c.lma-light-load-testing.internal"
 ```
 
+Manually run a non-headless test in your browser:
+
+
 ### Locust (loki_log)
 ```shell
 # check service status
@@ -226,7 +229,7 @@ curl -s http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal/c
 # check helper app is exposing grafana admin password
 curl localhost:8081/helper/grafana/password
 
-# check number of logs Logi processed
+# check number of logs Loki processed
 curl -s "http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal/cos-lite-load-test-loki-0/metrics" | grep log_messages_total
 curl -s "http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal/cos-lite-load-test-loki-0/metrics" | grep loki_ingester_wal_records_logged_total
 curl -s "http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal/cos-lite-load-test-loki-0/metrics" | grep -v '^# ' | grep -v '^go_' | sort -k 2 -g

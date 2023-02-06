@@ -28,7 +28,7 @@ applications:
     channel: edge
     options:
       git_repo: https://github.com/canonical/cos-lite-bundle.git
-      git_branch: feature/load_test_logging
+      git_branch: main
       grafana_dashboards_path: tests/load/gcp/grafana-dashboards
 
 relations:
