@@ -8,8 +8,8 @@ on:
 
 
 jobs:
-  integration-test-microk8s-pull-request:
-    name: Integration tests (microk8s)
+  integration-matrix:
+    name: Matrix
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
