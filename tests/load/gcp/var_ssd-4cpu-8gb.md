@@ -7,6 +7,7 @@
     (10 loglines per target, 3 processes)
   - 200 logging streams, 15 loglines/target/second (5/target, 3 proc)
 - Prom + Loki: 1.2M samples / min (150 targets) + 135k logs / min (150 streams)
+- It takes the VM 18 min from boot-up to all charms active/idle.
 
 ## Record (using flood element)
 | Identifier                    | 2022-04-22 | 2022-04-25 | 2022-04-29 | 2022-05-09 | 2022-05-10 | 2022-05-11 | 2022-05-14 |

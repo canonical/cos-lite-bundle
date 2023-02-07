@@ -35,7 +35,15 @@ export default () => {
     await browser.click(button)
   })
 
-  step('2. Open dashboard', async browser => {
+  step('2a. Open dashboard (expand list)', async browser => {
+    // In Grafana 9, all dashboards go under "General", which is collapsed.
+    // Need to click on it so all the available dashboards become visible.
+    let folder = By.visibleText('General')
+    await browser.wait(Until.elementIsVisible(folder))
+    await browser.click(folder)
+  })
+
+  step('2b. Open dashboard (click on target dashboard)', async browser => {
     let dashboard = By.visibleText('sre mock 2 panels - 6 lines and 6 log sources')
     await browser.wait(Until.elementIsVisible(dashboard))
     await browser.click(dashboard)

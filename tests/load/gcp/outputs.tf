@@ -1,38 +1,17 @@
-output "ip_vm_cos_lite_appliance" {
-  value = google_compute_instance.vm_cos_lite_appliance.network_interface.0.network_ip
-}
-
 output "ip_nat_vm_cos_lite_appliance" {
   value = google_compute_instance.vm_cos_lite_appliance.network_interface.0.access_config.0.nat_ip
-}
-
-output "ip_vm_prom_scrape" {
-  value = google_compute_instance.vm_prom_scrape.network_interface.0.network_ip
 }
 
 output "ip_nat_vm_prom_scrape" {
   value = google_compute_instance.vm_prom_scrape.network_interface.0.access_config.0.nat_ip
 }
 
-
-output "ip_vm_prom_query" {
-  value = google_compute_instance.vm_prom_query.*.network_interface.0.network_ip
-}
-
 output "ip_nat_vm_prom_query" {
   value = google_compute_instance.vm_prom_query.*.network_interface.0.access_config.0.nat_ip
 }
 
-output "ip_vm_loki_log" {
-  value = google_compute_instance.vm_loki_log.*.network_interface.0.network_ip
-}
-
 output "ip_nat_vm_loki_log" {
   value = google_compute_instance.vm_loki_log.*.network_interface.0.access_config.0.nat_ip
-}
-
-output "ip_vm_monitoring" {
-  value = google_compute_instance.vm_monitoring.*.network_interface.0.network_ip
 }
 
 output "ip_nat_vm_monitoring" {
