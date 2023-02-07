@@ -1,0 +1,61 @@
+import subprocess
+from lightkube.utils.quantity import parse_quantity
+from flask import Flask
+from typing import Dict
+
+# Run with: `FLASK_APP=pod_top_exporter.py flask run`
+app = Flask(__name__)
+
+
+def get_top_pod() -> dict:
+    cmd = "kubectl -n cos-lite-load-test top pod --no-headers".split()
+    try:
+        result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print(e.stdout.decode())
+        return {}
+
+    output = result.stdout.decode("utf-8").strip()
+
+    as_list = list(map(str.split, output.splitlines()))
+    # [['alertmanager-0', '1m', '51Mi'], ['catalogue-0', '1m', '38Mi'], ... ]
+
+    as_dict = {entry[0]: {"cpu": parse_quantity(entry[1]), "mem": parse_quantity(entry[2])} for entry in as_list}
+    # {'alertmanager-0': {'cpu': Decimal('0.056'), 'mem': Decimal('55574528.000')}, ...}
+
+    print(as_dict)
+    return as_dict
+
+
+class GaugeFamily:
+    def __init__(self, name: str, help: str):
+        self.name = name
+        self.help = help
+        self.metrics = set()
+
+    def add(self, labels: Dict[str, str], value: float):
+        labels_as_str = ",".join(f'{k}="{v}"' for k, v in labels.items())
+        self.metrics.add((labels_as_str, value))
+
+    def __str__(self):
+        output = f"# HELP {self.name} {self.help}\n"
+        output += f"# TYPE {self.name} gauge\n"
+        for metric in self.metrics:
+            labels = metric[0]
+            value = metric[1]
+            output += f'{self.name}{{{labels}}} {value}\n'
+
+        return output
+
+
+@app.route("/metrics")
+def metrics():
+    cpu = GaugeFamily("pod_cpu", "CPU usage")
+    mem = GaugeFamily("pod_mem", "Memory usage (bytes)")
+
+    for name, resources in get_top_pod().items():
+        cpu.add({"name": name}, resources["cpu"])
+        mem.add({"name": name}, resources["mem"])
+
+    output = str(cpu) + str(mem)
+    return output
