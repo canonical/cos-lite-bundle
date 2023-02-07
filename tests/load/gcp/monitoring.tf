@@ -5,6 +5,7 @@ locals {
   prom_target                 = "${local.cos_appliance_hostname}:80"
   grafana_target              = "${local.cos_appliance_hostname}:80"
   cos_exporter_target         = "${local.cos_appliance_hostname}:29100"
+  cos_pod_top_exporter_target = "${local.cos_appliance_hostname}:29101"
   prom_scrape_exporter_target = "${local.prom_scrape_hostname}:29100"
   loki_log_exporter_targets   = [for i in range(length(google_compute_instance.vm_loki_log)) : "'${google_compute_instance.vm_loki_log[i].name}.${var.zone}.c.${var.project}.internal:29100'"]
   prom_query_exporter_targets = [for i in range(length(google_compute_instance.vm_prom_query)) : "'${google_compute_instance.vm_prom_query[i].name}.${var.zone}.c.${var.project}.internal:29100'"]
@@ -29,6 +30,7 @@ data "cloudinit_config" "monitoring" {
       TARGET_COS_APPLIANCE_LOKI    = local.loki_target
       TARGET_COS_APPLIANCE_PROM    = local.prom_target
       TARGET_COS_EXPORTER          = local.cos_exporter_target
+      TARGET_COS_POD_TOP_EXPORTER  = local.cos_pod_top_exporter_target
       TARGET_LOKI_LOG_EXPORTER     = join(", ", local.loki_log_exporter_targets)
       TARGET_PROM_QUERY_EXPORTER   = join(", ", local.prom_query_exporter_targets)
       TARGET_PROM_SCRAPE_EXPORTER  = local.prom_scrape_exporter_target

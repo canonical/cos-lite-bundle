@@ -48,15 +48,15 @@ data "cloudinit_config" "cos_lite" {
             }),
           },
           {
-            "path" : "/run/cos-lite-pod-top.sh",
+            "path" : "/run/pod_top_exporter.py",
             "permissions" : "0755",
-            "content" : templatefile("cos-lite/cos-lite-pod-top.tpl.sh", {
+            "content" : templatefile("cos-lite/pod_top_exporter.tpl.py", {
               JUJU_MODEL_NAME = var.juju_model_name,
             }),
           },
           {
-            "path" : "/etc/systemd/system/pod-top-logger.service",
-            "content" : file("cos-lite/pod-top-logger.service"),
+            "path" : "/etc/systemd/system/pod-top-exporter.service",
+            "content" : file("cos-lite/pod-top-exporter.service"),
           },
           {
             "path" : "/run/overlay-load-test.yaml",

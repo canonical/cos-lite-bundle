@@ -3,6 +3,8 @@ set -eux
 # install deps
 DEBIAN_FRONTEND=noninteractive apt -y upgrade
 
+pip3 install flask
+
 # disable swap
 sysctl -w vm.swappiness=0
 echo "vm.swappiness = 0" | tee -a /etc/sysctl.conf
@@ -77,4 +79,4 @@ sudo -u ubuntu juju run-action cos-config/0 sync-now --wait
 #   Job for prometheus-stdout-logger.service failed because a timeout was exceeded.
 /run/wait-for-prom-ready.sh
 systemctl start prometheus-stdout-logger.service
-systemctl start pod-top-logger.service
+systemctl start pod-top-exporter.service

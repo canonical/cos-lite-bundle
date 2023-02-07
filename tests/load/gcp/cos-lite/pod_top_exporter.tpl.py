@@ -8,7 +8,9 @@ app = Flask(__name__)
 
 
 def get_top_pod() -> dict:
-    cmd = "kubectl -n cos-lite-load-test top pod --no-headers".split()
+    # Going through `current` directly because microk8s-kubectl.wrapper creates subprocesses which
+    # expect a login session
+    cmd = "/snap/microk8s/current/kubectl --kubeconfig /var/snap/microk8s/current/credentials/client.config top pod -n ${JUJU_MODEL_NAME} --no-headers".split()
     try:
         result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
