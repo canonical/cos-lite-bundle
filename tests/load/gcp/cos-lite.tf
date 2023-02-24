@@ -30,7 +30,7 @@ data "cloudinit_config" "cos_lite" {
           {
             "path" : "/run/wait-for-prom-ready.sh",
             "permissions" : "0755",
-            "content" : templatefile("cos-lite/wait-for-prom-ready.tpl.sh", {
+            "content" : templatefile("common/wait-for-prom-ready.tpl.sh", {
               PROM_EXTERNAL_URL = local.prom_url,
             }),
           },
