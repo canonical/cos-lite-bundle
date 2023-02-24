@@ -1,0 +1,46 @@
+metrics:
+  global:
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    remote_write:
+      - url: ${REMOTE_WRITE_URL}
+        basic_auth:
+          username: ${REMOTE_WRITE_USERNAME}
+          password: ${REMOTE_WRITE_PASSWORD}
+  configs:
+  - name: default
+    scrape_configs:
+    - job_name: 'cos-appliance-grafana-self'
+      static_configs:
+      - targets: ['${TARGET_COS_APPLIANCE_GRAFANA}']
+      metrics_path: '${METRICS_PATH_GRAFANA}'
+
+    - job_name: 'cos-appliance-loki-self'
+      static_configs:
+      - targets: ['${TARGET_COS_APPLIANCE_LOKI}']
+      metrics_path: '${METRICS_PATH_LOKI}'
+
+    - job_name: 'cos-appliance-prom-self'
+      static_configs:
+      - targets: ['${TARGET_COS_APPLIANCE_PROM}']
+      metrics_path: '${METRICS_PATH_PROM}'
+
+    - job_name: 'cos-appliance-node-exporter'
+      static_configs:
+      - targets: [ '${TARGET_COS_EXPORTER}' ]
+
+    - job_name: 'cos-appliance-pod-top'
+      static_configs:
+      - targets: [ '${TARGET_COS_POD_TOP_EXPORTER}' ]
+
+    - job_name: 'loki-log-node-exporter'
+      static_configs:
+      - targets: [ '${TARGET_LOKI_LOG_EXPORTER}' ]
+
+    - job_name: 'prom-query-node-exporter'
+      static_configs:
+      - targets: [ '${TARGET_PROM_QUERY_EXPORTER}' ]
+
+    - job_name: 'prom-scrape-node-exporter'
+      static_configs:
+      - targets: [ '${TARGET_PROM_SCRAPE_EXPORTER}' ]

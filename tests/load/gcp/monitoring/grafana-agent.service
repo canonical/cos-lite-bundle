@@ -1,0 +1,15 @@
+[Unit]
+Description=Grafana agent
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+ExecStartPre=wget https://github.com/grafana/agent/releases/download/v0.28.0/agent-linux-amd64.zip -P /run
+ExecStartPre=unzip /run/agent-linux-amd64.zip -d /run
+ExecStartPre=chmod a+x /run/agent-linux-amd64
+ExecStartPre=mv /run/agent-linux-amd64 /usr/bin
+ExecStart=/usr/bin/agent-linux-amd64 \
+            -config.file=/run/agent.yaml \
+            -metrics.wal-directory="/home/ubuntu/data"
