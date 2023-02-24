@@ -35,11 +35,11 @@ metrics:
 
     - job_name: 'loki-log-node-exporter'
       static_configs:
-      - targets: [ '${TARGET_LOKI_LOG_EXPORTER}' ]
+      - targets: [ ${TARGET_LOKI_LOG_EXPORTER} ]
 
     - job_name: 'prom-query-node-exporter'
       static_configs:
-      - targets: [ '${TARGET_PROM_QUERY_EXPORTER}' ]
+      - targets: [ ${TARGET_PROM_QUERY_EXPORTER} ]
 
     - job_name: 'prom-scrape-node-exporter'
       static_configs:

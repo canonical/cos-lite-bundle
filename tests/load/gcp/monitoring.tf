@@ -51,7 +51,13 @@ data "cloudinit_config" "monitoring" {
             "path" : "/etc/systemd/system/grafana-agent.service",
             "content" : file("monitoring/grafana-agent.service"),
           },
-
+          {
+            "path" : "/run/wait-for-prom-ready.sh",
+            "permissions" : "0755",
+            "content" : templatefile("common/wait-for-prom-ready.tpl.sh", {
+              PROM_EXTERNAL_URL = local.prom_url,
+            }),
+          },
         ],
 
         "package_update" : "true",
