@@ -3,7 +3,7 @@ set -eux
 # install deps
 DEBIAN_FRONTEND=noninteractive apt -y upgrade
 
-pip3 install flask
+pip3 install flask lightkube
 
 # disable swap
 sysctl -w vm.swappiness=0

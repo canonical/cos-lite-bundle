@@ -1,7 +1,11 @@
+# Copyright 2022 Canonical Ltd.
+# See LICENSE file for licensing details.
+
 import subprocess
-from lightkube.utils.quantity import parse_quantity
-from flask import Flask
 from typing import Dict
+
+from flask import Flask
+from lightkube.utils.quantity import parse_quantity
 
 # Run with: `FLASK_APP=pod_top_exporter.py flask run`
 app = Flask(__name__)
@@ -40,6 +44,7 @@ class GaugeFamily:
         self.metrics.add((labels_as_str, value))
 
     def __str__(self):
+        """Generate the metric header."""
         output = f"# HELP {self.name} {self.help}\n"
         output += f"# TYPE {self.name} gauge\n"
         for metric in self.metrics:

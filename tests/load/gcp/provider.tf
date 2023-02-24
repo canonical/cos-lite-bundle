@@ -70,13 +70,14 @@ data "http" "myip" {
 
 resource "google_compute_firewall" "external_scrape" {
   # Port 29100: for scraping node-exporter from the terraform host machine.
+  # Port 29101: for scraping pod-top-exporter
   # Port 80: for self /metrics endpoints from ingressed subpaths.
   name    = "external-scrape"
   network = google_compute_network.net_cos_lite_load_test_net.name
 
   allow {
     protocol = "tcp"
-    ports    = ["29100", "80"]
+    ports    = ["29100", "29101", "80"]
   }
 
   target_tags = ["load-test-traffic"]
