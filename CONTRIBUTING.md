@@ -44,7 +44,7 @@ juju deploy ./bundle.yaml
 To render the bundle for testing:
 
 ```shell
-./render_bundle.py bundle.yaml --testing=yes --channel=edge
+./render_bundle.py bundle.yaml --channel=edge
 ```
 
 This would include a tester charm (avalanche) and an overlay section with offers.
@@ -104,6 +104,12 @@ To keep the model and applications running after the tests completes:
 
 ```shell
 tox -e integration -- --keep-models
+```
+
+To run the end-to-end tests, you first need to have a k8s and a lxd controllers
+bootstrapped, and communicate their names using environment variables:
+```shell
+K8S_CONTROLLER="k8s_ctl_name" LXD_CONTROLLER="lxd_ctl_name" tox -e e2e
 ```
 
 ### Tests with local charms

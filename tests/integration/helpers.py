@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import List, Optional
 from urllib.parse import urlparse
 
+from juju.controller import Controller
+from juju.model import Model
 from pytest_operator.plugin import OpsTest
 
 logger = logging.getLogger(__name__)
@@ -169,3 +171,11 @@ class ModelConfigChange:
     async def __aexit__(self, exc_type, exc_value, exc_traceback):
         """On exit, the modified config options are reverted to their original values."""
         await self.ops_test.model.set_config(self.revert_to)
+
+
+async def get_or_add_model(controller: Controller, model_name: str) -> Model:
+    return (
+        controller.get_model(model_name)
+        if model_name in await controller.get_models()
+        else controller.add_model(model_name)
+    )
