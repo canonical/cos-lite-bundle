@@ -1,7 +1,7 @@
-avalanche_metric_count            = 10
-num_avalanche_targets             = 1
-num_logging_sources               = 75
-loki_log_lines_per_source_per_sec = 5
+avalanche_metric_count            = 250
+num_avalanche_targets             = 150
+num_logging_sources               = 20
+loki_log_lines_per_source_per_sec = 1
 
 disk_type = "pd-ssd"
 ncpus     = 4

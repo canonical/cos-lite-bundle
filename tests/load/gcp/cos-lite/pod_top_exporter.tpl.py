@@ -3,15 +3,24 @@
 
 import subprocess
 from typing import Dict
-
+from datetime import datetime
 from flask import Flask
 from lightkube.utils.quantity import parse_quantity
 
 # Run with: `FLASK_APP=pod_top_exporter.py flask run`
 app = Flask(__name__)
 
+# For memoization
+prev_time = None
+prev_data = {}
+
 
 def get_top_pod() -> dict:
+    global prev_time, prev_data
+    now = datetime.now()
+    if prev_time and (now - prev_time).total_seconds() < 15:
+        return prev_data
+
     # Going through `current` directly because microk8s-kubectl.wrapper creates subprocesses which
     # expect a login session
     cmd = "/snap/microk8s/current/kubectl --kubeconfig /var/snap/microk8s/current/credentials/client.config top pod -n ${JUJU_MODEL_NAME} --no-headers".split()
@@ -29,7 +38,9 @@ def get_top_pod() -> dict:
     as_dict = {entry[0]: {"cpu": parse_quantity(entry[1]), "mem": parse_quantity(entry[2])} for entry in as_list}
     # {'alertmanager-0': {'cpu': Decimal('0.056'), 'mem': Decimal('55574528.000')}, ...}
 
-    print(as_dict)
+    prev_time = now
+    prev_data = as_dict
+    # print(as_dict)
     return as_dict
 
 
@@ -60,7 +71,8 @@ def metrics():
     cpu = GaugeFamily("pod_cpu", "CPU usage")
     mem = GaugeFamily("pod_mem", "Memory usage (bytes)")
 
-    for name, resources in get_top_pod().items():
+    items = get_top_pod().items()
+    for name, resources in items:
         cpu.add({"name": name}, resources["cpu"])
         mem.add({"name": name}, resources["mem"])
 

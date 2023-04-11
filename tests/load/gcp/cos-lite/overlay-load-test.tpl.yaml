@@ -1,5 +1,8 @@
 --- # overlay.yaml
 applications:
+  loki:
+    resources:
+      loki-image: grafana/loki:2.4.1
   prometheus:
     storage:
       database: 1000GiB

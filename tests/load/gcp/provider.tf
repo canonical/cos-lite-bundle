@@ -97,8 +97,8 @@ resource "google_compute_firewall" "ssh" {
   }
 
   target_tags = ["load-test-traffic"]
-  # source_ranges = ["${chomp(data.http.myip.response_body)}/32"]
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = ["${chomp(data.http.myip.response_body)}/32"]
+  # source_ranges = ["0.0.0.0/0"]
 }
 
 locals {

@@ -89,32 +89,110 @@
 | Disk read IOPS (max)          |     10     |            |     32     |     85     |    565     |            |            |
 
 
-| Identifier                    | 2023-02-28 |  2023-03-27   | 2023-03-27  | 2023-02-00 | 2023-02-00 | 2023-02-00 | 2023-02-00 |
-|-------------------------------|:----------:|:-------------:|:-----------:|:----------:|:----------:|:----------:|:----------:|
-| Metrics per target            |    200     |      10       |     10      |     10     |            |            |            |
-| Scrape targets                |     75     |       1       |      1      |     1      |            |            |            |
-| Logging streams               |     75     |      100      |     90      |     75     |            |            |            |
-| Log lines per target [1/sec]  |     5      |       5       |      5      |     5      |            |            |            |
-| Scraped datapoints/min        |   600000   | 400 / 12k (*) |     400     |            |            |            |            |
-| Logged lines/min              |   67,500   |  90,000 (**)  | 81,000 (**) |   67,500   |            |            |            |
-| Loki: Pod CPU; Pod mem (GB)   | 1.22; 2.7  |   0.62; 3.1   |             |            |            |            |            |
-| Prom: Pod CPU; Pod mem (GB)   | 0.33; 1.5  |   0.21; 0.1   |             |            |            |            |            |
-| Graf: Pod CPU; Pod mem (GB)   | 0.27; 0.2  |   0.21; 0.2   |             |            |            |            |            |
-| Trfk: Pod CPU; Pod mem (GB)   | 0.10; 0.2  |   0.08; 0.1   |             |            |            |            |            |
-| % CPU (p50, p95, p99)         | 62, 68, 73 |  42, 48, 52   |             |            |            |            |            |
-| % mem (p50, p95, p99)         | 77, 77, 78 |  60, 61, 62   |             |            |            |            |            |
-| HTTP request times (p99) [ms] |    907     |     2800      |             |            |            |            |            |
-| Failed HTTP requests [%]      |     0      |   0.00114%    |             |            |            |            |            |
-| Storage [GiB/day]             |    26.1    |     27.2      |             |            |            |            |            |
-| Network tx (avg, max) [MiB/s] |  2.5, 5.1  |   1.6, 9.6    |             |            |            |            |            |
-| Network rx [MiB/s] (max)      |    0.6     |      0.6      |             |            |            |            |            |
-| Disk write [MiB/s] (avg, max) |  1.2, 2.2  |   1.5, 4.1    |             |            |            |            |            |
-| Disk write IOPS (avg, max)    |   35, 56   |    32, 61     |             |            |            |            |            |
-| Disk read [MiB/s] (max)       |    3.4     |      4.9      |             |            |            |            |            |
-| Disk read IOPS (max)          |    142     |      81       |             |            |            |            |            |
+| Identifier                    | 2023-02-28 |  2023-03-27   | 2023-03-27  |  2023-04-03   | 2023-04-03 !  |  2023-04-04   | 2023-04-04  |
+|-------------------------------|:----------:|:-------------:|:-----------:|:-------------:|:-------------:|:-------------:|:-----------:|
+| Metrics per target            |    200     |      10       |     10      |      10       |      10       |      10       |     10      |
+| Scrape targets                |     75     |       1       |      1      |       1       |       1       |       1       |      1      |
+| Logging streams               |     75     |      100      |     90      |      100      |      100      |      100      |     100     |
+| Log lines per target [1/sec]  |     5      |       5       |      5      |       5       |      10       |      15       |     12      |
+| Scraped datapoints/min        |   600000   | 400 / 12k (*) |     400     | 400 / 12k (*) | 400 / 12k (*) | 400 / 13k (*) |  400 / 12k  |
+| Logged lines/min              |   67,500   |  90,000 (**)  | 81,000 (**) |  90,000 (**)  | 180,000 (**)  |  270,000(**)  |   221,400   |
+| Loki: Pod CPU; Pod mem (GB)   | 1.22; 2.7  |   0.62; 3.1   |             |   1.0; 3.0    |   1.6; 3.6    |   1.98; 3.8   |  2.4; 3.7   |
+| Prom: Pod CPU; Pod mem (GB)   | 0.33; 1.5  |   0.21; 0.1   |             |   0.18; 0.1   |   0.2; 0.1    |   0.24; 0.1   |  0.25; 0.1  |
+| Graf: Pod CPU; Pod mem (GB)   | 0.27; 0.2  |   0.21; 0.2   |             |   0.24; 0.2   |   0.25; 0.2   |   0.28; 0.2   |  0.3; 0.2   |
+| Trfk: Pod CPU; Pod mem (GB)   | 0.10; 0.2  |   0.08; 0.1   |             |   0.09; 0.1   |   0.09; 0.1   |   0.1; 0.1    |  0.11; 0.2  |
+| % CPU (p50, p95, p99)         | 62, 68, 73 |  42, 48, 52   |             |  51, 54, 58   |  68, 72, 73   |  83, 94, 96   | 93, 99, 99  |
+| % mem (p50, p95, p99)         | 77, 77, 78 |  60, 61, 62   |             |  58, 60, 60   |  60, 61, 61   |  61, 62, 62   | 61, 62, 62  |
+| HTTP request times (p99) [ms] |    907     |     2800      |             |      467      |      931      |   1000-2000   |  2500-4000  |
+| Failed HTTP requests [%]      |     0      |   0.00114%    |             |       0       |       0       |       0       |    3e-4     |
+| Storage [GiB/day]             |    26.1    |     27.2      |             |     21.9      |     53.8      |     81.1      |    66.5     |
+| Network tx (avg, max) [MiB/s] |  2.5, 5.1  |   1.6, 9.6    |             |   2.7, 7.6    |   2.6, 6.0    |   2.5, 9.1    |  2.5, 6.1   |
+| Network rx [MiB/s] (max)      |    0.6     |      0.6      |             |      0.6      |     1.18      |      1.9      |     1.4     |
+| Disk write [MiB/s] (avg, max) |  1.2, 2.2  |   1.5, 4.1    |             |   1.8, 5.1    |   3.7, 6.3    |   3.1, 6.3    |  4.2, 6.5   |
+| Disk write IOPS (avg, max)    |   35, 56   |    32, 61     |             |    42, 76     |    56, 80     |    85, 262    |   71, 101   |
+| Disk read [MiB/s] (max)       |    3.4     |      4.9      |             |      0.5      |      0.5      |      1.3      |     1.1     |
+| Disk read IOPS (max)          |    142     |      81       |             |      19       |      41       |      154      |     131     |
+
+
+| Identifier                    | 2023-04-05  | 2023-04-06  | 2023-04-06 | 2023-04-07  | 2023-04-08  | 2023-04-09  | 2023-04-09  |
+|-------------------------------|:-----------:|:-----------:|:----------:|:-----------:|:-----------:|:-----------:|:-----------:|
+| Pass/Fail                     |    PASS     |    PASS     |    FAIL    |    PASS     |    FAIL     |    FAIL     |    FAIL     |
+| Metrics per target            |     200     |     275     |    300     |     285     |     250     |     250     |     250     |
+| Scrape targets                |     150     |     150     |    150     |     150     |     150     |     150     |     150     |
+| Logging streams               |      1      |      1      |     1      |      1      |     83      |     100     |     100     |
+| Log lines per target [1/sec]  |      1      |      1      |     1      |      1      |     10      |      5      |      1      |
+| Scraped datapoints/min        |  1,200,000  |  1,650,000  | 1,800,000  |  1,710,000  |  1,500,000  |  1,500,000  |  1,500,000  |
+| Logged lines/min              |     180     |     180     |    180     |     180     | 149,400 (*) |   90,000    |   18,000    |
+| Loki: Pod CPU; Pod mem (GB)   |  0.16; 0.2  |  0.17; 0.2  | 0.17; 0.2  |  0.16; 0.2  |             |  0.72; 1.6  |  0.65; 2.0  |
+| Prom: Pod CPU; Pod mem (GB)   |  0.35; 2.9  |  0.42; 3.8  |  0.4; 4.2  |  0.41; 3.9  |             |  0.26; 3.3  |  0.39; 3.3  |
+| Graf: Pod CPU; Pod mem (GB)   |  0.19; 0.2  |  0.21; 0.2  |  0.2; 0.2  |  0.19; 0.2  |             |             |             |
+| Trfk: Pod CPU; Pod mem (GB)   |  0.08; 0.1  |  0.09; 0.2  | 0.08; 0.2  |  0.07; 0.2  |             |             |             |
+| % CPU (p50, p95, p99)         | 30, 35, 37  | 33, 42, 43  | 33, 40, 46 | 33, 40, 53  |             |     94      |     100     |
+| % mem (p50, p95, p99)         | 62, 63, 64  | 72, 74, 74  | 76, 79, 80 | 74, 76, 76  |             |     96      |     92      |
+| HTTP request times (p99) [ms] |     235     |     313     |    254     |     245     |             |             |     886     |
+| Failed HTTP requests [%]      |      0      |      0      |     0      |      0      |             |             |             |
+| Storage [GiB/day]             |    7.38     |    8.41     |    16.5    |    3.31     |             |             |    18.4     |
+| Network tx (avg, max) [MiB/s] |  1.5, 5.7   |  1.7, 4.6   |  1.7, 5.2  |  1.6, 5.2   |             |             |             |
+| Network rx [MiB/s] (max)      |     0.2     |     0.3     |    0.3     |     0.3     |             |             |             |
+| Disk write [MiB/s] (avg, max) |  0.5, 0.8   |  0.5, 0.8   |   0.4, 1   |   2.2, 60   |             |             |             |
+| Disk write IOPS (avg, max)    |   29, 49    |   29, 50    |   28, 45   |   86, 309   |             |             |             |
+| Disk read [MiB/s] (max)       |    0.05     |     0.4     |    1.1     |     69      |             |             |     111     |
+| Disk read IOPS (max)          |      2      |      7      |     21     |     931     |             |             |    2357     |
+
+| Identifier                    | 2023-04-09 | 2023-04-10 | 2023-04-10 | 2023-04-10 | 2023-04-10 | 2023-04-10 | 2023-04-10 |
+|-------------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
+| Pass/Fail                     | To repeat  |            |            |            |            |            |            |
+| Metrics per target            |    250     |            |            |            |            |            |            |
+| Scrape targets                |    150     |            |            |            |            |            |            |
+| Logging streams               |     20     |            |            |            |            |            |            |
+| Log lines per target [1/sec]  |     1      |            |            |            |            |            |            |
+| Scraped datapoints/min        |  1,500,00  |            |            |            |            |            |            |
+| Logged lines/min              |    3600    |            |            |            |            |            |            |
+| Loki: Pod CPU; Pod mem (GB)   | 0.55; 0.8  |            |            |            |            |            |            |
+| Prom: Pod CPU; Pod mem (GB)   | 0.46; 3.5  |            |            |            |            |            |            |
+| Graf: Pod CPU; Pod mem (GB)   | 0.27; 0.2  |            |            |            |            |            |            |
+| Trfk: Pod CPU; Pod mem (GB)   |  0.1; 0.2  |            |            |            |            |            |            |
+| % CPU (p50, p95, p99)         | 48, 56, 57 |            |            |            |            |            |            |
+| % mem (p50, p95, p99)         | 76, 78, 78 |            |            |            |            |            |            |
+| HTTP request times (p99) [ms] |    589     |            |            |            |            |            |            |
+| Failed HTTP requests [%]      |     0      |            |            |            |            |            |            |
+| Storage [GiB/day]             |    10.1    |            |            |            |            |            |            |
+| Network tx (avg, max) [MiB/s] |  2.6, 8.3  |            |            |            |            |            |            |
+| Network rx [MiB/s] (max)      |    0.3     |            |            |            |            |            |            |
+| Disk write [MiB/s] (avg, max) |  0.6, 0.9  |            |            |            |            |            |            |
+| Disk write IOPS (avg, max)    |   30, 44   |            |            |            |            |            |            |
+| Disk read [MiB/s] (max)       |    0.4     |            |            |            |            |            |            |
+| Disk read IOPS (max)          |     11     |            |            |            |            |            |            |
 
 
 ### Comments
+#### 2023-04-10
+Switched to MicroK8s 1.25 (from 1.24).
+
+#### 2023-04-09
+Failed after a couple of hours, again at 07:00:00, due to StopContainer.
+
+#### 2023-04-08
+- 149,400 loglines/min calculated; in practice: more (TODO how much?)
+
+#### 2023-04-06
+- With 1.8M datapoint/min, all charms receive StopContainer every 4 or 8 hours
+  *exactly*. Filed a bug https://bugs.launchpad.net/juju/+bug/2015566, but this
+  is probably from overload.
+
+#### 2023-04-04
+(*) The calculated scraped datapoints/min is 400, but actually it was ~13k.
+(**) Using Loki 2.4.1.
+
+Loki pod CPU is 1.98, but the overall VM cpu is at 83% (p50).
+
+The next test, with lower, 221,400 log lines / min, had higher CPU usage and
+longer grafana response time. Something is fishy, so taking 180,000 as max.
+
+#### 2023-04-03
+(*) The calculated scraped datapoints/min is 400, but actually it was ~12k.
+(**) Using Loki 2.4.1.
+
 #### 2023-03-27
 (*) The calculated scraped datapoints/min is 400, but actually it was ~12k.
 (**) Many queries were dropped by loki ("too many outstanding requests").
