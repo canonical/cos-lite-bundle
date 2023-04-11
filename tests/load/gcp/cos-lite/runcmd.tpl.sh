@@ -30,7 +30,7 @@ systemctl start node-exporter.service
 adduser ubuntu microk8s
 microk8s status --wait-ready
 microk8s enable dns:$(grep nameserver /run/systemd/resolve/resolv.conf | awk '{print $2}')
-microk8s.enable hostpath-storage ingress
+microk8s.enable hostpath-storage
 # wait for addons to become available
 microk8s.kubectl rollout status deployments/hostpath-provisioner -n kube-system -w --timeout=600s
 
@@ -39,7 +39,6 @@ kubectl patch deployment hostpath-provisioner -n kube-system -p '{"spec": {"temp
 microk8s.kubectl rollout status deployments/hostpath-provisioner -n kube-system -w --timeout=600s
 
 microk8s.kubectl rollout status deployments/coredns -n kube-system -w --timeout=600s
-microk8s.kubectl rollout status daemonsets/nginx-ingress-microk8s-controller -n ingress -w --timeout=600s
 microk8s.enable metrics-server
 microk8s.kubectl rollout status deployment.apps/metrics-server -n kube-system -w --timeout=600s
 
