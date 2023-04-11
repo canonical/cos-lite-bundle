@@ -47,7 +47,7 @@ microk8s.enable metallb:$IPADDR-$IPADDR
 microk8s.kubectl rollout status daemonset.apps/speaker -n metallb-system -w --timeout=600s
 
 # prep juju
-sudo -u ubuntu juju bootstrap --no-gui --agent-version=2.9.42 microk8s uk8s
+sudo -u ubuntu juju bootstrap --no-gui --agent-version=2.9.34 microk8s uk8s
 sudo -u ubuntu juju add-model --config logging-config="<root>=WARNING; unit=DEBUG" --config update-status-hook-interval="5m" ${JUJU_MODEL_NAME}
 sudo -u ubuntu juju deploy --channel=edge cos-lite --trust --overlay /run/overlay-load-test.yaml --trust
 
