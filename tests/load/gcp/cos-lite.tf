@@ -95,7 +95,7 @@ data "cloudinit_config" "cos_lite" {
         "snap" : {
           "commands" : [
             "snap install --classic juju --channel=2.9/stable",
-            "snap install --classic microk8s --channel=1.25/stable",
+            "snap install --classic microk8s --channel=1.26/stable",
             "snap alias microk8s.kubectl kubectl",
             "snap refresh",
           ]
