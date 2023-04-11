@@ -34,10 +34,6 @@ microk8s.enable hostpath-storage
 # wait for addons to become available
 microk8s.kubectl rollout status deployments/hostpath-provisioner -n kube-system -w --timeout=600s
 
-# Patch hostpath to allocate less resources (https://github.com/canonical/microk8s-core-addons/pull/73)
-kubectl patch deployment hostpath-provisioner -n kube-system -p '{"spec": {"template": {"spec": {"containers": [{"name":"hostpath-provisioner", "image": "cdkbot/hostpath-provisioner:1.3.0" }] }}}}'
-microk8s.kubectl rollout status deployments/hostpath-provisioner -n kube-system -w --timeout=600s
-
 microk8s.kubectl rollout status deployments/coredns -n kube-system -w --timeout=600s
 microk8s.enable metrics-server
 microk8s.kubectl rollout status deployment.apps/metrics-server -n kube-system -w --timeout=600s
