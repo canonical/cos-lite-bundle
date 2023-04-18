@@ -2,8 +2,9 @@
 # See LICENSE file for licensing details.
 
 import subprocess
-from typing import Dict
 from datetime import datetime
+from typing import Dict
+
 from flask import Flask
 from lightkube.utils.quantity import parse_quantity
 
