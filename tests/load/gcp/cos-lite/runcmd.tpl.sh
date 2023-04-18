@@ -3,6 +3,8 @@ set -eux
 # install deps
 DEBIAN_FRONTEND=noninteractive apt -y upgrade
 
+pip3 install flask lightkube
+
 # disable swap
 sysctl -w vm.swappiness=0
 echo "vm.swappiness = 0" | tee -a /etc/sysctl.conf
@@ -28,16 +30,11 @@ systemctl start node-exporter.service
 adduser ubuntu microk8s
 microk8s status --wait-ready
 microk8s enable dns:$(grep nameserver /run/systemd/resolve/resolv.conf | awk '{print $2}')
-microk8s.enable hostpath-storage ingress
+microk8s.enable hostpath-storage
 # wait for addons to become available
 microk8s.kubectl rollout status deployments/hostpath-provisioner -n kube-system -w --timeout=600s
 
-# Patch hostpath to allocate less resources (https://github.com/canonical/microk8s-core-addons/pull/73)
-kubectl patch deployment hostpath-provisioner -n kube-system -p '{"spec": {"template": {"spec": {"containers": [{"name":"hostpath-provisioner", "image": "cdkbot/hostpath-provisioner:1.3.0" }] }}}}'
-microk8s.kubectl rollout status deployments/hostpath-provisioner -n kube-system -w --timeout=600s
-
 microk8s.kubectl rollout status deployments/coredns -n kube-system -w --timeout=600s
-microk8s.kubectl rollout status daemonsets/nginx-ingress-microk8s-controller -n ingress -w --timeout=600s
 microk8s.enable metrics-server
 microk8s.kubectl rollout status deployment.apps/metrics-server -n kube-system -w --timeout=600s
 
@@ -77,4 +74,4 @@ sudo -u ubuntu juju run-action cos-config/0 sync-now --wait
 #   Job for prometheus-stdout-logger.service failed because a timeout was exceeded.
 /run/wait-for-prom-ready.sh
 systemctl start prometheus-stdout-logger.service
-systemctl start pod-top-logger.service
+systemctl start pod-top-exporter.service

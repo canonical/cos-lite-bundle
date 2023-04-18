@@ -90,6 +90,17 @@ which will the following vm instances:
 - pd-ssd-2cpu-8gb
 - prom-query
 
+```mermaid
+graph LR
+
+  cos-lite ==>|scrape| avalanche
+  loki-log ==>|push logs| cos-lite
+  prom-query ==>|view dashboard| cos-lite
+  monitoring -->|scrape| cos-lite
+  monitoring -->|scrape| loki-log
+  monitoring -->|scrape| prom-query
+```
+
 To enable pushing monitoring data to grafana cloud, create
 [var](var_grafana_cloud.tfvars) using the
 [provided example](var_grafana_cloud.example.tfvars) and include it in the

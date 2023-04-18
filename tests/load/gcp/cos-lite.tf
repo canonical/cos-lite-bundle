@@ -30,7 +30,7 @@ data "cloudinit_config" "cos_lite" {
           {
             "path" : "/run/wait-for-prom-ready.sh",
             "permissions" : "0755",
-            "content" : templatefile("cos-lite/wait-for-prom-ready.tpl.sh", {
+            "content" : templatefile("common/wait-for-prom-ready.tpl.sh", {
               PROM_EXTERNAL_URL = local.prom_url,
             }),
           },
@@ -48,15 +48,15 @@ data "cloudinit_config" "cos_lite" {
             }),
           },
           {
-            "path" : "/run/cos-lite-pod-top.sh",
+            "path" : "/run/pod_top_exporter.py",
             "permissions" : "0755",
-            "content" : templatefile("cos-lite/cos-lite-pod-top.tpl.sh", {
+            "content" : templatefile("cos-lite/pod_top_exporter.tpl.py", {
               JUJU_MODEL_NAME = var.juju_model_name,
             }),
           },
           {
-            "path" : "/etc/systemd/system/pod-top-logger.service",
-            "content" : file("cos-lite/pod-top-logger.service"),
+            "path" : "/etc/systemd/system/pod-top-exporter.service",
+            "content" : file("cos-lite/pod-top-exporter.service"),
           },
           {
             "path" : "/run/overlay-load-test.yaml",
@@ -95,7 +95,7 @@ data "cloudinit_config" "cos_lite" {
         "snap" : {
           "commands" : [
             "snap install --classic juju --channel=2.9/stable",
-            "snap install --classic microk8s --channel=1.24/stable",
+            "snap install --classic microk8s --channel=1.26/stable",
             "snap alias microk8s.kubectl kubectl",
             "snap refresh",
           ]

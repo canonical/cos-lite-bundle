@@ -18,7 +18,7 @@ curl -s http://avalanche.us-central1-a.c.lma-light-load-testing.internal:9001/me
 # check service status
 systemctl status node-exporter
 systemctl status prometheus-stdout-logger
-systemctl status pod-top-logger
+systemctl status pod-top-exporter
 
 # check ingress is working
 curl -s http://pd-ssd-4cpu-8gb.us-central1-a.c.lma-light-load-testing.internal/cos-lite-load-test-prometheus-0/api/v1/targets | jq ".data.activeTargets[].scrapeUrl"
