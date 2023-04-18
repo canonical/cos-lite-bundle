@@ -22,8 +22,8 @@ systemctl disable systemd-tmpfiles-clean.timer --now
 
 # start services
 systemctl daemon-reload
-#sed -i 's/ENABLED="false"/ENABLED="true"/' /etc/default/sysstat
-#systemctl restart sysstat sysstat-collect.timer sysstat-summary.timer
+sed -i 's/ENABLED="false"/ENABLED="true"/' /etc/default/sysstat
+systemctl restart sysstat sysstat-collect.timer sysstat-summary.timer
 systemctl start node-exporter.service
 
 # setup microk8s and bootstrap

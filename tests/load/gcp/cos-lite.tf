@@ -88,7 +88,7 @@ data "cloudinit_config" "cos_lite" {
           "tcptrack",
           "kitty-terminfo",
           "iputils-ping",
-          #"sysstat",
+          "sysstat",
           "python3-flask",
         ],
 
