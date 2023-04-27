@@ -50,18 +50,18 @@ async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
             option = str(await ops_test.build_charm(option))
         return option
 
-    charms = dict(
-        traefik=pytestconfig.getoption("traefik"),
-        alertmanager=pytestconfig.getoption("alertmanager"),
-        prometheus=pytestconfig.getoption("prometheus"),
-        grafana=pytestconfig.getoption("grafana"),
-        loki=pytestconfig.getoption("loki"),
-        avalanche=pytestconfig.getoption("avalanche"),
-    )
+    charms = {
+        "traefik": pytestconfig.getoption("traefik"),
+        "alertmanager": pytestconfig.getoption("alertmanager"),
+        "prometheus": pytestconfig.getoption("prometheus"),
+        "grafana": pytestconfig.getoption("grafana"),
+        "loki": pytestconfig.getoption("loki"),
+        "avalanche": pytestconfig.getoption("avalanche"),
+    }
 
-    additional_args = dict(
-        channel=pytestconfig.getoption("channel"),
-    )
+    additional_args = {
+        "channel": pytestconfig.getoption("channel"),
+    }
 
     context = {k: await build_charm_if_is_dir(v) for k, v in charms.items() if v is not None}
     context.update(additional_args)
