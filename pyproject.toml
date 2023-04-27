@@ -14,9 +14,6 @@ line-length = 99
 target-version = ["py38"]
 exclude = "\\.tpl\\.py$"
 
-[tool.isort]
-profile = "black"
-
 # Linting tools configuration
 [tool.ruff]
 line-length = 99
