@@ -128,7 +128,7 @@ for i, (x_label, y_label) in enumerate(to_plot):
     x, y = np.array(data_without_nans[x_label]), np.array(data_without_nans[y_label])
 
     popt, _ = curve_fit(fit_linear, x, y)
-    y_fit = list(map(lambda x_: fit_linear(x_, *popt), x))
+    y_fit = [fit_linear(x_, *popt) for x_ in x]
     ax.plot(x, y_fit, "k--")
     ax.text((min(x) + max(x)) / 2, (min(y) + max(y)) / 2, str(popt))
 fig.suptitle("Per-pod resource usage")
