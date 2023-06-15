@@ -4,6 +4,10 @@ bundle: kubernetes
 name: cos-lite
 description: >
   COS Lite is a light-weight, highly-integrated, observability stack running on Kubernetes
+website: https://github.com/canonical/cos-lite-bundle
+issues: https://github.com/canonical/cos-lite-bundle/issues
+docs: https://discourse.charmhub.io/t/canonical-observability-stack/5132
+
 applications:
   traefik:
     charm: {{ traefik|default('traefik-k8s', true) }}
