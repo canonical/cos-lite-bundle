@@ -1,5 +1,4 @@
 ---
-{%- set testing = testing is defined and testing.casefold() in ["1", "yes", "true"] %}
 bundle: kubernetes
 name: cos-lite
 description: >
@@ -64,7 +63,7 @@ applications:
       title: Canonical Observability Stack
       tagline: Model-driven Observability Stack deployed with a single command.
       description: |
-        Canonical Observability Stack Lite, or COS Lite, is a light-weight, highly-integrated, 
+        Canonical Observability Stack Lite, or COS Lite, is a light-weight, highly-integrated,
         Juju-based observability suite running on Kubernetes.
   loki:
     charm: {{ loki|default('loki-k8s', true) }}
@@ -76,21 +75,6 @@ applications:
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
-  {%- if testing %}
-  avalanche:
-    charm: {{ avalanche|default('avalanche-k8s', true) }}
-    scale: 2
-    trust: true
-    {%- if avalanche is defined and avalanche.endswith('.charm') %}
-    resources:
-      avalanche-image: "quay.io/freshtracks.io/avalanche"
-    {%- else %}
-    channel: {{ channel|default('edge', true) }}
-    {%- endif %}
-    options:
-      metric_count: 10
-      series_count: 2
-  {%- endif %}
 
 relations:
 - [traefik:ingress-per-unit, prometheus:ingress]
@@ -102,9 +86,6 @@ relations:
 - [grafana:grafana-source, loki:grafana-source]
 - [grafana:grafana-source, alertmanager:grafana-source]
 - [loki:alertmanager, alertmanager:alerting]
-{% if testing -%}
-- [prometheus:metrics-endpoint, avalanche:metrics-endpoint]
-{% endif -%}
 # COS-monitoring
 - [prometheus:metrics-endpoint, traefik:metrics-endpoint]
 - [prometheus:metrics-endpoint, alertmanager:self-metrics-endpoint]
@@ -118,28 +99,3 @@ relations:
 - [catalogue:catalogue, grafana:catalogue]
 - [catalogue:catalogue, prometheus:catalogue]
 - [catalogue:catalogue, alertmanager:catalogue]
-
-{% if testing -%}
---- # overlay.yaml
-applications:
-  alertmanager:
-    offers:
-      alertmanager-karma-dashboard:
-        endpoints:
-          - karma-dashboard
-  grafana:
-    offers:
-      grafana-dashboards:
-        endpoints:
-          - grafana-dashboard
-  loki:
-    offers:
-      loki-logging:
-        endpoints:
-        - logging
-  prometheus:
-    offers:
-      prometheus-scrape:
-        endpoints:
-        - metrics-endpoint
-{% endif -%}

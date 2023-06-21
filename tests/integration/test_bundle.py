@@ -35,48 +35,26 @@ def get_this_script_dir() -> Path:
 
 
 @pytest.mark.abort_on_fail
-async def test_build_and_deploy(ops_test: OpsTest, pytestconfig):
+async def test_build_and_deploy(ops_test: OpsTest, rendered_bundle):
     """Build the charm-under-test and deploy it together with related charms.
 
     Assert on the unit status before any relations/configurations take place.
     """
     await ops_test.model.set_config({"logging-config": "<root>=WARNING; unit=DEBUG"})
 
-    logger.info("Rendering bundle %s", get_this_script_dir() / ".." / ".." / "bundle.yaml.j2")
-
-    async def build_charm_if_is_dir(option: str) -> str:
-        if Path(option).is_dir():
-            logger.info("Building charm from source: %s", option)
-            option = str(await ops_test.build_charm(option))
-        return option
-
-    charms = {
-        "traefik": pytestconfig.getoption("traefik"),
-        "alertmanager": pytestconfig.getoption("alertmanager"),
-        "prometheus": pytestconfig.getoption("prometheus"),
-        "grafana": pytestconfig.getoption("grafana"),
-        "loki": pytestconfig.getoption("loki"),
-        "avalanche": pytestconfig.getoption("avalanche"),
-    }
-
-    additional_args = {
-        "channel": pytestconfig.getoption("channel"),
-    }
-
-    context = {k: await build_charm_if_is_dir(v) for k, v in charms.items() if v is not None}
-    context.update(additional_args)
-
-    # set the "testing" template variable so the template renders for testing
-    context["testing"] = "true"
-
-    logger.debug("context: %s", context)
-
-    rendered_bundle = ops_test.render_bundle(
-        get_this_script_dir() / ".." / ".." / "bundle.yaml.j2", context=context
-    )
-
     # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
     await cli_deploy_bundle(ops_test, str(rendered_bundle))
+
+    # Also deploy avalanche, to have metrics and alerts
+    await ops_test.model.deploy(
+        "ch:avalanche-k8s",
+        application_name="avalanche",
+        channel="edge",
+        config={"metric_count": 10, "series_count": 2},
+        num_units=2,
+    )
+    await ops_test.model.add_relation("avalanche:metrics-endpoint", "prometheus:metrics-endpoint")
+
     # Idle period is set to 90 to capture restarts caused by applying resource limits
     # FIXME: raise_on_error should be removed (i.e. set to True) when units stop flapping to error
     await ops_test.model.wait_for_idle(
