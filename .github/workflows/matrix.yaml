@@ -15,20 +15,26 @@ jobs:
       fail-fast: false
       matrix:
         charm-channel: [ "edge", "beta", "candidate", "stable" ]
-        juju-channel: [ "2.9/stable", "3.0/stable", "3.1/stable" ]
+        juju-channel: [ "2.9/stable", "3.2/stable" ]
         include:
           - juju-channel: "2.9/stable"
             juju-agent-version: "2.9.34"
             microk8s-channel: "1.25/stable"
-          - juju-channel: "3.0/stable"
-            juju-agent-version: "3.0.2"
-            microk8s-channel: "1.25-strict/stable"
-          - juju-channel: "3.1/stable"
-            juju-agent-version: "3.1.0"
+          - juju-channel: "3.2/stable"
+            juju-agent-version: "3.2.0"
             microk8s-channel: "1.25-strict/stable"
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    - name: Figure out the pylibjuju version we need (must match juju version)
+      run: |
+        # Only keep major.minor of the installed juju version
+        echo "PYLIBJUJU=$(echo "${{ matrix.juju-agent-version }}" | sed 's/\([0-9]\+\.[0-9]\+\).*$/\1/')" >> $GITHUB_ENV
+    - name: Pin python-libjuju to the matching juju version
+      shell: bash
+      run: |
+        # Update pylibjuju pin in tox.ini, assuming the dep is given on a separate line
+        sed -E -i 's/    juju\s*[><=^~]{1,2}\s*[0-9]+.*/    juju~=${{ env.PYLIBJUJU }}/g' tox.ini
     - name: Get prefsrc
       run: |
         echo "IPADDR=$(ip -4 -j route get 2.2.2.2 | jq -r '.[] | .prefsrc')" >> $GITHUB_ENV
