@@ -52,13 +52,12 @@ This would include a tester charm (avalanche) and an overlay section with offers
 Optionally, you may render the template with local charms, for example:
 
 ```shell
-./render_bundle.py bundle.yaml --testing=yes --channel=edge \
+./render_bundle.py bundle.yaml --channel=edge \
   --traefik=$(pwd)/../traefik-k8s-operator/traefik-k8s_ubuntu-20.04-amd64.charm \
   --prometheus=$(pwd)/../prometheus-k8s-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
   --alertmanager=$(pwd)/../alertmanager-k8s-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
   --grafana=$(pwd)/../grafana-k8s-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
-  --loki=$(pwd)/../loki-operator/loki-k8s-operator_ubuntu-20.04-amd64.charm \
-  --avalanche=$(pwd)/../avalanche-k8s-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
+  --loki=$(pwd)/../loki-operator/loki-k8s-operator_ubuntu-20.04-amd64.charm
 ```
 
 #### Render template using tox
@@ -70,8 +69,7 @@ tox -e integration -- --keep-models -k test_build_and_deploy \
   --prometheus=$(pwd)/../prometheus-k8s-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
   --alertmanager=$(pwd)/../alertmanager-k8s-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
   --grafana=$(pwd)/../grafana-k8s-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
-  --loki=$(pwd)/../loki-operator/loki-k8s-operator_ubuntu-20.04-amd64.charm \
-  --avalanche=$(pwd)/../avalanche-k8s-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
+  --loki=$(pwd)/../loki-operator/loki-k8s-operator_ubuntu-20.04-amd64.charm
 ```
 
 Now `juju switch` into the newly created model (or use `--model=MODEL` in
@@ -121,6 +119,5 @@ tox -e integration -- \
   --prometheus=$(pwd)/../prometheus-k8s-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
   --alertmanager=$(pwd)/../alertmanager-k8s-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
   --grafana=$(pwd)/../grafana-k8s-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
-  --loki=$(pwd)/../loki-operator/loki-k8s-operator_ubuntu-20.04-amd64.charm \
-  --avalanche=$(pwd)/../avalanche-k8s-operator/avalanche-k8s_ubuntu-20.04-amd64.charm
+  --loki=$(pwd)/../loki-operator/loki-k8s-operator_ubuntu-20.04-amd64.charm
 ```

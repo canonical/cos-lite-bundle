@@ -1,0 +1,14 @@
+---
+applications:
+  ca:
+    charm: self-signed-certificates
+    channel: edge
+    scale: 1
+
+relations:
+ - [ca, traefik:receive-ca-cert]
+ - [ca, alertmanager:certificates]
+ - [ca, prometheus:certificates]
+ - [ca, grafana:certificates]
+ - [ca, loki:certificates]
+ - [ca, catalogue:certificates]

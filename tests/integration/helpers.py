@@ -6,7 +6,7 @@ import json
 import logging
 import urllib.request
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 from urllib.parse import urlparse
 
 from juju.controller import Controller
@@ -16,8 +16,16 @@ from pytest_operator.plugin import OpsTest
 logger = logging.getLogger(__name__)
 
 
-async def cli_deploy_bundle(ops_test: OpsTest, name: str, channel: str = "edge"):
+async def cli_deploy_bundle(
+    ops_test: OpsTest, name: str, *, channel: str = "edge", overlays: List[Union[str, Path]] = None
+):
+    """Deploy bundle from charmhub or from file."""
     # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
+    overlay_args = []
+    if overlays:
+        for overlay in overlays:
+            overlay_args.extend(["--overlay", str(overlay)])
+
     run_args = [
         "juju",
         "deploy",
@@ -25,7 +33,7 @@ async def cli_deploy_bundle(ops_test: OpsTest, name: str, channel: str = "edge")
         "-m",
         ops_test.model_full_name,
         name,
-    ]
+    ] + overlay_args
     if not Path(name).is_file():
         run_args.append(f"--channel={channel}")
 
@@ -42,6 +50,8 @@ async def get_proxied_unit_url(ops_test: OpsTest, app_name: str, unit_num: int) 
         await ops_test.model.applications["traefik"].units[0].run_action("show-proxied-endpoints")
     )
     action = await action.wait()
+    # Before deserialization, output looks like this:
+    # '{"prom/0": {"url": "http://cluster.local:80/test-prometheus-alerts-32k4-prom-0"}, "am": {"url": "http://cluster.local:80/test-prometheus-alerts-32k4-am"}}'
     proxied_endpoints = json.loads(action.results["proxied-endpoints"])
 
     logging.debug(f"Endpoints proxied by Traefik/0: {proxied_endpoints}")

@@ -4,12 +4,9 @@
 # See LICENSE file for licensing details.
 
 import asyncio
-import inspect
 import json
 import logging
-import os
 import urllib.request
-from pathlib import Path
 
 import juju
 import juju.utils
@@ -28,32 +25,18 @@ logger = logging.getLogger(__name__)
 juju_topology_keys = {"juju_model_uuid", "juju_model", "juju_application"}
 
 
-def get_this_script_dir() -> Path:
-    filename = inspect.getframeinfo(inspect.currentframe()).filename  # type: ignore[arg-type]
-    path = os.path.dirname(os.path.abspath(filename))
-    return Path(path)
-
-
 @pytest.mark.abort_on_fail
-async def test_build_and_deploy(ops_test: OpsTest, rendered_bundle):
+@pytest.mark.parametrize("tls_enabled", [False, True], scope="module")
+async def test_build_and_deploy(ops_test: OpsTest, rendered_bundle, tls_enabled):
     """Build the charm-under-test and deploy it together with related charms.
 
     Assert on the unit status before any relations/configurations take place.
     """
-    await ops_test.model.set_config({"logging-config": "<root>=WARNING; unit=DEBUG"})
-
-    # use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/511 is fixed.
-    await cli_deploy_bundle(ops_test, str(rendered_bundle))
-
-    # Also deploy avalanche, to have metrics and alerts
-    await ops_test.model.deploy(
-        "ch:avalanche-k8s",
-        application_name="avalanche",
-        channel="edge",
-        config={"metric_count": 10, "series_count": 2},
-        num_units=2,
-    )
-    await ops_test.model.add_relation("avalanche:metrics-endpoint", "prometheus:metrics-endpoint")
+    # Add "testing" overlay to deploy avalanche, to have metrics and alerts
+    overlays = ["overlays/testing-overlay.yaml"]
+    if tls_enabled:
+        overlays.extend(["overlays/tls-overlay.yaml"])
+    await cli_deploy_bundle(ops_test, str(rendered_bundle), overlays=overlays)
 
     # Idle period is set to 90 to capture restarts caused by applying resource limits
     # FIXME: raise_on_error should be removed (i.e. set to True) when units stop flapping to error
@@ -67,9 +50,6 @@ async def test_build_and_deploy(ops_test: OpsTest, rendered_bundle):
 
     response = urllib.request.urlopen(prometheus_0_url, data=None, timeout=2.0)
     assert response.code == 200
-
-    # effectively disable the update status from firing
-    await ops_test.model.set_config({"update-status-hook-interval": "60m"})
 
 
 @pytest.mark.abort_on_fail
@@ -106,6 +86,22 @@ async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
     # a jsonified activeAlertmanagers looks like this:
     # [{'url': 'http://<ingress:80 or fqdn:9093>/api/v2/alerts'}]
     assert f"/{ops_test.model_name}-alertmanager/api/v2/alerts" in response.read().decode("utf8")
+
+    # TODO Make sure activeAlertmanagers includes our am, and that droppedAlertmanagers is empty.
+    # curl -s http://cluster.local:80/test-prometheus-alerts-32k4-prom-0/api/v1/alertmanagers | jq
+    # {
+    #   "status": "success",
+    #   "data": {
+    #     "activeAlertmanagers": [
+    #       {
+    #         "url": "http://cluster.local:80/test-prometheus-alerts-32k4-am/api/v2/alerts"
+    #       }
+    #     ],
+    #     "droppedAlertmanagers": []
+    #   }
+    # }
+
+    # TODO make sure prom/api/v1/alerts has similar content to am/api/v2/alerts
 
 
 async def test_juju_topology_labels_in_alerts(ops_test: OpsTest):
