@@ -1,17 +1,26 @@
+---
 # Tracing overlay
 #
 # This overlay enhances cos-lite with the distributed tracing backend Tempo.
-
 applications:
   tempo:
-    charm: 'tempo-k8s'
+    charm: tempo-k8s
     scale: 1
     trust: true
-    channel: 'edge'
+    channel: edge
 
 relations:
-- [traefik:ingress, tempo:ingress]
-- [prometheus:alertmanager, alertmanager:alerting]
+# COS lite integrations
+- [tempo:logging, loki:logging]
+- [tempo:ingress, traefik:ingress]
+# todo: alertmanager
 - [grafana:grafana-source, tempo:grafana-source]
 - [prometheus:metrics-endpoint, tempo:metrics-endpoint]
 - [grafana:grafana-dashboard, tempo:grafana-dashboard]
+# tracing relations
+- [traefik:tracing, tempo:tracing]
+- [prometheus:tracing, tempo:tracing]
+#- [grafana:tracing, tempo:tracing]
+#- [loki:tracing, tempo:tracing]
+#- [alertmanager:tracing, tempo:tracing]
+#- [catalogue:tracing, tempo:tracing]
