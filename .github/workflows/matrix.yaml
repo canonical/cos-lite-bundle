@@ -15,10 +15,10 @@ jobs:
       fail-fast: false
       matrix:
         charm-channel: [ "edge", "beta", "candidate", "stable" ]
-        juju-channel: [ "2.9/stable", "3.2/stable" ]
+        juju-channel: [ "3.1/stable", "3.2/stable" ]
         include:
-          - juju-channel: "2.9/stable"
-            juju-agent-version: "2.9.34"
+          - juju-channel: "3.1/stable"
+            juju-agent-version: "3.1.5"
             microk8s-channel: "1.25/stable"
           - juju-channel: "3.2/stable"
             juju-agent-version: "3.2.0"
