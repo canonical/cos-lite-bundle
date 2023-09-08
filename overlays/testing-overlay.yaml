@@ -1,6 +1,7 @@
 applications:
   alertmanager:
-    scale: 2
+    # Ideally we'd want a scale of 2 here, but on a 2cpu github runner it exhausts available CPU.
+    scale: 1
   avalanche:
     charm: avalanche-k8s
     channel: edge
