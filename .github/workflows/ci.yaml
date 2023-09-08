@@ -42,7 +42,7 @@ jobs:
     - name: Setup operator environment
       uses: charmed-kubernetes/actions-operator@main
       with:
-        juju-channel: 2.9/stable
+        juju-channel: 3.1/stable
         provider: microk8s
         channel: 1.25-strict/stable
         microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
@@ -50,7 +50,9 @@ jobs:
       run: tox -e integration -- --channel=edge
     - name: Dump debug log
       if: failure()
-      run: for ctl in $(juju controllers --format json | jq -r '.controllers | keys[]'); do for mdl in $(juju models --format json | jq -r '.models[].name' | grep -v "admin/controller"); do juju debug-log -m $ctl:$mdl --replay --ms --no-tail; done; done || true
+      run: |
+        for ctl in $(juju controllers --format json | jq -r '.controllers | keys[]'); do for mdl in $(juju models --format json | jq -r '.models[].name' | grep -v "admin/controller"); do juju debug-log -m $ctl:$mdl --replay --ms --no-tail; done; done || true
+        exit 0
       shell: bash
   end-to-end-tests:
     # Must use Juju 3 to bootstrap both uk8s and lxd:https://bugs.launchpad.net/juju/+bug/2003582
@@ -66,7 +68,7 @@ jobs:
       - name: Setup lxd controller
         uses: charmed-kubernetes/actions-operator@main
         with:
-          juju-channel: 2.9/stable
+          juju-channel: 3.1/stable
           provider: lxd
       - name: Save lxd controller name
         id: lxd-controller
@@ -75,7 +77,7 @@ jobs:
       - name: Setup k8s controller
         uses: charmed-kubernetes/actions-operator@main
         with:
-          juju-channel: 2.9/stable
+          juju-channel: 3.1/stable
           provider: microk8s
           channel: 1.25-strict/stable
           microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
