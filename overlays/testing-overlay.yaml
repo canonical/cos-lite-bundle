@@ -1,7 +1,25 @@
 applications:
   alertmanager:
-    # Ideally we'd want a scale of 2 here, but on a 2cpu github runner it exhausts available CPU.
-    scale: 1
+    scale: 2
+    # Set low resource requests to accommodate small VMs
+    options:
+      cpu: 1m
+      memory: 1Mi
+  prometheus:
+    # Set low resource requests to accommodate small VMs
+    options:
+      cpu: 1m
+      memory: 1Mi
+  grafana:
+    # Set low resource requests to accommodate small VMs
+    options:
+      cpu: 1m
+      memory: 1Mi
+  loki:
+    # Set low resource requests to accommodate small VMs
+    options:
+      cpu: 1m
+      memory: 1Mi
   avalanche:
     charm: avalanche-k8s
     channel: edge
