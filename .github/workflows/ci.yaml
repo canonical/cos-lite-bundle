@@ -46,6 +46,8 @@ jobs:
         provider: microk8s
         channel: 1.25-strict/stable
         microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
+    - name: Update python-libjuju dependency to match juju
+      run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=3.1.0/g' tox.ini
     - name: Run tests (edge channel)
       run: tox -e integration -- --channel=edge
     - name: Dump debug log
