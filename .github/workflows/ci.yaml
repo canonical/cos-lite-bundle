@@ -42,7 +42,7 @@ jobs:
     - name: Setup operator environment
       uses: charmed-kubernetes/actions-operator@main
       with:
-        juju-channel: 2.9/stable
+        juju-channel: 3.1/stable
         provider: microk8s
         channel: 1.25-strict/stable
         microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
@@ -66,7 +66,7 @@ jobs:
       - name: Setup lxd controller
         uses: charmed-kubernetes/actions-operator@main
         with:
-          juju-channel: 2.9/stable
+          juju-channel: 3.1/stable
           provider: lxd
       - name: Save lxd controller name
         id: lxd-controller
@@ -75,7 +75,7 @@ jobs:
       - name: Setup k8s controller
         uses: charmed-kubernetes/actions-operator@main
         with:
-          juju-channel: 2.9/stable
+          juju-channel: 3.1/stable
           provider: microk8s
           channel: 1.25-strict/stable
           microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
