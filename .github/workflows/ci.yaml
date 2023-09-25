@@ -46,6 +46,9 @@ jobs:
         provider: microk8s
         channel: 1.25-strict/stable
         microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
+    - name: Update python-libjuju dependency to match juju version
+      # Assuming the dep is given on a separate tox.ini line
+      run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=3.1.0/g' tox.ini
     - name: Run tests (edge channel)
       run: tox -e integration -- --channel=edge
     - name: Dump debug log
@@ -88,6 +91,8 @@ jobs:
       - name: Fix microk8s permissions
         run: |
           chmod -R ugo+rwX ~/.kube
+      - name: Update python-libjuju dependency to match juju
+        run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=3.1.0/g' tox.ini
       - name: Run end-to-end tests
         run: tox run -vve e2e
         env:

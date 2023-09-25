@@ -60,10 +60,9 @@ async def get_proxied_unit_url(ops_test: OpsTest, app_name: str, unit_num: int) 
 
     traefik_address = await get_address(ops_test, "traefik")
     url = urlparse(unit_url)
-    if not (port := url.port):
-        port = 443 if url.scheme == "https" else 80
-
-    final_url = f"{url.scheme}://{traefik_address}:{port}{url.path}"
+    final_url = (
+        f"{url.scheme}://{traefik_address}{':' + str(url.port) if url.port else ''}{url.path}"
+    )
     logging.debug(f"Routing over traefik using: {final_url}")
 
     return final_url
