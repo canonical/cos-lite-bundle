@@ -4,16 +4,22 @@
 import asyncio
 import json
 import logging
+import ssl
 import urllib.request
 from pathlib import Path
 from typing import List, Optional, Union
-from urllib.parse import urlparse
 
 from juju.controller import Controller
 from juju.model import Model
 from pytest_operator.plugin import OpsTest
 
 logger = logging.getLogger(__name__)
+
+
+# We also need an insecure context to connect to e.g. unit ip addresses directly
+insecure_context = ssl.create_default_context()
+insecure_context.check_hostname = False
+insecure_context.verify_mode = ssl.CERT_NONE
 
 
 async def cli_deploy_bundle(
@@ -44,7 +50,7 @@ async def cli_deploy_bundle(
     await ops_test.model.wait_for_idle(timeout=1000, raise_on_error=False)
 
 
-async def get_proxied_unit_url(ops_test: OpsTest, app_name: str, unit_num: int) -> str:
+async def get_proxied_url(ops_test: OpsTest, app_name: str, unit_num: Optional[int] = None) -> str:
     """Returns the URL assigned by Traefik over the ingress_per_unit relation interface."""
     action = (
         await ops_test.model.applications["traefik"].units[0].run_action("show-proxied-endpoints")
@@ -56,16 +62,8 @@ async def get_proxied_unit_url(ops_test: OpsTest, app_name: str, unit_num: int) 
 
     logging.debug(f"Endpoints proxied by Traefik/0: {proxied_endpoints}")
 
-    unit_url = proxied_endpoints[f"{app_name}/{unit_num}"]["url"]
-
-    traefik_address = await get_address(ops_test, "traefik")
-    url = urlparse(unit_url)
-    final_url = (
-        f"{url.scheme}://{traefik_address}{':' + str(url.port) if url.port else ''}{url.path}"
-    )
-    logging.debug(f"Routing over traefik using: {final_url}")
-
-    return final_url
+    key = f"{app_name}/{unit_num}" if unit_num else app_name
+    return proxied_endpoints[key]["url"]
 
 
 async def get_address(ops_test: OpsTest, app_name: str, unit_num: Optional[int] = None) -> str:
@@ -88,9 +86,7 @@ async def get_address(ops_test: OpsTest, app_name: str, unit_num: Optional[int] 
     )
 
 
-async def get_alertmanager_alerts(
-    ops_test: OpsTest, unit_name, unit_num, retries=3, path=""
-) -> List[dict]:
+async def get_alertmanager_alerts(ops_test: OpsTest, app_name, retries=3) -> List[dict]:
     """Get a list of alerts.
 
     Response looks like this:
@@ -115,11 +111,12 @@ async def get_alertmanager_alerts(
         }
     }
     """
-    # TODO consume this from alertmanager_client when becomes available
-    address = await get_address(ops_test, unit_name, unit_num)
-    path = "/" + path.lstrip("/").rstrip("/")
-    url = f"http://{address}:9093{path}/api/v2/alerts"
-    while not (alerts := json.loads(urllib.request.urlopen(url, data=None, timeout=2).read())):
+    url = f"{await get_proxied_url(ops_test, app_name)}/api/v2/alerts"
+    while not (
+        alerts := json.loads(
+            urllib.request.urlopen(url, data=None, timeout=2, context=insecure_context).read()
+        )
+    ):
         retries -= 1
         logger.warning("no alerts")
         if retries > 0:
@@ -130,9 +127,7 @@ async def get_alertmanager_alerts(
     return alerts
 
 
-async def get_alertmanager_groups(
-    ops_test: OpsTest, unit_name, unit_num, retries=3, path=""
-) -> List[dict]:
+async def get_alertmanager_groups(ops_test: OpsTest, app_name, retries=3) -> List[dict]:
     """Get a list of groups of alerts.
 
     Response looks like this:
@@ -151,10 +146,13 @@ async def get_alertmanager_groups(
     where "alarm1_dict" etc. are the same object described in `get_alertmanager_alerts`.
     """
     # TODO consume this from alertmanager_client when becomes available
-    address = await get_address(ops_test, unit_name, unit_num)
-    path = "/" + path.lstrip("/").rstrip("/")
-    url = f"http://{address}:9093{path}/api/v2/alerts/groups"
-    while not (groups := json.loads(urllib.request.urlopen(url, data=None, timeout=2).read())):
+    url = f"{await get_proxied_url(ops_test, app_name)}/api/v2/alerts/groups"
+
+    while not (
+        groups := json.loads(
+            urllib.request.urlopen(url, data=None, timeout=2, context=insecure_context).read()
+        )
+    ):
         retries -= 1
         logger.warning("no alerts")
         if retries > 0:
