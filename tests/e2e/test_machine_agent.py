@@ -160,7 +160,7 @@ async def test_metrics(ops_test):
         f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
         "prometheus/0",
         "curl",
-        f"localhost:9090/{k8s_mdl.name}-prometheus-0/api/v1/label/juju_unit/values",
+        f"localhost:9090/api/v1/label/juju_unit/values",
     ]
     try:
         result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
