@@ -9,13 +9,13 @@ import logging
 import ssl
 import tempfile
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 from urllib.request import urlopen
 
 import juju
 import juju.utils
 import pytest
-import sh
 from helpers import (
     ModelConfigChange,
     cli_deploy_bundle,
@@ -68,18 +68,20 @@ async def test_build_and_deploy(ops_test: OpsTest, rendered_bundle, tls_enabled)
 
 
 @pytest.mark.abort_on_fail
-async def test_obtain_external_ca_cert():
-    status = sh.juju("status", "--no-color")
+async def test_obtain_external_ca_cert(ops_test):
+    return_code, stdout, stderr = await ops_test.juju("status", "--no-color")
+    status = stdout
     if "external-ca/0" in status:
         # Obtain certificate from external-ca
         temp_dir = tempfile.mkdtemp()
-        cert_path = temp_dir + "/external_ca.pem"
-        sh.jq(
-            "-r",
-            '."external-ca/0".results."ca-certificate"',
-            _in=sh.juju(*"run external-ca/0 get-ca-certificate --format=json --no-color".split()),
-            _out=cert_path,
+        cert_path = Path(temp_dir + "/external_ca.pem")
+
+        return_code, stdout, stderr = await ops_test.juju(
+            *"run external-ca/0 get-ca-certificate --format=json --no-color".split()
         )
+        cert = json.loads(stdout)["external-ca/0"]["results"]["ca-certificate"]
+        cert_path.write_text(cert)
+
         ctx = ssl.create_default_context()
         ctx.load_verify_locations(cert_path)
         context.external_ca = ctx
@@ -89,7 +91,7 @@ async def test_obtain_external_ca_cert():
 
 
 @pytest.mark.abort_on_fail
-async def test_web_uis_are_reachable_via_ingress_url():
+async def test_web_uis_are_reachable_via_ingress_url(ops_test):
     # Create mapping from app name (as it appears in catalogue) to its url
     # Looks like this:
     # {
@@ -97,9 +99,11 @@ async def test_web_uis_are_reachable_via_ingress_url():
     #   'Prometheus': 'https://prometheus-0.prometheus-endpoints.test.svc.cluster.local:9090',
     #   'Alertmanager': 'https://alertmanager-0.alertmanager-endpoints.test.svc.cluster.local:9093'
     # }
-    cat_conf = json.loads(
-        sh.juju("ssh", "--container", "catalogue", "catalogue/0", "cat", "/web/config.json")
+    return_code, stdout, stderr = await ops_test.juju(
+        "ssh", "--container", "catalogue", "catalogue/0", "cat", "/web/config.json"
     )
+    cat_conf = json.loads(stdout)
+
     apps = {app["name"]: app["url"] for app in cat_conf["apps"]}
 
     for name, url in apps.items():
