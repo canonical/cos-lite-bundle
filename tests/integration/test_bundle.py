@@ -119,7 +119,7 @@ async def test_web_uis_are_reachable_via_ingress_url(ops_test):
 
 
 @pytest.mark.abort_on_fail
-async def test_web_uis_are_reachable_via_unit_ip(ops_test: OpsTest, tls_enabled):
+async def test_web_uis_are_reachable_via_unit_ip(ops_test: OpsTest):
     """Make sure strip-prefix works as expected so that no path is needed when curling unit ip."""
     for app_name, port, path in [
         ("alertmanager", 9093, "/api/v2/status"),

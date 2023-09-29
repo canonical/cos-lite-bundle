@@ -62,7 +62,7 @@ async def get_proxied_url(ops_test: OpsTest, app_name: str, unit_num: Optional[i
 
     logging.debug(f"Endpoints proxied by Traefik/0: {proxied_endpoints}")
 
-    key = f"{app_name}/{unit_num}" if unit_num else app_name
+    key = f"{app_name}/{unit_num}" if unit_num is not None else app_name
     return proxied_endpoints[key]["url"]
 
 
