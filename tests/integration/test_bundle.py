@@ -148,7 +148,7 @@ async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
     # a jsonified activeAlertmanagers looks like this:
     # [{'url': 'http://<ingress:80 or fqdn:9093>/api/v2/alerts'}]
     active_alertmanagers = decoded["data"]["activeAlertmanagers"]
-    assert len(active_alertmanagers) == len(ops_test.model.applications["prometheus"].units)
+    assert len(active_alertmanagers) == len(ops_test.model.applications["alertmanager"].units)
 
     # Make sure droppedAlertmanagers is empty
     assert not decoded["data"].get("droppedAlertmanagers")
