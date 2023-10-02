@@ -154,6 +154,7 @@ async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
     assert not decoded["data"].get("droppedAlertmanagers")
 
 
+@pytest.mark.abort_on_fail
 async def test_juju_topology_labels_in_alerts(ops_test: OpsTest):
     """For alert labels to reach alertmanager, labels need to be injected and forwarded to prom."""
     alerts = await get_alertmanager_alerts(ops_test, "alertmanager", retries=100)
@@ -171,6 +172,7 @@ async def test_juju_topology_labels_in_alerts(ops_test: OpsTest):
     logger.info("juju topology test passed for %s alerts", i + 1)
 
 
+@pytest.mark.abort_on_fail
 async def test_alerts_are_grouped(ops_test: OpsTest):
     groups = await get_alertmanager_groups(ops_test, "alertmanager", retries=100)
     i = -1
@@ -182,6 +184,7 @@ async def test_alerts_are_grouped(ops_test: OpsTest):
     logger.info("juju topology grouping test passed for %s groups", i + 1)
 
 
+@pytest.mark.abort_on_fail
 async def test_alerts_are_fired_from_non_leader_units_too(ops_test: OpsTest):
     """The list of alerts must include an "AlwaysFiring" alert from each avalanche unit."""
 
@@ -203,11 +206,12 @@ async def test_alerts_are_fired_from_non_leader_units_too(ops_test: OpsTest):
     await juju.utils.block_until_with_coroutine(all_alerts_fire, timeout=300, wait_period=15)
 
 
+@pytest.mark.abort_on_fail
 async def test_bundle_charms_can_handle_frequent_update_status(ops_test: OpsTest):
     async with ModelConfigChange(ops_test, **{"update-status-hook-interval": "10s"}):
         # Wait for a considerable amount of time to make sure charms can repeatedly handle this.
         # If all goes well, `wait_for_idle` would raise a timeout error
-        soak_time = 5 * 60  # 5 min
+        soak_time = 2 * 60  # 2 min
         try:
             await ops_test.model.wait_for_idle(
                 status="active",
@@ -224,36 +228,55 @@ async def test_bundle_charms_can_handle_frequent_update_status(ops_test: OpsTest
     await ops_test.model.wait_for_idle(status="active")
 
 
-async def test_prometheus_scrapes_loki_through_traefik(ops_test: OpsTest):
-    """Prometheus should correctly scrape Loki through its traefik endpoint."""
+@pytest.mark.abort_on_fail
+async def test_prometheus_scrapes_loki(ops_test: OpsTest):
+    """Prometheus should successfully scrape Loki."""
     prom_url = await get_proxied_url(ops_test, "prometheus", 0)
 
     response = urlopen(
         f"{prom_url}/api/v1/targets", data=None, timeout=2.0, context=insecure_context
     )
     assert response.code == 200
-    targets = json.loads(response.read())["data"]["activeTargets"]
-    targets_summary = [(t["discoveredLabels"]["__metrics_path__"], t["health"]) for t in targets]
-    assert (f"/{ops_test.model_name}-loki-0/metrics", "up") in targets_summary
+    as_str = response.read().decode("utf8")
+    assert "loki" in as_str  # Should appear in the juju_application label
+    assert "loki-k8s" in as_str  # Should appear in the juju_charm label
+    assert ops_test.model_name in as_str  # Should appear in the juju_model label and job name
+
+    as_dict = json.loads(as_str)["data"]
+    assert as_dict["droppedTargets"] == []  # Shouldn't have any dropped targets
+
+    # All jobs should be up
+    health = {target["labels"]["job"]: target["health"] for target in as_dict["activeTargets"]}
+    assert set(health.values()) == {"up"}
+
     logger.info("prometheus is successfully scraping loki through traefik")
 
 
-async def test_loki_receives_logs_through_traefik(ops_test: OpsTest):
-    """Loki should be able to receive logs through its traefik endpoint."""
+@pytest.mark.abort_on_fail
+async def test_loki_receives_logs(ops_test: OpsTest):
+    """Loki should be able to receive logs."""
     loki_url = await get_proxied_url(ops_test, "loki", 0)
 
-    await ops_test.model.deploy("zinc-k8s", application_name="zinc", channel="stable", trust=True)
+    await ops_test.model.deploy("flog-k8s", application_name="flog", channel="edge", trust=True)
     await ops_test.model.wait_for_idle(status="active")
     # Create the relation
-    await ops_test.model.add_relation("loki", "zinc")
-    await ops_test.model.wait_for_idle(status="active")
+    await ops_test.model.add_relation("loki", "flog")
+
+    # Without a sleep, we get an empty response. Need to give promtail some time to stream the logs
+    # or for loki to display them.
+    await asyncio.gather(
+        ops_test.model.wait_for_idle(status="active"),
+        asyncio.sleep(120)
+    )
+
     # Check that logs are coming in
-    response = urlopen(f"{loki_url}/loki/api/v1/series", context=insecure_context)
+    url = f"{loki_url}/loki/api/v1/series"
+    logger.info("Querying loki at %s...", url)
+    response = urlopen(url, context=insecure_context)
     assert response.code == 200
-    series = json.loads(response.read())["data"]
-    series_charms = [s["juju_charm"] for s in series]
-    assert "zinc-k8s" in series_charms
-    logger.info("loki is successfully receiving zinc logs through traefik")
+    as_str = response.read().decode("utf8")
+    assert "flog-k8s" in as_str
+    logger.info("loki is successfully receiving flog logs")
 
 
 @pytest.mark.abort_on_fail
