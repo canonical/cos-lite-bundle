@@ -264,10 +264,7 @@ async def test_loki_receives_logs(ops_test: OpsTest):
 
     # Without a sleep, we get an empty response. Need to give promtail some time to stream the logs
     # or for loki to display them.
-    await asyncio.gather(
-        ops_test.model.wait_for_idle(status="active"),
-        asyncio.sleep(120)
-    )
+    await asyncio.gather(ops_test.model.wait_for_idle(status="active"), asyncio.sleep(120))
 
     # Check that logs are coming in
     url = f"{loki_url}/loki/api/v1/series"
