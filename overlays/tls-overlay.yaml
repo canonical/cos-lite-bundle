@@ -12,7 +12,7 @@ applications:
     channel: edge
     scale: 1
     options:
-      ca-common-name: external.demo.ca
+      ca-common-name: external-ca.example.com
 
 relations:
  # This is a more general CA (e.g. root CA) that signs traefik's own CSR.
