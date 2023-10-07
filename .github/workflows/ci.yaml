@@ -19,9 +19,9 @@ jobs:
         python: [3.8]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python }}
     - name: Install dependencies
@@ -35,22 +35,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Get prefsrc
       run: |
         echo "IPADDR=$(ip -4 -j route get 2.2.2.2 | jq -r '.[] | .prefsrc')" >> $GITHUB_ENV
     - name: Setup operator environment
       uses: charmed-kubernetes/actions-operator@main
       with:
-        juju-channel: 2.9/stable
+        juju-channel: 3.1/stable
         provider: microk8s
         channel: 1.25-strict/stable
         microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
+    - name: Update python-libjuju dependency to match juju version
+      # Assuming the dep is given on a separate tox.ini line
+      run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=3.1.0/g' tox.ini
     - name: Run tests (edge channel)
       run: tox -e integration -- --channel=edge
     - name: Dump debug log
       if: failure()
-      run: for ctl in $(juju controllers --format json | jq -r '.controllers | keys[]'); do for mdl in $(juju models --format json | jq -r '.models[].name' | grep -v "admin/controller"); do juju debug-log -m $ctl:$mdl --replay --ms --no-tail; done; done || true
+      run: |
+        for ctl in $(juju controllers --format json | jq -r '.controllers | keys[]'); do for mdl in $(juju models --format json | jq -r '.models[].name' | grep -v "admin/controller"); do juju debug-log -m $ctl:$mdl --replay --ms --no-tail; done; done || true
+        exit 0
       shell: bash
   end-to-end-tests:
     # Must use Juju 3 to bootstrap both uk8s and lxd:https://bugs.launchpad.net/juju/+bug/2003582
@@ -66,7 +71,7 @@ jobs:
       - name: Setup lxd controller
         uses: charmed-kubernetes/actions-operator@main
         with:
-          juju-channel: 2.9/stable
+          juju-channel: 3.1/stable
           provider: lxd
       - name: Save lxd controller name
         id: lxd-controller
@@ -75,7 +80,7 @@ jobs:
       - name: Setup k8s controller
         uses: charmed-kubernetes/actions-operator@main
         with:
-          juju-channel: 2.9/stable
+          juju-channel: 3.1/stable
           provider: microk8s
           channel: 1.25-strict/stable
           microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
@@ -86,6 +91,8 @@ jobs:
       - name: Fix microk8s permissions
         run: |
           chmod -R ugo+rwX ~/.kube
+      - name: Update python-libjuju dependency to match juju
+        run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=3.1.0/g' tox.ini
       - name: Run end-to-end tests
         run: tox run -vve e2e
         env:

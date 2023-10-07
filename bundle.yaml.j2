@@ -14,7 +14,7 @@ applications:
     trust: true
     {%- if traefik is defined and traefik.endswith('.charm') %}
     resources:
-        traefik-image: "jnsgruk/traefik:2.7.0"
+        traefik-image: "ghcr.io/canonical/traefik:2.10.4"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -24,7 +24,7 @@ applications:
     trust: true
     {%- if alertmanager is defined and alertmanager.endswith('.charm') %}
     resources:
-        alertmanager-image: "ubuntu/prometheus-alertmanager:0.23-22.04_beta"
+        alertmanager-image: "ghcr.io/canonical/alertmanager:0.25.0"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -34,7 +34,7 @@ applications:
     trust: true
     {%- if prometheus is defined and prometheus.endswith('.charm') %}
     resources:
-      prometheus-image: "ubuntu/prometheus:2.33-22.04_beta"
+      prometheus-image: "ghcr.io/canonical/prometheus:dev"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -44,8 +44,8 @@ applications:
     trust: true
     {%- if grafana is defined and grafana.endswith('.charm') %}
     resources:
-      grafana-image: "ubuntu/grafana:9.2-22.04_beta"
-      litestream-image: "litestream/litestream:0.4.0-beta.2"
+      grafana-image: "docker.io/ubuntu/grafana:9.2-22.04_beta"
+      litestream-image: "docker.io/litestream/litestream:0.4.0-beta.2"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -55,7 +55,7 @@ applications:
     trust: true
     {%- if catalogue is defined and catalogue.endswith('.charm') %}
     resources:
-      catalogue-image: "ghcr.io/canonical/catalogue-k8s"
+      catalogue-image: "ghcr.io/canonical/catalogue-k8s-operator:latest"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -71,7 +71,7 @@ applications:
     trust: true
     {%- if loki is defined and loki.endswith('.charm') %}
     resources:
-      loki-image: "grafana/loki:2.4.1"
+      loki-image: "ghcr.io/canonical/loki:2.7.4"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}

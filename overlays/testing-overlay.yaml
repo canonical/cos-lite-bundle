@@ -1,0 +1,33 @@
+applications:
+  alertmanager:
+    scale: 2
+    # Set low resource requests to accommodate small VMs
+    options:
+      cpu: 1m
+      memory: 1Mi
+  prometheus:
+    # Set low resource requests to accommodate small VMs
+    options:
+      cpu: 1m
+      memory: 1Mi
+  grafana:
+    # Set low resource requests to accommodate small VMs
+    options:
+      cpu: 1m
+      memory: 1Mi
+  loki:
+    # Set low resource requests to accommodate small VMs
+    options:
+      cpu: 1m
+      memory: 1Mi
+  avalanche:
+    charm: avalanche-k8s
+    channel: edge
+    scale: 2
+    trust: true
+    options:
+      metric_count: 10
+      series_count: 2
+
+relations:
+  - [avalanche:metrics-endpoint, prometheus]

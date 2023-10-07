@@ -97,11 +97,9 @@ async def test_deploy_machine_charms():
     )
     # Must relate the subordinate before any "wait for idle", because otherwise agent would be in
     # 'unknown' status.
-    await asyncio.gather(
-        lxd_mdl.add_relation(f"{principal_cos_agent.name}:cos-agent", agent.name),
-        lxd_mdl.add_relation(f"{principal_juju_info.name}:juju-info", agent.name),
-        lxd_mdl.block_until(lambda: len(lxd_mdl.applications[agent.name].units) > 0),
-    )
+    await lxd_mdl.add_relation(f"{principal_cos_agent.name}:cos-agent", agent.name)
+    await lxd_mdl.add_relation(f"{principal_juju_info.name}:juju-info", agent.name)
+    await lxd_mdl.block_until(lambda: len(lxd_mdl.applications[agent.name].units) > 0)
 
 
 @pytest.mark.abort_on_fail
@@ -133,12 +131,17 @@ async def test_integration():
 
     # `idle_period` needs to be greater than the scrape interval to make sure metrics ingested.
     await asyncio.gather(
-        lxd_mdl.wait_for_idle(
-            status="active", timeout=7200, idle_period=180, raise_on_error=False
-        ),
-        k8s_mdl.wait_for_idle(
-            status="active", timeout=7200, idle_period=180, raise_on_error=False
-        ),
+        # First, we wait for the critical phase to pass with raise_on_error=False.
+        # (In CI, using github runners, we often see unreproducible hook failures.)
+        lxd_mdl.wait_for_idle(timeout=1800, idle_period=180, raise_on_error=False),
+        k8s_mdl.wait_for_idle(timeout=1800, idle_period=180, raise_on_error=False),
+    )
+
+    await asyncio.gather(
+        # Then we wait for "active", without raise_on_error=False, so the test fails sooner in case
+        # there is a persistent error status.
+        lxd_mdl.wait_for_idle(status="active", timeout=7200, idle_period=180),
+        k8s_mdl.wait_for_idle(status="active", timeout=7200, idle_period=180),
     )
 
 
@@ -160,7 +163,7 @@ async def test_metrics(ops_test):
         f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
         "prometheus/0",
         "curl",
-        f"localhost:9090/{k8s_mdl.name}-prometheus-0/api/v1/label/juju_unit/values",
+        "localhost:9090/api/v1/label/juju_unit/values",
     ]
     try:
         result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
