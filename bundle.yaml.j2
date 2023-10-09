@@ -14,7 +14,7 @@ applications:
     trust: true
     {%- if traefik is defined and traefik.endswith('.charm') %}
     resources:
-        traefik-image: "ghcr.io/canonical/traefik:2.10.4"
+        traefik-image: "ghcr.io/canonical/traefik:dev"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -24,7 +24,7 @@ applications:
     trust: true
     {%- if alertmanager is defined and alertmanager.endswith('.charm') %}
     resources:
-        alertmanager-image: "ghcr.io/canonical/alertmanager:0.25.0"
+        alertmanager-image: "ghcr.io/canonical/alertmanager:dev"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -44,7 +44,7 @@ applications:
     trust: true
     {%- if grafana is defined and grafana.endswith('.charm') %}
     resources:
-      grafana-image: "docker.io/ubuntu/grafana:9.2-22.04_beta"
+      grafana-image: "ghcr.io/canonical/grafana:dev"
       litestream-image: "docker.io/litestream/litestream:0.4.0-beta.2"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
@@ -55,7 +55,7 @@ applications:
     trust: true
     {%- if catalogue is defined and catalogue.endswith('.charm') %}
     resources:
-      catalogue-image: "ghcr.io/canonical/catalogue-k8s-operator:latest"
+      catalogue-image: "ghcr.io/canonical/catalogue-k8s-operator:dev"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -71,7 +71,7 @@ applications:
     trust: true
     {%- if loki is defined and loki.endswith('.charm') %}
     resources:
-      loki-image: "ghcr.io/canonical/loki:2.7.4"
+      loki-image: "ghcr.io/canonical/loki:dev"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
