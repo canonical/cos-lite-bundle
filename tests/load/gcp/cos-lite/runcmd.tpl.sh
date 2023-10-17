@@ -27,7 +27,7 @@ systemctl restart sysstat sysstat-collect.timer sysstat-summary.timer
 systemctl start node-exporter.service
 
 # setup microk8s and bootstrap
-adduser ubuntu microk8s
+usermod -a -G snap_microk8s ubuntu
 microk8s status --wait-ready
 microk8s enable dns:$(grep nameserver /run/systemd/resolve/resolv.conf | awk '{print $2}')
 microk8s.enable hostpath-storage
@@ -42,14 +42,20 @@ microk8s.kubectl rollout status deployment.apps/metrics-server -n kube-system -w
 # The connection to the server 127.0.0.1:16443 was refused - did you specify the right host or port?
 # the metallb addon must be enabled only after the dns addon was rolled out
 # https://github.com/ubuntu/microk8s/issues/2770#issuecomment-984346287
-IPADDR=$(ip -4 -j route | jq -r '.[] | select(.dst | contains("default")) | .prefsrc')
+IPADDR=$(ip -4 -j route get 2.2.2.2 | jq -r '.[] | .prefsrc')
 microk8s.enable metallb:$IPADDR-$IPADDR
 microk8s.kubectl rollout status daemonset.apps/speaker -n metallb-system -w --timeout=600s
 
 # prep juju
-sudo -u ubuntu juju bootstrap --no-gui --agent-version=2.9.34 microk8s uk8s
+# For some reason, in the minimal cloud image, the group and owner of the ubuntu user is root
+chgrp -R ubuntu /home/ubuntu
+chown -R ubuntu /home/ubuntu
+
+# https://bugs.launchpad.net/juju/+bug/1988355
+sudo -u ubuntu mkdir -p /home/ubuntu/.local/share/juju
+sudo -u ubuntu juju bootstrap --agent-version=3.1.6 microk8s uk8s
 sudo -u ubuntu juju add-model --config logging-config="<root>=WARNING; unit=DEBUG" --config update-status-hook-interval="5m" ${JUJU_MODEL_NAME}
-sudo -u ubuntu juju deploy --channel=edge cos-lite --trust --overlay /run/overlay-load-test.yaml --trust
+sudo -u ubuntu juju deploy --channel=edge cos-lite --trust --overlay /home/ubuntu/overlay-load-test.yaml --trust
 
 
 # start services
@@ -68,7 +74,7 @@ sudo -u ubuntu juju relate grafana:ingress traefik
 systemctl start cos-lite-rest-server.service
 
 # force reldata reinit in case files appeared on disk after the last hook fired
-sudo -u ubuntu juju run-action cos-config/0 sync-now --wait
+sudo -u ubuntu juju run cos-config/0 sync-now
 
 # Waiting for prom here because systemd would timeout waiting for the unit to become active/idle:
 #   Job for prometheus-stdout-logger.service failed because a timeout was exceeded.

@@ -35,3 +35,18 @@ output "num_virtual_sres" {
   # Total number of virtual SREs
   value = var.num_querying_nodes * var.num_virtual_sres_per_node
 }
+
+
+# The following are used in healthchecks.sh.
+
+output "prom_internal_url" {
+    value = local.prom_url
+}
+
+output "loki_internal_url" {
+    value = local.loki_url
+}
+
+output "avalanche_internal_address" {
+    value = local.avalanche_target
+}

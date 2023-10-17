@@ -59,7 +59,8 @@ data "cloudinit_config" "cos_lite" {
             "content" : file("cos-lite/pod-top-exporter.service"),
           },
           {
-            "path" : "/run/overlay-load-test.yaml",
+            # Path must be inside $HOME because juju 3 is a strictly confined snap
+            "path" : "/home/ubuntu/overlay-load-test.yaml",
             "content" : templatefile("cos-lite/overlay-load-test.tpl.yaml", {
               COS_APPLIANCE_HOSTNAME = local.cos_appliance_hostname,
               NUM_TARGETS            = var.num_avalanche_targets,
@@ -94,9 +95,12 @@ data "cloudinit_config" "cos_lite" {
 
         "snap" : {
           "commands" : [
-            "snap install --classic juju --channel=2.9/stable",
-            "snap install --classic microk8s --channel=1.26/stable",
+            # Juju 3.1 is supported until 25.04
+            "snap install --classic juju --channel=3.1/stable",
+            "snap install --classic microk8s --channel=1.27-strict/stable",
             "snap alias microk8s.kubectl kubectl",
+            "snap alias microk8s.kubectl k",
+            "snap install yq",
             "snap refresh",
           ]
         }
@@ -141,4 +145,3 @@ resource "google_compute_instance" "vm_cos_lite_appliance" {
     }
   }
 }
-
