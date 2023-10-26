@@ -2,7 +2,7 @@
 applications:
   loki:
     resources:
-      loki-image: grafana/loki:2.4.1
+      loki-image: ubuntu/loki:2.8.4-22.04
   prometheus:
     storage:
       database: 1000GiB

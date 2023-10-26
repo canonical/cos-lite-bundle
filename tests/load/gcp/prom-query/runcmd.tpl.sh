@@ -1,5 +1,8 @@
 set -eux
 
+# TODO: try to add "owner" and "defer" to "write_files" to prevent from cloud init to set $HOME to
+#  be owned by root:root.
+#  https://canonical-cloud-init.readthedocs-hosted.com/en/latest/reference/modules.html#write-files
 chown -R ubuntu /home/ubuntu
 chgrp -R ubuntu /home/ubuntu
 

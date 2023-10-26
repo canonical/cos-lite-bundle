@@ -48,6 +48,9 @@ microk8s.kubectl rollout status daemonset.apps/speaker -n metallb-system -w --ti
 
 # prep juju
 # For some reason, in the minimal cloud image, the group and owner of the ubuntu user is root
+# TODO: try to add "owner" and "defer" to "write_files" to prevent from cloud init to set $HOME to
+#  be owned by root:root.
+#  https://canonical-cloud-init.readthedocs-hosted.com/en/latest/reference/modules.html#write-files
 chgrp -R ubuntu /home/ubuntu
 chown -R ubuntu /home/ubuntu
 
