@@ -24,7 +24,7 @@ def fit_bilinear(x_mat, a1, a2, b):
     return a1 * x + a2 * y + b
 
 
-data = pandas.read_csv(f"{path}/var_ssd-4cpu-8gb.csv")
+data = pandas.read_csv(f"{path}/var_ssd-8cpu-16gb.csv")
 
 
 def add_subplot(ax, param: str, vmin: float = None, vmax: float = None):

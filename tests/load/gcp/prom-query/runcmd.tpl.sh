@@ -21,6 +21,7 @@ sudo -u ubuntu npx -y playwright@1.27.1 install
 TARGET="$(find /home/ubuntu/.cache/ms-playwright/ -maxdepth 1 -type d -name "chromium-*" | head -1)"
 ln -s "$TARGET" /home/ubuntu/.cache/ms-playwright/chromium
 ln -s "$TARGET" /home/ubuntu/.cache/ms-playwright/chromium-1084
+ln -s "$TARGET" /home/ubuntu/.cache/ms-playwright/chromium-1091
 
 # wait until the cos-lite node is up
 timeout 1800 bash -c "until curl -s --connect-timeout 2.0 --max-time 5 ${PROM_URL}/api/v1/targets; do sleep 5; done"

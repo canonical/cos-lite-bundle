@@ -1,6 +1,9 @@
 --- # overlay.yaml
 applications:
   loki:
+    options:
+      ingestion-rate-mb: 60
+      ingestion-burst-size-mb: 100
     resources:
       loki-image: ubuntu/loki:2.8.4-22.04
   prometheus:
