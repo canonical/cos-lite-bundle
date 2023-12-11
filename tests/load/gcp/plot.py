@@ -24,9 +24,6 @@ def fit_bilinear(x_mat, a1, a2, b):
     return a1 * x + a2 * y + b
 
 
-data = pandas.read_csv(f"{path}/var_ssd-8cpu-16gb.csv")
-
-
 def add_subplot(ax, param: str, vmin: float = None, vmax: float = None):
     # fig, ax = p.subplots()
 
@@ -91,46 +88,53 @@ def add_subplot(ax, param: str, vmin: float = None, vmax: float = None):
     plot_data("other", data[(data["Pass/Fail"] != "PASS") & (data["Pass/Fail"] != "FAIL")])
 
 
-to_plot = [
-    ("% CPU (p99)", 0, 100),
-    ("% Mem (p99)", 0, 100),
-    ("Storage (GiB/day)",),
-    ("HTTP request times (p99) (ms)",),
-]
+if __name__ == "__main__":
+    data = pandas.read_csv(f"{path}/results.csv")
 
-num_subplots = len(to_plot)
-rows = int(2)
-cols = int(np.ceil(num_subplots / rows))
-fig = p.figure()
-for i in range(num_subplots):
-    ax = p.subplot(rows, cols, i + 1)
-    add_subplot(ax, *to_plot[i])
-fig.suptitle("VM resource usage")
+    # Filter out. TODO: make this a cli arg
+    data = data[(data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)]
+    print(data)
 
-# Plot pod CPU, mem
-to_plot = [
-    ("Log lines / min", "Loki Pod CPU"),
-    ("Log lines / min", "Loki Pod Mem"),
-    ("Metrics datapoints / min", "Prom Pod CPU"),
-    ("Metrics datapoints / min", "Prom Pod Mem"),
-]
-num_subplots = len(to_plot)
-rows = int(2)
-cols = int(np.ceil(num_subplots / rows))
-fig = p.figure()
-for i, (x_label, y_label) in enumerate(to_plot):
-    ax = fig.add_subplot(rows, cols, i + 1)
-    data.plot(x=x_label, y=y_label, kind="scatter", ax=ax)
-    ax.grid(linestyle="--")
+    to_plot = [
+        ("% CPU (p99)", 0, 100),
+        ("% Mem (p99)", 0, 100),
+        ("Storage (GiB/day)",),
+        ("HTTP request times (p99) (ms)",),
+    ]
 
-    # Curve fit
-    data_without_nans = data[[x_label, y_label]].dropna().sort_values(x_label)
-    x, y = np.array(data_without_nans[x_label]), np.array(data_without_nans[y_label])
+    num_subplots = len(to_plot)
+    rows = int(2)
+    cols = int(np.ceil(num_subplots / rows))
+    fig = p.figure()
+    for i in range(num_subplots):
+        ax = p.subplot(rows, cols, i + 1)
+        add_subplot(ax, *to_plot[i])
+    fig.suptitle("VM resource usage")
 
-    popt, _ = curve_fit(fit_linear, x, y)
-    y_fit = [fit_linear(x_, *popt) for x_ in x]
-    ax.plot(x, y_fit, "k--")
-    ax.text((min(x) + max(x)) / 2, (min(y) + max(y)) / 2, str(popt))
-fig.suptitle("Per-pod resource usage")
+    # Plot pod CPU, mem
+    to_plot = [
+        ("Log lines / min", "Loki Pod CPU"),
+        ("Log lines / min", "Loki Pod Mem"),
+        ("Metrics datapoints / min", "Prom Pod CPU"),
+        ("Metrics datapoints / min", "Prom Pod Mem"),
+    ]
+    num_subplots = len(to_plot)
+    rows = int(2)
+    cols = int(np.ceil(num_subplots / rows))
+    fig = p.figure()
+    for i, (x_label, y_label) in enumerate(to_plot):
+        ax = fig.add_subplot(rows, cols, i + 1)
+        data.plot(x=x_label, y=y_label, kind="scatter", ax=ax)
+        ax.grid(linestyle="--")
 
-p.show()
+        # Curve fit
+        data_without_nans = data[[x_label, y_label]].dropna().sort_values(x_label)
+        x, y = np.array(data_without_nans[x_label]), np.array(data_without_nans[y_label])
+
+        popt, _ = curve_fit(fit_linear, x, y)
+        y_fit = [fit_linear(x_, *popt) for x_ in x]
+        ax.plot(x, y_fit, "k--")
+        ax.text((min(x) + max(x)) / 2, (min(y) + max(y)) / 2, str(popt))
+    fig.suptitle("Per-pod resource usage")
+
+    p.show()
