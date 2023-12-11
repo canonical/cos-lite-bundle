@@ -74,11 +74,6 @@ microk8s.kubectl rollout status statefulset.apps/grafana -n ${JUJU_MODEL_NAME} -
 #sudo -u ubuntu juju relate grafana:ingress traefik
 
 
-# https://bugs.launchpad.net/juju/+bug/2045317
-microk8s.kubectl rollout status statefulset.apps/loki -n ${JUJU_MODEL_NAME} -w --timeout=600s
-sudo -u ubuntu juju refresh --switch loki-k8s --channel=edge/325 loki  # Expires at 2023-12-30T00:00:00Z
-
-
 # wait for grafana to become active
 /run/wait-for-grafana-ready.sh
 systemctl start cos-lite-rest-server.service
