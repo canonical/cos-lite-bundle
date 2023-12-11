@@ -130,7 +130,7 @@ resource "google_compute_instance" "vm_cos_lite_appliance" {
     initialize_params {
       image = "ubuntu-os-cloud/ubuntu-minimal-2204-lts"
       type  = var.disk_type
-      size  = "100"
+      size  = "200"
     }
   }
 
