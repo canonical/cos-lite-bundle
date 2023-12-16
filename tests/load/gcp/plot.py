@@ -91,7 +91,7 @@ def add_subplot(ax, param: str, vmin: float = None, vmax: float = None):
 def per_pod_resource_usage(data: pandas.DataFrame):
     series = {
         "ssd-4cpu-8gb": ({"marker": "s", "color": "r"}, data[(data["Pass/Fail"] == "PASS") & (data["Disk"] == "ssd") & (data["CPUs"] == 4) & (data["GBs"] == 8)]),
-        "ssd-8cpu-16gb": ({"marker": "o", "color": "k"}, data[(data["Pass/Fail"] == "PASS") & (data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)]),
+        "ssd-8cpu-16gb": ({"marker": "o", "color": "k"}, data[(data["Loki"] == "2.9.2") & (data["Pass/Fail"] == "PASS") & (data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)]),
     }
 
     series_without_fit = {
@@ -138,31 +138,45 @@ def per_pod_resource_usage(data: pandas.DataFrame):
 def total_estimation_from_per_pod(loglines_per_minute, datapoints_per_minute) -> Tuple[float, float, float]:
     # Return a 3-tuple: (cpu, mem_gb, storage_gb_per_day).
 
-    cpu_components = np.array([  # in vCPUs
+    # If loglines_per_minute and datapoints_per_minute were scalars, we could have used matrix multiplication:
+    # (cpu, mem, disk) = A.dot(x) + idle_coeffs
+
+    # / cpu [vCPUs]   \     /  -- cpu coeffs --  \  / loglines/min   \     /  cos idle cpu           \
+    # | mem [GB]      |  =  |  -- mem coeffs --  |  | datapoints/min |  +  |  cos, microk8s idle mem |
+    # \ disk [GB/day] /     \  -- disk coeffs -- /  \                /     \  host disk fill rate    /
+    #
+    #        y           =             A          *         x           +                b
+    #      [3x1]                     [3x2]                [2x1]                        [3x1]
+
+    # But because they are matrices (from meshgrid), we calculate manually.
+
+    cpu_coeffs = np.array([  # in vCPUs
         # (a1, b1, c), where cpu = a1*(logline per minutes) + b1 * (datapoints/min) + c
-        [6.84e-6, 0, 0.483],  # loki - only depends on loglines
-        [0, 1.08e-7, 0.173],  # prom - only depends on metric datapoints
-        [0, 0, 0.25],  # grafana - does not depend on ingestion rate
-        [0, 0, 0.08],  # traefik - does not depend on ingestion rate
+        [6.84e-6, 0, 0.483],  # loki - contributes to cpu only via loglines
+        [0, 1.08e-7, 0.173],  # prom - contributes to cpu only via metric datapoints
+        [0, 0, 0.25],  # grafana
+        [0, 0, 0.08],  # traefik
+        [0, 0, 0.1],  # host os (microk8s, ...)
     ]).sum(axis=0)
 
-    mem_components = np.array([  # in GB
-        # (a1, b1, c), where mem = a1*(logline per minutes) + b1 * (datapoints/min) + c
+    mem_coeffs = np.array([  # in GB
+        # (a1, b1, c), where mem = a1*(logline per minutes) + b1 * (datapoints/min)
         [3.52e-6, 0, 2.07],  # loki
         [0, 1.47e-6, 0.25],  # prom
-        [0.00, 0.00, 0.20],  # grafana
-        [0.00, 0.00, 0.20],  # traefik
+        [0, 0, 0.2],  # grafana
+        [0, 0, 0.2],  # traefik
+        [0, 0, 4],  # host os (microk8s, ...)
     ]).sum(axis=0)
 
-    # (a1, b1, c), where disk = a1*(logline per minutes) + b1 * (datapoints/min) + c
+    # (a1, b1, c), where disk = a1*(logline per minutes) + b1 * (datapoints/min)
     # From fit - c is 0 because the fit was 1e-12 which is effectively zero.
     # The initial system size - about 4gb - is eliminated by the derivative (GB/day).
-    disk_components = np.array([3.18e-4, 3.24e-6, 0])  # in GB/day
+    disk_coeffs = np.array([3.18e-4, 3.24e-6, 0])  # in GB/day
 
     return (
-        cpu_components[0] * loglines_per_minute + cpu_components[1] * datapoints_per_minute + cpu_components[2],
-        mem_components[0] * loglines_per_minute + mem_components[1] * datapoints_per_minute + mem_components[2],
-        disk_components[0] * loglines_per_minute + disk_components[1] * datapoints_per_minute + disk_components[2],
+        cpu_coeffs[0] * loglines_per_minute + cpu_coeffs[1] * datapoints_per_minute + cpu_coeffs[2],
+        mem_coeffs[0] * loglines_per_minute + mem_coeffs[1] * datapoints_per_minute + mem_coeffs[2],
+        disk_coeffs[0] * loglines_per_minute + disk_coeffs[1] * datapoints_per_minute + disk_coeffs[2],
     )
 
 
@@ -210,27 +224,30 @@ def plot_total_estimation():
     datapoints_mat, loglines_mat = np.meshgrid(datapoints, loglines)
     cpu, mem, disk = total_estimation_from_per_pod(loglines_mat, datapoints_mat)
 
+    def mkplot(ax, title, cpu, mem, disk):
+        im = ax.imshow(cpu / cpu.max() + mem / mem.max() + disk / disk.max(), origin="lower", cmap="Pastel2")
+
+        x_labels = [f"{dp / 1e6:.0f}M" for dp in datapoints]
+        y_labels = [f"{ll / 1e3:.0f}k" for ll in loglines]
+        ax.set_xticks(np.arange(len(x_labels)), labels=x_labels)
+        ax.set_yticks(np.arange(len(y_labels)), labels=y_labels)
+        ax.set_xlabel("Datapoints/min")
+        ax.set_ylabel("Log lines/min")
+
+        # Loop over data dimensions and create text annotations.
+        for i in range(len(loglines)):
+            for j in range(len(datapoints)):
+                cpu_ann = f"{cpu[i, j]:.1f} cpu"
+                mem_ann = f"{mem[i, j]:.1f} gb"
+                disk_ann = f"{disk[i, j]:.0f} gb/day"
+                cell_ann = f"{cpu_ann}\n{mem_ann}\n{disk_ann}"
+                text = ax.text(j, i, cell_ann, ha="center", va="center", color="k")
+
+        ax.set_title(title)
+
     fig = p.figure()
-    ax = fig.add_subplot(1, 1, 1)
-    im = ax.imshow(cpu/cpu.max() + mem/mem.max() + disk/disk.max(), origin="lower")
-
-    x_labels = [f"{dp/1e6:.0f}M" for dp in datapoints]
-    y_labels = [f"{ll/1e3:.0f}k" for ll in loglines]
-    ax.set_xticks(np.arange(len(x_labels)), labels=x_labels)
-    ax.set_yticks(np.arange(len(y_labels)), labels=y_labels)
-    ax.set_xlabel("Datapoints/min")
-    ax.set_ylabel("Log lines/min")
-
-    # Loop over data dimensions and create text annotations.
-    for i in range(len(loglines)):
-        for j in range(len(datapoints)):
-            cpu_ann = f"{cpu[i, j]:.1f} cpu"
-            mem_ann = f"{mem[i, j]:.1f} gb"
-            disk_ann = f"{disk[i, j]:.0f} gb/day"
-            cell_ann = f"{cpu_ann}\n{mem_ann}\n{disk_ann}"
-            text = ax.text(j, i, cell_ann, ha="center", va="center", color="w")
-
-    ax.set_title("VM sizing")
+    mkplot(fig.add_subplot(1, 2, 1), "VM sizing from per-pod data", cpu, mem, disk)
+    mkplot(fig.add_subplot(1, 2, 2), "VM sizing (with margin)", np.ceil(1.1*cpu), np.ceil(1.1*mem), np.ceil(1.1*disk))
     fig.tight_layout()
 
 
