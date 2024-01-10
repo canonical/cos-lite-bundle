@@ -28,14 +28,14 @@ data "cloudinit_config" "cos_lite" {
             "content" : file("common/node-exporter.service"),
           },
           {
-            "path" : "/run/wait-for-prom-ready.sh",
+            "path" : "/var/wait-for-prom-ready.sh",
             "permissions" : "0755",
             "content" : templatefile("common/wait-for-prom-ready.tpl.sh", {
               PROM_EXTERNAL_URL = local.prom_url,
             }),
           },
           {
-            "path" : "/run/wait-for-grafana-ready.sh",
+            "path" : "/var/wait-for-grafana-ready.sh",
             "permissions" : "0755",
             "content" : templatefile("cos-lite/wait-for-grafana-ready.tpl.sh", {
               GRAFANA_EXTERNAL_URL = local.grafana_url,
@@ -48,7 +48,7 @@ data "cloudinit_config" "cos_lite" {
             }),
           },
           {
-            "path" : "/run/pod_top_exporter.py",
+            "path" : "/var/pod_top_exporter.py",
             "permissions" : "0755",
             "content" : templatefile("cos-lite/pod_top_exporter.tpl.py", {
               JUJU_MODEL_NAME = var.juju_model_name,
@@ -69,7 +69,7 @@ data "cloudinit_config" "cos_lite" {
             }),
           },
           {
-            "path" : "/run/cos-lite-rest-server.py",
+            "path" : "/var/cos-lite-rest-server.py",
             "permissions" : "0755",
             "content" : file("cos-lite/cos-lite-rest-server.py"),
           },

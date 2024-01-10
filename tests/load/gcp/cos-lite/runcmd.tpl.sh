@@ -75,7 +75,7 @@ microk8s.kubectl rollout status statefulset.apps/grafana -n ${JUJU_MODEL_NAME} -
 
 
 # wait for grafana to become active
-/run/wait-for-grafana-ready.sh
+/var/wait-for-grafana-ready.sh
 systemctl start cos-lite-rest-server.service
 
 # force reldata reinit in case files appeared on disk after the last hook fired
@@ -83,6 +83,6 @@ sudo -u ubuntu juju run cos-config/0 sync-now
 
 # Waiting for prom here because systemd would timeout waiting for the unit to become active/idle:
 #   Job for prometheus-stdout-logger.service failed because a timeout was exceeded.
-/run/wait-for-prom-ready.sh
+/var/wait-for-prom-ready.sh
 systemctl start prometheus-stdout-logger.service
 systemctl start pod-top-exporter.service
