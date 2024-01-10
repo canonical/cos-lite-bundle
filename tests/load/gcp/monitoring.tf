@@ -61,6 +61,8 @@ data "cloudinit_config" "monitoring" {
         ],
 
         "package_update" : "true",
+        "package_upgrade": "true",
+        "package_reboot_if_required": "true",
 
         "packages" : [
           "unzip",

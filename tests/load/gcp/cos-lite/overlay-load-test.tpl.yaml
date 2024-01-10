@@ -1,11 +1,15 @@
 --- # overlay.yaml
 applications:
+  grafana:
+    # We need a 9.2 image until the load test is fixed to work with v10.
+    resources:
+      grafana-image: docker.io/ubuntu/grafana:9.2-22.04_beta
   loki:
     options:
       ingestion-rate-mb: 60
       ingestion-burst-size-mb: 100
     resources:
-      loki-image: ubuntu/loki:2.8.4-22.04
+      loki-image: ubuntu/loki:2.9.2-22.04
   prometheus:
     storage:
       database: 1000GiB
