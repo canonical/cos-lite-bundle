@@ -4,7 +4,8 @@
 
 import inspect
 import os
-from typing import Literal, Tuple
+from typing import Literal, Tuple, Callable, Optional
+from types import SimpleNamespace
 
 import numpy as np
 import pandas
@@ -22,6 +23,10 @@ def fit_linear(x, a, b):
 def fit_bilinear(x_mat, a1, a2, b):
     x, y = x_mat
     return a1 * x + a2 * y + b
+
+
+def fit_exp(x, a, b):
+    return a + b * np.exp(-x)
 
 
 def add_subplot(ax, param: str, vmin: float = None, vmax: float = None):
@@ -88,49 +93,203 @@ def add_subplot(ax, param: str, vmin: float = None, vmax: float = None):
     plot_data("other", data[(data["Pass/Fail"] != "PASS") & (data["Pass/Fail"] != "FAIL")])
 
 
+def plot_serie(ax, xlabel, ylabel, series_label: str, serie: pandas.DataFrame, fit: Optional[Callable], **plotargs):
+    serie.plot(x=xlabel, y=ylabel, kind="scatter", ax=ax, label=series_label, **plotargs)
+
+    if fit:
+        without_nans = serie[[xlabel, ylabel]].dropna().sort_values(xlabel)
+        x, y = np.array(without_nans[xlabel]), np.array(without_nans[ylabel])
+
+        popt, _ = curve_fit(fit, x, y)
+        y_fit = [fit(x_, *popt) for x_ in x]
+        ax.plot(x, y_fit, f"{plotargs['color']}--")
+        ax.text((min(x) + max(x)) / 2, (min(y) + max(y)) / 2, str(popt))
+        
+
+def plot_passed_failed(ax, xlabel, ylabel, series_label, serie: pandas.DataFrame, fit: Optional[Callable], plotargs: dict):
+    # Passed, with fit
+    passed = serie[(serie["Pass/Fail"] == "PASS")]
+    plot_serie(
+        ax,
+        xlabel,
+        ylabel,
+        series_label + f" ({len(passed)} passed)",
+        passed,
+        fit,
+        **plotargs,
+    )
+    
+    # Failed, without fit
+    failed = serie[(serie["Pass/Fail"] != "PASS")]
+    plot_serie(
+        ax,
+        xlabel,
+        ylabel,
+        series_label + f" ({len(failed)} failed)",
+        failed,
+        None,
+        **{**plotargs, **{"marker": "x"}},
+    )
+    
+
 def per_pod_resource_usage(data: pandas.DataFrame):
-    series = {
-        "ssd-4cpu-8gb": ({"marker": "s", "color": "r"}, data[(data["Pass/Fail"] == "PASS") & (data["Disk"] == "ssd") & (data["CPUs"] == 4) & (data["GBs"] == 8)]),
-        "ssd-8cpu-16gb": ({"marker": "o", "color": "k"}, data[(data["Loki"] == "2.9.2") & (data["Pass/Fail"] == "PASS") & (data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)]),
-    }
+    vm4cpu8gb = SimpleNamespace(
+        label="ssd-4cpu-8gb",
+        data=data[(data["Disk"] == "ssd") & (data["CPUs"] == 4) & (data["GBs"] == 8)],
+        plotopts={"marker": "s", "color": "r"},
+    )
+    vm8cpu16gb = SimpleNamespace(
+        label="ssd-8cpu-16gb",
+        data=data[(data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)],
+        plotopts={"marker": "o", "color": "k"},
+    )
 
-    series_without_fit = {
-        "ssd-4cpu-8gb (failed)": ({"marker": "x", "color": "r"}, data[(data["Pass/Fail"] != "PASS") & (data["Disk"] == "ssd") & (data["CPUs"] == 4) & (data["GBs"] == 8)]),
-        "ssd-8cpu-16gb (failed)": ({"marker": "x", "color": "k"}, data[(data["Pass/Fail"] != "PASS") & (data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)]),
-    }
-
-    # Plot pod CPU, mem
-    to_plot = [
-        ("Log lines / min", "Loki Pod CPU"),
-        ("Log lines / min", "Loki Pod Mem"),
-        ("Metrics datapoints / min", "Prom Pod CPU"),
-        ("Metrics datapoints / min", "Prom Pod Mem"),
-    ]
-    num_subplots = len(to_plot)
-    rows = int(2)
-    cols = int(np.ceil(num_subplots / rows))
     fig = p.figure()
-    for i, (x_label, y_label) in enumerate(to_plot):
-        ax = fig.add_subplot(rows, cols, i + 1)
 
-        def plot_series(series, *, fit: bool):
-            for (label, (plotargs, serie)) in series.items():
-                serie.plot(x=x_label, y=y_label, kind="scatter", ax=ax, label=label, **plotargs)
+    # Loki CPU
+    ax = fig.add_subplot(2, 2, 1)
+    xlabel = "Log lines / min"
+    ylabel = "Loki Pod CPU"
+    plot_passed_failed(
+        ax,
+        xlabel,
+        ylabel,
+        "ssd-4cpu-8gb",
+        vm4cpu8gb.data,
+        fit_linear,
+        vm4cpu8gb.plotopts,
+    )
+    plot_passed_failed(
+        ax,
+        xlabel,
+        ylabel,
+        "ssd-8cpu-16gb",
+        vm8cpu16gb.data[(vm8cpu16gb.data["Loki"] == "2.9.2") & (vm8cpu16gb.data["Duration (hr)"] >= 12)],
+        fit_exp,
+        vm8cpu16gb.plotopts,
+    )
+    ax.grid(linestyle="--")
 
-                if fit:
-                    # Curve fit
-                    data_without_nans = serie[[x_label, y_label]].dropna().sort_values(x_label)
-                    x, y = np.array(data_without_nans[x_label]), np.array(data_without_nans[y_label])
+    # Loki Mem
+    ax = fig.add_subplot(2, 2, 2)
+    xlabel = "Log lines / min"
+    ylabel = "Loki Pod Mem"
+    plot_passed_failed(
+        ax,
+        xlabel,
+        ylabel,
+        "ssd-4cpu-8gb",
+        vm4cpu8gb.data,
+        fit_linear,
+        vm4cpu8gb.plotopts,
+    )
+    plot_passed_failed(
+        ax,
+        xlabel,
+        ylabel,
+        "ssd-8cpu-16gb",
+        vm8cpu16gb.data[(vm8cpu16gb.data["Loki"] == "2.9.2") & (vm8cpu16gb.data["Duration (hr)"] >= 12)],
+        fit_exp,
+        vm8cpu16gb.plotopts,
+    )
+    ax.grid(linestyle="--")
 
-                    popt, _ = curve_fit(fit_linear, x, y)
-                    y_fit = [fit_linear(x_, *popt) for x_ in x]
-                    ax.plot(x, y_fit, f"{plotargs['color']}--")
-                    ax.text((min(x) + max(x)) / 2, (min(y) + max(y)) / 2, str(popt))
+    # Prom CPU
+    ax = fig.add_subplot(2, 2, 3)
+    xlabel = "Metrics datapoints / min"
+    ylabel = "Prom Pod CPU"
+    plot_passed_failed(
+        ax,
+        xlabel,
+        ylabel,
+        "ssd-4cpu-8gb",
+        vm4cpu8gb.data,
+        fit_linear,
+        vm4cpu8gb.plotopts,
+    )
+    plot_passed_failed(
+        ax,
+        xlabel,
+        ylabel,
+        "ssd-8cpu-16gb",
+        vm8cpu16gb.data[(vm8cpu16gb.data["Duration (hr)"] >= 12) >= (vm8cpu16gb.data["Log lines / min"] > 0)],
+        fit_linear,
+        vm8cpu16gb.plotopts,
+    )
+    ax.grid(linestyle="--")
 
-        plot_series(series, fit=True)
-        plot_series(series_without_fit, fit=False)
+    # Prom Mem
+    ax = fig.add_subplot(2, 2, 4)
+    xlabel = "Metrics datapoints / min"
+    ylabel = "Prom Pod Mem"
+    plot_passed_failed(
+        ax,
+        xlabel,
+        ylabel,
+        "ssd-4cpu-8gb",
+        vm4cpu8gb.data,
+        fit_linear,
+        vm4cpu8gb.plotopts,
+    )
+    plot_passed_failed(
+        ax,
+        xlabel,
+        ylabel,
+        "ssd-8cpu-16gb",
+        vm8cpu16gb.data[(vm8cpu16gb.data["Duration (hr)"] >= 12) >= (vm8cpu16gb.data["Log lines / min"] > 0)],
+        fit_linear,
+        vm8cpu16gb.plotopts,
+    )
+    ax.grid(linestyle="--")
 
-        ax.grid(linestyle="--")
+    
+    #series = {
+    #    "ssd-4cpu-8gb": ({"marker": "s", "color": "r"}, data[(data["Pass/Fail"] == "PASS") & (data["Disk"] == "ssd") & (data["CPUs"] == 4) & (data["GBs"] == 8)]),
+    #    "ssd-8cpu-16gb": ({"marker": "o", "color": "k"}, data[(data["Loki"] == "2.9.2") & (data["Pass/Fail"] == "PASS") & (data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)]),
+    #}
+
+    #series_without_fit = {
+    #    "ssd-4cpu-8gb (failed)": ({"marker": "x", "color": "r"}, data[(data["Pass/Fail"] != "PASS") & (data["Disk"] == "ssd") & (data["CPUs"] == 4) & (data["GBs"] == 8)]),
+    #    "ssd-8cpu-16gb (failed)": ({"marker": "x", "color": "k"}, data[(data["Pass/Fail"] != "PASS") & (data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)]),
+    #}
+
+    ## Plot pod CPU, mem
+    #to_plot = [
+    #    ("Log lines / min", "Loki Pod CPU"),
+    #    ("Log lines / min", "Loki Pod Mem"),
+    #    ("Metrics datapoints / min", "Prom Pod CPU"),
+    #    ("Metrics datapoints / min", "Prom Pod Mem"),
+    #]
+    #num_subplots = len(to_plot)
+    #rows = int(2)
+    #cols = int(np.ceil(num_subplots / rows))
+    #fig = p.figure()
+    #for i, (x_label, y_label) in enumerate(to_plot):
+    #    ax = fig.add_subplot(rows, cols, i + 1)
+
+    #    def plot_series(series, *, fit: bool):
+    #        for (label, (plotargs, serie)) in series.items():
+    #            serie.plot(x=x_label, y=y_label, kind="scatter", ax=ax, label=label, **plotargs)
+
+    #            if fit:
+    #                # Curve fit
+    #                data_without_nans = serie[[x_label, y_label]].dropna().sort_values(x_label)
+    #                x, y = np.array(data_without_nans[x_label]), np.array(data_without_nans[y_label])
+
+    #                if "Loki" in y_label:
+    #                    fit_func = fit_exp
+    #                else:
+    #                    fit_func = fit_linear
+    #                
+    #                popt, _ = curve_fit(fit_func, x, y)
+    #                y_fit = [fit_func(x_, *popt) for x_ in x]
+    #                ax.plot(x, y_fit, f"{plotargs['color']}--")
+    #                ax.text((min(x) + max(x)) / 2, (min(y) + max(y)) / 2, str(popt))
+
+    #    plot_series(series, fit=True)
+    #    plot_series(series_without_fit, fit=False)
+
+    #    ax.grid(linestyle="--")
 
     fig.suptitle("Per-pod resource usage")
 
