@@ -106,9 +106,8 @@ def plot_serie(ax, xlabel, ylabel, series_label: str, serie: pandas.DataFrame, f
         ax.text((min(x) + max(x)) / 2, (min(y) + max(y)) / 2, str(popt))
         
 
-def plot_passed_failed(ax, xlabel, ylabel, series_label, serie: pandas.DataFrame, fit: Optional[Callable], plotargs: dict):
+def plot_passed_failed(ax, xlabel, ylabel, series_label, passed: pandas.DataFrame, failed: pandas.DataFrame, fit: Optional[Callable], plotargs: dict):
     # Passed, with fit
-    passed = serie[(serie["Pass/Fail"] == "PASS")]
     plot_serie(
         ax,
         xlabel,
@@ -120,7 +119,6 @@ def plot_passed_failed(ax, xlabel, ylabel, series_label, serie: pandas.DataFrame
     )
     
     # Failed, without fit
-    failed = serie[(serie["Pass/Fail"] != "PASS")]
     plot_serie(
         ax,
         xlabel,
@@ -135,12 +133,14 @@ def plot_passed_failed(ax, xlabel, ylabel, series_label, serie: pandas.DataFrame
 def per_pod_resource_usage(data: pandas.DataFrame):
     vm4cpu8gb = SimpleNamespace(
         label="ssd-4cpu-8gb",
-        data=data[(data["Disk"] == "ssd") & (data["CPUs"] == 4) & (data["GBs"] == 8)],
+        passed=data[(data["Disk"] == "ssd") & (data["CPUs"] == 4) & (data["GBs"] == 8) & (data["Pass/Fail"] == "PASS")],
+        failed=data[(data["Disk"] == "ssd") & (data["CPUs"] == 4) & (data["GBs"] == 8) & (data["Pass/Fail"] != "PASS")],
         plotopts={"marker": "s", "color": "r"},
     )
     vm8cpu16gb = SimpleNamespace(
         label="ssd-8cpu-16gb",
-        data=data[(data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)],
+        passed=data[(data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16) & (data["Pass/Fail"] == "PASS")],
+        failed=data[(data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16) & (data["Pass/Fail"] != "PASS")],
         plotopts={"marker": "o", "color": "k"},
     )
 
@@ -155,7 +155,8 @@ def per_pod_resource_usage(data: pandas.DataFrame):
         xlabel,
         ylabel,
         vm4cpu8gb.label,
-        vm4cpu8gb.data,
+        vm4cpu8gb.passed,
+        vm4cpu8gb.failed,
         fit_linear,
         vm4cpu8gb.plotopts,
     )
@@ -164,7 +165,8 @@ def per_pod_resource_usage(data: pandas.DataFrame):
         xlabel,
         ylabel,
         vm8cpu16gb.label,
-        vm8cpu16gb.data[(vm8cpu16gb.data["Loki"] == "2.9.2") & (vm8cpu16gb.data["Duration (hr)"] >= 12)],
+        vm8cpu16gb.passed[(vm8cpu16gb.passed["Loki"] == "2.9.2") & (vm8cpu16gb.passed["Duration (hr)"] >= 12)],
+        vm8cpu16gb.failed[(vm8cpu16gb.failed["Loki"] == "2.9.2")],
         fit_exp,
         vm8cpu16gb.plotopts,
     )
@@ -179,7 +181,8 @@ def per_pod_resource_usage(data: pandas.DataFrame):
         xlabel,
         ylabel,
         vm4cpu8gb.label,
-        vm4cpu8gb.data,
+        vm4cpu8gb.passed,
+        vm4cpu8gb.failed,
         fit_linear,
         vm4cpu8gb.plotopts,
     )
@@ -188,7 +191,8 @@ def per_pod_resource_usage(data: pandas.DataFrame):
         xlabel,
         ylabel,
         vm8cpu16gb.label,
-        vm8cpu16gb.data[(vm8cpu16gb.data["Loki"] == "2.9.2") & (vm8cpu16gb.data["Duration (hr)"] >= 12)],
+        vm8cpu16gb.passed[(vm8cpu16gb.passed["Loki"] == "2.9.2") & (vm8cpu16gb.passed["Duration (hr)"] >= 12)],
+        vm8cpu16gb.failed[(vm8cpu16gb.failed["Loki"] == "2.9.2")],
         fit_exp,
         vm8cpu16gb.plotopts,
     )
@@ -203,7 +207,8 @@ def per_pod_resource_usage(data: pandas.DataFrame):
         xlabel,
         ylabel,
         vm4cpu8gb.label,
-        vm4cpu8gb.data,
+        vm4cpu8gb.passed,
+        vm4cpu8gb.failed,
         fit_linear,
         vm4cpu8gb.plotopts,
     )
@@ -212,7 +217,8 @@ def per_pod_resource_usage(data: pandas.DataFrame):
         xlabel,
         ylabel,
         vm8cpu16gb.label,
-        vm8cpu16gb.data[(vm8cpu16gb.data["Duration (hr)"] >= 12) >= (vm8cpu16gb.data["Log lines / min"] > 0)],
+        vm8cpu16gb.passed,
+        vm8cpu16gb.failed,
         fit_linear,
         vm8cpu16gb.plotopts,
     )
@@ -227,7 +233,8 @@ def per_pod_resource_usage(data: pandas.DataFrame):
         xlabel,
         ylabel,
         vm4cpu8gb.label,
-        vm4cpu8gb.data,
+        vm4cpu8gb.passed,
+        vm4cpu8gb.failed,
         fit_linear,
         vm4cpu8gb.plotopts,
     )
@@ -236,7 +243,8 @@ def per_pod_resource_usage(data: pandas.DataFrame):
         xlabel,
         ylabel,
         vm8cpu16gb.label,
-        vm8cpu16gb.data[(vm8cpu16gb.data["Duration (hr)"] >= 12) >= (vm8cpu16gb.data["Log lines / min"] > 0)],
+        vm8cpu16gb.passed,
+        vm8cpu16gb.failed,
         fit_linear,
         vm8cpu16gb.plotopts,
     )
