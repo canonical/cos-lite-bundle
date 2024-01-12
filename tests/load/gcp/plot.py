@@ -96,7 +96,7 @@ def add_subplot(ax, param: str, vmin: float = None, vmax: float = None):
 def plot_serie(ax, xlabel, ylabel, series_label: str, serie: pandas.DataFrame, fit: Optional[Callable], **plotargs):
     serie.plot(x=xlabel, y=ylabel, kind="scatter", ax=ax, label=series_label, **plotargs)
 
-    if fit:
+    if fit and len(serie):
         without_nans = serie[[xlabel, ylabel]].dropna().sort_values(xlabel)
         x, y = np.array(without_nans[xlabel]), np.array(without_nans[ylabel])
 
@@ -128,7 +128,89 @@ def plot_passed_failed(ax, xlabel, ylabel, series_label, passed: pandas.DataFram
         None,
         **{**plotargs, **{"marker": "x"}},
     )
+
+
+def vm_usage(data: pandas.DataFrame):
+    data = data[(data["Disk"] == "ssd") & (data["Pass/Fail"] == "PASS")]
     
+    ssd4cpu8gb = data[(data["CPUs"] == 4) & (data["GBs"] == 8)]
+    vm4cpu8gb = SimpleNamespace(
+        label="ssd-4cpu-8gb",
+        loki=ssd4cpu8gb[(ssd4cpu8gb["Metrics datapoints / min"] < 1000) & (ssd4cpu8gb["Loki"] == "2.9.2")],
+        prom=ssd4cpu8gb[(ssd4cpu8gb["Log lines / min"] == 0)],
+        plotopts={"marker": "s", "color": "r"},
+    )
+    
+    ssd8cpu16gb = data[(data["CPUs"] == 8) & (data["GBs"] == 16)]
+    vm8cpu16gb = SimpleNamespace(
+        label="ssd-8cpu-16gb",
+        loki=ssd8cpu16gb[(ssd8cpu16gb["Metrics datapoints / min"] < 1000) & (ssd8cpu16gb["Loki"] == "2.9.2")],
+        prom=ssd8cpu16gb[(ssd8cpu16gb["Log lines / min"] == 0)],
+        plotopts={"marker": "o", "color": "k"},
+    )
+
+    fig = p.figure()
+
+    # Loki CPU
+    ax = fig.add_subplot(2, 3, 1)
+    xlabel = "Log lines / min"
+    ylabel = "% CPU (p99)"
+    plot_serie(ax, xlabel, ylabel, vm4cpu8gb.label, vm4cpu8gb.loki, None, **vm4cpu8gb.plotopts)
+    plot_serie(ax, xlabel, ylabel, vm8cpu16gb.label, vm8cpu16gb.loki, None, **vm8cpu16gb.plotopts)
+    ax.set_ylim([0, 100])
+    ax.set_xlim([0, None])
+    ax.grid(linestyle="--")
+    
+    # Loki Mem
+    ax = fig.add_subplot(2, 3, 2)
+    xlabel = "Log lines / min"
+    ylabel = "% Mem (p99)"
+    plot_serie(ax, xlabel, ylabel, vm4cpu8gb.label, vm4cpu8gb.loki, None, **vm4cpu8gb.plotopts)
+    plot_serie(ax, xlabel, ylabel, vm8cpu16gb.label, vm8cpu16gb.loki, None, **vm8cpu16gb.plotopts)
+    ax.set_ylim([0, 100])
+    ax.set_xlim([0, None])
+    ax.grid(linestyle="--")
+    
+    # Loki storage
+    ax = fig.add_subplot(2, 3, 3)
+    xlabel = "Log lines / min"
+    ylabel = "Storage (GiB/day)"
+    plot_serie(ax, xlabel, ylabel, vm4cpu8gb.label, vm4cpu8gb.loki, fit_linear, **vm4cpu8gb.plotopts)
+    plot_serie(ax, xlabel, ylabel, vm8cpu16gb.label, vm8cpu16gb.loki, fit_linear, **vm8cpu16gb.plotopts)
+    ax.set_ylim([0, None])
+    ax.set_xlim([0, None])
+    ax.grid(linestyle="--")
+    
+    # Prom CPU
+    ax = fig.add_subplot(2, 3, 4)
+    xlabel = "Metrics datapoints / min"
+    ylabel = "% CPU (p99)"
+    plot_serie(ax, xlabel, ylabel, vm4cpu8gb.label, vm4cpu8gb.prom, None, **vm4cpu8gb.plotopts)
+    plot_serie(ax, xlabel, ylabel, vm8cpu16gb.label, vm8cpu16gb.prom, None, **vm8cpu16gb.plotopts)
+    ax.set_ylim([0, 100])
+    ax.set_xlim([0, None])
+    ax.grid(linestyle="--")
+    
+    # Prom Mem
+    ax = fig.add_subplot(2, 3, 5)
+    xlabel = "Metrics datapoints / min"
+    ylabel = "% Mem (p99)"
+    plot_serie(ax, xlabel, ylabel, vm4cpu8gb.label, vm4cpu8gb.prom, None, **vm4cpu8gb.plotopts)
+    plot_serie(ax, xlabel, ylabel, vm8cpu16gb.label, vm8cpu16gb.prom, None, **vm8cpu16gb.plotopts)
+    ax.set_ylim([0, 100])
+    ax.set_xlim([0, None])
+    ax.grid(linestyle="--")
+        
+    # Prom storage
+    ax = fig.add_subplot(2, 3, 6)
+    xlabel = "Metrics datapoints / min"
+    ylabel = "Storage (GiB/day)"
+    plot_serie(ax, xlabel, ylabel, vm4cpu8gb.label, vm4cpu8gb.prom, fit_linear, **vm4cpu8gb.plotopts)
+    plot_serie(ax, xlabel, ylabel, vm8cpu16gb.label, vm8cpu16gb.prom, fit_linear, **vm8cpu16gb.plotopts)
+    ax.set_ylim([0, 100])
+    ax.set_xlim([0, None])
+    ax.grid(linestyle="--")
+
 
 def per_pod_resource_usage(data: pandas.DataFrame):
     vm4cpu8gb = SimpleNamespace(
@@ -421,6 +503,7 @@ def plot_total_estimation():
 if __name__ == "__main__":
     data = pandas.read_csv(f"{path}/results.csv")
 
+    vm_usage(data)
     per_pod_resource_usage(data)
     plot_total_estimation()
 
