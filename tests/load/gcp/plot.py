@@ -25,8 +25,10 @@ def fit_bilinear(x_mat, a1, a2, b):
     return a1 * x + a2 * y + b
 
 
-def fit_exp(x, a, b):
-    return a + b * np.exp(-x)
+def fit_exp(x, a, b, c):
+    # return a + b * np.exp(-x)
+    # return a + b * np.log(c*x)
+    return a + b*np.arctan(c*x)
 
 
 def add_subplot(ax, param: str, vmin: float = None, vmax: float = None):
@@ -101,8 +103,9 @@ def plot_serie(ax, xlabel, ylabel, series_label: str, serie: pandas.DataFrame, f
         x, y = np.array(without_nans[xlabel]), np.array(without_nans[ylabel])
 
         popt, _ = curve_fit(fit, x, y)
-        y_fit = [fit(x_, *popt) for x_ in x]
-        ax.plot(x, y_fit, f"{plotargs['color']}--")
+        x_fit = np.linspace(min(x), max(x))
+        y_fit = [fit(x_, *popt) for x_ in x_fit]
+        ax.plot(x_fit, y_fit, f"{plotargs['color']}--")
         ax.text((min(x) + max(x)) / 2, (min(y) + max(y)) / 2, str(popt))
         return popt
         
@@ -214,6 +217,8 @@ def vm_usage(data: pandas.DataFrame):
 
 
 def per_pod_resource_usage(data: pandas.DataFrame):
+    data["Log lines / min"] = data["Log lines / min"]
+
     vm4cpu8gb = SimpleNamespace(
         label="ssd-4cpu-8gb",
         passed=data[(data["Disk"] == "ssd") & (data["CPUs"] == 4) & (data["GBs"] == 8) & (data["Pass/Fail"] == "PASS")],
@@ -506,6 +511,9 @@ def plot_storage(data: pandas.DataFrame):
     ssd8cpu16gb = data[(data["CPUs"] == 8) & (data["GBs"] == 16)]
     logs_only = SimpleNamespace(
         label="Logs only",
+        # Taking "metrics < 1000" instead of zero due to limitation in load test provisioning logic.
+        # This means that the estimated disk usage for logs is slightly higher, due to the small contribution of
+        # some "stray" metrics.
         data=ssd8cpu16gb[(ssd8cpu16gb["Metrics datapoints / min"] < 1000) & (ssd8cpu16gb["Loki"] == "2.9.2")],
         plotopts={"marker": "o", "color": "k"},
     )
@@ -534,9 +542,9 @@ def plot_storage(data: pandas.DataFrame):
     combined_data.pop(l_label)
 
     corrected_metrics = SimpleNamespace(
-        label="Corrected metrics",
+        label="(Corrected) metrics only",
         data=combined_data,
-        plotopts={"marker": "s", "color": "r"},
+        plotopts={"marker": "o", "color": "k"},
     )
 
     ax = fig.add_subplot(2, 2, 3)
@@ -569,6 +577,49 @@ def plot_storage(data: pandas.DataFrame):
     ax.set_ylabel(ylabel)
 
 
+def plot_vm_from_per_pod():
+    def calc(metrics: float, logs: float) -> (float, float, float):
+        """Returns (cpu, gb-mem, gb/day-disk)."""
+        disk = (3.011e-4 * logs + 2.447e-3) + (3.823e-6 * metrics + 1.021)
+        cpu = 1.442e-1 + 1.89 * np.arctan(1.365e-4 * logs) + 1.059e-7 * metrics + 1.696e-1 + (0.25 + 0.08 + 1.0)
+        mem = 4.851e-2 + 2.063 * np.arctan(2.539e-3 * logs) + 1.464e-6 * metrics + 2.51e-1 + (0.2 + 0.2 + 2.6)
+        return cpu, mem, disk
+
+        # Annotated heatmap
+        # https://matplotlib.org/stable/gallery/images_contours_and_fields/image_annotated_heatmap.html
+
+    datapoints = np.linspace(0, 6e6, 7)  # "x, datapoints per minute
+    loglines = np.linspace(0, 360e3, 7)  # "y", loglines per minute
+    datapoints_mat, loglines_mat = np.meshgrid(datapoints, loglines)
+    cpu, mem, disk = calc(datapoints_mat, loglines_mat)
+
+    def mkplot(ax, title, cpu, mem, disk):
+        im = ax.imshow(cpu / cpu.max() + mem / mem.max() + disk / disk.max(), origin="lower", cmap="Pastel2")
+
+        x_labels = [f"{dp / 1e6:.0f}M" for dp in datapoints]
+        y_labels = [f"{ll / 1e3:.0f}k" for ll in loglines]
+        ax.set_xticks(np.arange(len(x_labels)), labels=x_labels)
+        ax.set_yticks(np.arange(len(y_labels)), labels=y_labels)
+        ax.set_xlabel("Datapoints/min")
+        ax.set_ylabel("Log lines/min")
+
+        # Loop over data dimensions and create text annotations.
+        for i in range(len(loglines)):
+            for j in range(len(datapoints)):
+                cpu_ann = f"{cpu[i, j]:.1f} cpu"
+                mem_ann = f"{mem[i, j]:.1f} gb"
+                disk_ann = f"{disk[i, j]:.0f} gb/day"
+                cell_ann = f"{cpu_ann}\n{mem_ann}\n{disk_ann}"
+                text = ax.text(j, i, cell_ann, ha="center", va="center", color="k")
+
+        ax.set_title(title)
+
+    fig = p.figure()
+    # mkplot(fig.add_subplot(1, 2, 1), "VM sizing from per-pod data", cpu, mem, disk)
+    mkplot(fig.add_subplot(1, 1, 1), "VM sizing from per-pod data (with 10% margin)", np.ceil(1.1 * cpu), np.ceil(1.1 * mem),
+           np.ceil(1.1 * disk))
+
+
 if __name__ == "__main__":
     data = pandas.read_csv(f"{path}/results.csv")
 
@@ -576,25 +627,26 @@ if __name__ == "__main__":
     vm_usage(data)
     per_pod_resource_usage(data)
     plot_total_estimation()
-    #
-    # # Filter out. TODO: make this a cli arg
-    # data = data[(data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)]
-    # print(data)
-    #
-    # to_plot = [
-    #     ("% CPU (p99)", 0, 100),
-    #     ("% Mem (p99)", 0, 100),
-    #     ("Storage (GiB/day)",),
-    #     ("HTTP request times (p99) (ms)",),
-    # ]
-    #
-    # num_subplots = len(to_plot)
-    # rows = int(2)
-    # cols = int(np.ceil(num_subplots / rows))
-    # fig = p.figure()
-    # for i in range(num_subplots):
-    #     ax = p.subplot(rows, cols, i + 1)
-    #     add_subplot(ax, *to_plot[i])
-    # fig.suptitle("VM resource usage")
+    plot_vm_from_per_pod()
+
+    # Filter out. TODO: make this a cli arg
+    data = data[(data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)]
+    print(data)
+
+    to_plot = [
+        ("% CPU (p99)", 0, 100),
+        ("% Mem (p99)", 0, 100),
+        ("Storage (GiB/day)",),
+        ("HTTP request times (p99) (ms)",),
+    ]
+
+    num_subplots = len(to_plot)
+    rows = int(2)
+    cols = int(np.ceil(num_subplots / rows))
+    fig = p.figure()
+    for i in range(num_subplots):
+        ax = p.subplot(rows, cols, i + 1)
+        add_subplot(ax, *to_plot[i])
+    fig.suptitle("VM resource usage")
 
     p.show()
