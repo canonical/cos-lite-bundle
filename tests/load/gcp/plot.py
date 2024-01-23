@@ -104,6 +104,7 @@ def plot_serie(ax, xlabel, ylabel, series_label: str, serie: pandas.DataFrame, f
         y_fit = [fit(x_, *popt) for x_ in x]
         ax.plot(x, y_fit, f"{plotargs['color']}--")
         ax.text((min(x) + max(x)) / 2, (min(y) + max(y)) / 2, str(popt))
+        return popt
         
 
 def plot_passed_failed(ax, xlabel, ylabel, series_label, passed: pandas.DataFrame, failed: pandas.DataFrame, fit: Optional[Callable], plotargs: dict):
@@ -500,31 +501,100 @@ def plot_total_estimation():
     fig.tight_layout()
 
 
+def plot_storage(data: pandas.DataFrame):
+    data = data[(data["Disk"] == "ssd") & (data["Pass/Fail"] == "PASS")]
+    ssd8cpu16gb = data[(data["CPUs"] == 8) & (data["GBs"] == 16)]
+    logs_only = SimpleNamespace(
+        label="Logs only",
+        data=ssd8cpu16gb[(ssd8cpu16gb["Metrics datapoints / min"] < 1000) & (ssd8cpu16gb["Loki"] == "2.9.2")],
+        plotopts={"marker": "o", "color": "k"},
+    )
+
+    fig = p.figure()
+    ax = fig.add_subplot(2, 2, 1)
+
+    xlabel = "Log lines / min"
+    ylabel = "Storage (GiB/day)"
+    logs_fit = plot_serie(ax, xlabel, ylabel, logs_only.label, logs_only.data, fit_linear, **logs_only.plotopts)
+    ax.set_ylim([0, None])
+    ax.set_xlim([0, None])
+    ax.grid(linestyle="--")
+
+    # The fit for logs-only is: [3.01e-4, 2.447e-3].
+    # That was a very good fit, so use it to isolate the contribution of metrics to storage.
+    data = data[(data["Disk"] == "ssd") & (data["Pass/Fail"] == "PASS")]
+    ssd8cpu16gb = data[(data["CPUs"] == 8) & (data["GBs"] == 16)]
+    combined_data = ssd8cpu16gb#[(ssd8cpu16gb["Loki"] == "2.9.2")]
+    m_label = "Metrics datapoints / min"
+    l_label = "Log lines / min"
+    s_label = "Storage (GiB/day)"
+    combined_data = pandas.DataFrame(np.array(combined_data[[m_label, l_label, s_label]].dropna().sort_values(m_label)), columns=[m_label, l_label, s_label])
+    corrected_prom_storage = combined_data[s_label] - (logs_fit[0] * combined_data[l_label] + logs_fit[1])
+    combined_data[s_label] = corrected_prom_storage
+    combined_data.pop(l_label)
+
+    corrected_metrics = SimpleNamespace(
+        label="Corrected metrics",
+        data=combined_data,
+        plotopts={"marker": "s", "color": "r"},
+    )
+
+    ax = fig.add_subplot(2, 2, 3)
+
+    xlabel = m_label
+    ylabel = s_label
+    metrics_fit = plot_serie(ax, xlabel, ylabel, corrected_metrics.label, corrected_metrics.data, fit_linear, **corrected_metrics.plotopts)
+    ax.set_ylim([0, None])
+    ax.set_xlim([0, None])
+    ax.grid(linestyle="--")
+
+    # Contour plot
+    ax = fig.add_subplot(2, 2, (2, 4))
+    xlabel = "Metrics datapoints / min"
+    ylabel = "Log lines / min"
+
+    datapoints = np.linspace(0, 6.6e6)  # "x, datapoints per minute
+    loglines = np.linspace(0, 360e3)  # "y", loglines per minute
+    datapoints_mat, loglines_mat = np.meshgrid(datapoints, loglines)
+
+    disk = logs_fit[0] * loglines_mat + logs_fit[1] + metrics_fit[0] * datapoints_mat + metrics_fit[1]
+    cs3 = ax.contour(datapoints_mat, loglines_mat, disk, colors="black", linestyles="-", linewidths=1,
+                     levels=np.arange(10,151,10))
+
+    ax.clabel(cs3, inline=True, fontsize=9)
+
+    ax.grid(linestyle="--")
+    ax.set_title("Disk size estimation (GiB/day)")
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+
+
 if __name__ == "__main__":
     data = pandas.read_csv(f"{path}/results.csv")
 
+    plot_storage(data)
     vm_usage(data)
     per_pod_resource_usage(data)
     plot_total_estimation()
-
-    # Filter out. TODO: make this a cli arg
-    data = data[(data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)]
-    print(data)
-
-    to_plot = [
-        ("% CPU (p99)", 0, 100),
-        ("% Mem (p99)", 0, 100),
-        ("Storage (GiB/day)",),
-        ("HTTP request times (p99) (ms)",),
-    ]
-
-    num_subplots = len(to_plot)
-    rows = int(2)
-    cols = int(np.ceil(num_subplots / rows))
-    fig = p.figure()
-    for i in range(num_subplots):
-        ax = p.subplot(rows, cols, i + 1)
-        add_subplot(ax, *to_plot[i])
-    fig.suptitle("VM resource usage")
+    #
+    # # Filter out. TODO: make this a cli arg
+    # data = data[(data["Disk"] == "ssd") & (data["CPUs"] == 8) & (data["GBs"] == 16)]
+    # print(data)
+    #
+    # to_plot = [
+    #     ("% CPU (p99)", 0, 100),
+    #     ("% Mem (p99)", 0, 100),
+    #     ("Storage (GiB/day)",),
+    #     ("HTTP request times (p99) (ms)",),
+    # ]
+    #
+    # num_subplots = len(to_plot)
+    # rows = int(2)
+    # cols = int(np.ceil(num_subplots / rows))
+    # fig = p.figure()
+    # for i in range(num_subplots):
+    #     ax = p.subplot(rows, cols, i + 1)
+    #     add_subplot(ax, *to_plot[i])
+    # fig.suptitle("VM resource usage")
 
     p.show()
