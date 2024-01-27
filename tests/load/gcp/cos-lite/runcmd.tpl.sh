@@ -69,10 +69,6 @@ sudo -u ubuntu juju deploy --channel=edge cos-lite --trust --overlay /home/ubunt
 # Error from server (NotFound): statefulsets.apps "grafana" not found
 sleep 120
 microk8s.kubectl rollout status statefulset.apps/grafana -n ${JUJU_MODEL_NAME} -w --timeout=600s
-#sudo -u ubuntu juju remove-relation grafana:ingress traefik
-#sleep 30
-#sudo -u ubuntu juju relate grafana:ingress traefik
-
 
 # wait for grafana to become active
 /var/wait-for-grafana-ready.sh

@@ -97,7 +97,6 @@ data "cloudinit_config" "cos_lite" {
 
         "snap" : {
           "commands" : [
-            # Juju 3.1 is supported until 25.04
             "snap install --classic juju --channel=3.1/stable",
             "snap install --classic microk8s --channel=1.27-strict/stable",
             "snap alias microk8s.kubectl kubectl",
