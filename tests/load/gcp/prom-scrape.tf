@@ -27,6 +27,8 @@ data "cloudinit_config" "avalanche" {
           },
         ],
         "package_update" : "true",
+        "package_upgrade": "true",
+        "package_reboot_if_required": "true",
 
         "packages" : [
           "git",
@@ -48,7 +50,7 @@ data "cloudinit_config" "avalanche" {
 
 resource "google_compute_instance" "vm_prom_scrape" {
   name         = "avalanche"
-  machine_type = "custom-2-8192"
+  machine_type = "custom-4-16384"
   tags         = ["load-test-traffic", "vm-prom-scrape"]
 
   boot_disk {

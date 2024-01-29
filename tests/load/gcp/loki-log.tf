@@ -35,6 +35,8 @@ data "cloudinit_config" "loki_log" {
         ],
 
         "package_update" : "true",
+        "package_upgrade": "true",
+        "package_reboot_if_required": "true",
 
         "packages" : [
           "python3-pip",
@@ -61,7 +63,8 @@ resource "google_compute_instance" "vm_loki_log" {
 
   name = "loki-log"
 
-  machine_type = "custom-4-4096"
+  machine_type = "custom-6-5632"
+  allow_stopping_for_update = true
 
   tags = ["load-test-traffic", "vm-loki-log"]
 

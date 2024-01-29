@@ -6,6 +6,9 @@ sudo cat /var/lib/cloud/instance/cloud-config.txt
 ```
 
 ```shell
+# check cloud-init completed
+cat /var/log/cloud-init-output.log
+
 # check service status
 systemctl status grafana-agent
 journalctl -u grafana-agent --follow

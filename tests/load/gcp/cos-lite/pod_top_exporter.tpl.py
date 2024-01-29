@@ -13,14 +13,15 @@ app = Flask(__name__)
 
 # For memoization
 prev_time = None
-prev_data = {}
+prev_top_pod_data = {}
+prev_restart_count_data = {}
 
 
 def get_top_pod() -> dict:
-    global prev_time, prev_data
+    global prev_time, prev_top_pod_data
     now = datetime.now()
-    if prev_time and (now - prev_time).total_seconds() < 15:
-        return prev_data
+    if prev_top_pod_data and prev_time and (now - prev_time).total_seconds() < 15:
+        return prev_top_pod_data
 
     # Going through `current` directly because microk8s-kubectl.wrapper creates subprocesses which
     # expect a login session
@@ -40,9 +41,64 @@ def get_top_pod() -> dict:
     # {'alertmanager-0': {'cpu': Decimal('0.056'), 'mem': Decimal('55574528.000')}, ...}
 
     prev_time = now
-    prev_data = as_dict
+    prev_top_pod_data = as_dict
     # print(as_dict)
     return as_dict
+
+
+def get_restart_count() -> Dict[str, Dict[str, int]]:
+    """Get the restart count per container per pod."""
+    global prev_time, prev_top_pod_data
+    now = datetime.now()
+    if prev_restart_count_data and prev_time and (now - prev_time).total_seconds() < 15:
+        return prev_top_pod_data
+
+    # Going through `current` directly because microk8s-kubectl.wrapper creates subprocesses which
+    # expect a login session
+    jsnopath_expr = r'{range .items[*]}{.metadata.name}{range .status.containerStatuses[*]}{","}{.name}{","}{.restartCount}{end}{"\n"}{end}'
+    cmd = [
+        "/snap/microk8s/current/kubectl",
+        "--kubeconfig",
+        "/var/snap/microk8s/current/credentials/client.config",
+        "-n",
+        "${JUJU_MODEL_NAME}",
+        "get",
+        "pod",
+        f"-o=jsonpath={jsnopath_expr}",
+    ]
+    try:
+        result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print(e.stdout.decode())
+        return {}
+
+    output = result.stdout.decode("utf-8").strip()
+    # Output looks like this:
+    # modeloperator-86c5cfd684-7c2cb,juju-operator,0
+    # traefik-0,charm,0,traefik,0
+    # alertmanager-0,alertmanager,0,charm,0
+    # loki-0,charm,1,loki,1
+    # scrape-target-0,charm,1
+    # prometheus-0,charm,1,prometheus,0
+    # catalogue-0,catalogue,0,charm,1
+    # cos-config-0,charm,1,git-sync,1
+    # grafana-0,charm,0,grafana,1,litestream,1
+    # scrape-config-0,charm,1
+
+    restart_counts = {}
+    for line in output.splitlines():
+        # Each line is made up of pod name and pairs of container name and restart count.
+        # The length may change, depending on the number of containers in the pod.
+        pod_name = line.split(",")[0]
+        pairs = line.split(",")[1:]
+        # Convert list to dict (https://stackoverflow.com/a/12739974/3516684)
+        it = iter(pairs)
+        pod_restart_counts = dict(zip(it, it))
+        # Convert values from str to int:
+        pod_restart_counts = {k: int(v) for k, v in pod_restart_counts.items()}
+        restart_counts[pod_name] = pod_restart_counts
+
+    return restart_counts
 
 
 class GaugeFamily:
@@ -77,5 +133,11 @@ def metrics():
         cpu.add({"name": name}, resources["cpu"])
         mem.add({"name": name}, resources["mem"])
 
-    output = str(cpu) + str(mem)
+    # TODO the restart count should be a counter type, not a gauge.
+    pod_restart_count = GaugeFamily("pod_restart_count", "Pod restart count")
+    for pod_name, containers in get_restart_count().items():
+        for container_name, restart_count in containers.items():
+            pod_restart_count.add({"pod_name": pod_name, "container_name": container_name}, restart_count)
+
+    output = str(cpu) + str(mem) + str(pod_restart_count)
     return output

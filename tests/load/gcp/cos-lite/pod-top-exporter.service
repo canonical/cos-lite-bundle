@@ -6,6 +6,6 @@ After=network.target
 Type=simple
 Restart=always
 RestartSec=5
-ExecStartPre=/run/wait-for-prom-ready.sh
-Environment=FLASK_APP=/run/pod_top_exporter.py
+ExecStartPre=/var/wait-for-prom-ready.sh
+Environment=FLASK_APP=/var/pod_top_exporter.py
 ExecStart=flask run -p 29101 --host 0.0.0.0
