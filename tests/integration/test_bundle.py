@@ -4,6 +4,7 @@
 # See LICENSE file for licensing details.
 
 import asyncio
+import base64
 import json
 import logging
 import ssl
@@ -11,7 +12,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 import juju
 import juju.utils
@@ -22,6 +23,7 @@ from helpers import (
     get_address,
     get_alertmanager_alerts,
     get_alertmanager_groups,
+    get_all_proxied_urls,
     get_proxied_url,
 )
 from pytest_operator.plugin import OpsTest
@@ -274,6 +276,37 @@ async def test_loki_receives_logs(ops_test: OpsTest):
     as_str = response.read().decode("utf8")
     assert "flog-k8s" in as_str
     logger.info("loki is successfully receiving flog logs")
+
+
+@pytest.mark.abort_on_fail
+async def test_all_traefik_proxied_urls_return_200(ops_test: OpsTest):
+    """Traefik proxied URLs should be accessible and return 200."""
+    proxied_urls = await get_all_proxied_urls(ops_test)
+    for app, url_dict in proxied_urls.items():
+        url = url_dict["url"]
+        response = urlopen(url, context=insecure_context)
+        assert response.code == 200
+        logger.info(f"{app} is successfully responding via its traefik ingress URL.")
+
+
+@pytest.mark.abort_on_fail
+async def test_grafana_login_works(ops_test: OpsTest):
+    """Test that we can login and execute admin commands using the charm's get-admin-password credentials."""
+    action = await ops_test.model.applications["grafana"].units[0].run_action("get-admin-password")
+    action = await action.wait()
+    admin_password = action.results["admin-password"]
+    grafana_url = f"{action.results['url']}/api/user"
+    # Query the url
+    # https://grafana.com/docs/grafana/latest/developers/http_api/user/#actual-user
+    req = Request(grafana_url)
+    b64auth = base64.standard_b64encode("%s:%s" % ("admin", admin_password))
+    req.add_header("Authorization", "Basic %s" % b64auth)
+    response = urlopen(req)
+    assert response.code == 200
+    as_str = response.read().decode("utf8")
+    as_dict = json.loads(as_str)
+    assert as_dict["login"] == "admin"
+    assert as_dict["isGrafanaAdmin"]
 
 
 @pytest.mark.abort_on_fail

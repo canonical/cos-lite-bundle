@@ -7,7 +7,7 @@ import logging
 import ssl
 import urllib.request
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from juju.controller import Controller
 from juju.model import Model
@@ -50,8 +50,8 @@ async def cli_deploy_bundle(
     await ops_test.model.wait_for_idle(timeout=1000, raise_on_error=False)
 
 
-async def get_proxied_url(ops_test: OpsTest, app_name: str, unit_num: Optional[int] = None) -> str:
-    """Returns the URL assigned by Traefik over the ingress_per_unit relation interface."""
+async def get_all_proxied_urls(ops_test: OpsTest) -> Dict[str, Dict[str, str]]:
+    """Returns the URL assigned by Traefik over the ingress_per_unit relation interface for all proxied units."""
     action = (
         await ops_test.model.applications["traefik"].units[0].run_action("show-proxied-endpoints")
     )
@@ -61,6 +61,13 @@ async def get_proxied_url(ops_test: OpsTest, app_name: str, unit_num: Optional[i
     proxied_endpoints = json.loads(action.results["proxied-endpoints"])
 
     logging.debug(f"Endpoints proxied by Traefik/0: {proxied_endpoints}")
+
+    return proxied_endpoints
+
+
+async def get_proxied_url(ops_test: OpsTest, app_name: str, unit_num: Optional[int] = None) -> str:
+    """Returns the URL assigned by Traefik over the ingress_per_unit relation interface."""
+    proxied_endpoints = await get_all_proxied_urls(ops_test)
 
     key = f"{app_name}/{unit_num}" if unit_num is not None else app_name
     return proxied_endpoints[key]["url"]
