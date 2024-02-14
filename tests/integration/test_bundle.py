@@ -135,6 +135,31 @@ async def test_web_uis_are_reachable_via_unit_ip(ops_test: OpsTest):
 
 
 @pytest.mark.abort_on_fail
+async def test_grafana_sees_prometheus_loki_datasources(ops_test: OpsTest):
+    prom_url = await get_proxied_url(ops_test, "prometheus", 0)
+    prom_url = f"{prom_url}/api/v1/status/config"
+    prom_response = urlopen(
+        prom_url,
+        data=None,
+        timeout=2.0,
+        context=context.external_ca if prom_url.startswith("https://") else None,
+    )
+    prom_response_decoded = json.loads(prom_response.read().decode("utf8"))
+    assert prom_response_decoded["status"] == "success"
+
+    loki_url = await get_proxied_url(ops_test, "loki", 0)
+    loki_url = f"{loki_url}/ready"
+    loki_response = urlopen(
+        loki_url,
+        data=None,
+        timeout=2.0,
+        context=context.external_ca if loki_url.startswith("https://") else None,
+    )
+    loki_response_decoded = loki_response.read().decode("utf8")
+    assert loki_response_decoded.strip() == "ready"
+
+
+@pytest.mark.abort_on_fail
 async def test_prometheus_sees_alertmanager(ops_test: OpsTest):
     prom_url = await get_proxied_url(ops_test, "prometheus", 0)
 
