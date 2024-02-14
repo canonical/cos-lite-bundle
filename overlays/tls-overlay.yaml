@@ -18,6 +18,10 @@ relations:
  # This is a more general CA (e.g. root CA) that signs traefik's own CSR.
  - [external-ca, traefik:certificates]
 
+ # We need this relation for Grafana to trust externals URLs provided by traefik.
+ # for instance: Loki and Prometheus endpoints data sources.
+ - [external-ca, grafana:receive-ca-cert]
+
   # This is the local CA that signs CSRs from COS charms (excluding traefik).
   # Traefik is trusting this CA so that it could load balance via TLS.
  - [ca, traefik:receive-ca-cert]
