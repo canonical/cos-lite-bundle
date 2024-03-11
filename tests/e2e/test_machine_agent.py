@@ -34,7 +34,7 @@ async def test_setup_models(ops_test: OpsTest):
     k8s_mdl_name = lxd_mdl_name = ops_test.model_name
 
     # We do not want to make assumptions here about the current controller.
-    # Assuming a k8s controller is ready and its name is stored in $LXD_CONTROLLER.
+    # Assuming a lxd controller is ready and its name is stored in $LXD_CONTROLLER.
     lxd_ctl = Controller()
     await lxd_ctl.connect(lxd_ctl_name)
     lxd_mdl = await get_or_add_model(ops_test, lxd_ctl, lxd_mdl_name)
