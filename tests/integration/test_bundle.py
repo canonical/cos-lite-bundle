@@ -280,10 +280,9 @@ async def test_loki_receives_logs(ops_test: OpsTest):
 
 @pytest.mark.abort_on_fail
 async def test_all_traefik_proxied_urls_return_200(ops_test: OpsTest):
-    """Traefik proxied URLs should be accessible and return 200."""
+    """Verify that all ingressed applications' URLs are reachable from localhost and return 200."""
     proxied_urls = await get_all_proxied_urls(ops_test)
-    for app, url_dict in proxied_urls.items():
-        url = url_dict["url"]
+    for app, url in proxied_urls.items():
         response = urlopen(url, context=insecure_context)
         assert response.code == 200
         logger.info(f"{app} is successfully responding via its traefik ingress URL.")
@@ -291,7 +290,7 @@ async def test_all_traefik_proxied_urls_return_200(ops_test: OpsTest):
 
 @pytest.mark.abort_on_fail
 async def test_grafana_login_works(ops_test: OpsTest):
-    """Test that we can login and execute admin commands using the charm's get-admin-password credentials."""
+    """Test that the admin password we can obtain from grafana is valid."""
     action = await ops_test.model.applications["grafana"].units[0].run_action("get-admin-password")
     action = await action.wait()
     admin_password = action.results["admin-password"]

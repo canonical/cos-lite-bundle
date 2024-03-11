@@ -62,7 +62,7 @@ async def get_all_proxied_urls(ops_test: OpsTest) -> Dict[str, Dict[str, str]]:
 
     logging.debug(f"Endpoints proxied by Traefik/0: {proxied_endpoints}")
 
-    return proxied_endpoints
+    return {p: p["url"] for p in proxied_endpoints}
 
 
 async def get_proxied_url(ops_test: OpsTest, app_name: str, unit_num: Optional[int] = None) -> str:
@@ -70,7 +70,7 @@ async def get_proxied_url(ops_test: OpsTest, app_name: str, unit_num: Optional[i
     proxied_endpoints = await get_all_proxied_urls(ops_test)
 
     key = f"{app_name}/{unit_num}" if unit_num is not None else app_name
-    return proxied_endpoints[key]["url"]
+    return proxied_endpoints[key]
 
 
 async def get_address(ops_test: OpsTest, app_name: str, unit_num: Optional[int] = None) -> str:
