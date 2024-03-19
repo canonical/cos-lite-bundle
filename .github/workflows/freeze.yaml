@@ -1,0 +1,44 @@
+name: Freeze charm revisions
+
+on:
+  workflow_dispatch:
+    inputs:
+      base-arch:
+        type: choice
+        description: Base architecture
+        options:
+          - amd64
+    secrets:
+      CHARMHUB_TOKEN:
+        required: true
+      OBSERVABILITY_NOCTUA_TOKEN:
+        required: true
+
+jobs:
+  freeze:
+    name: Freeze charm revisions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Update manifest file
+        env:
+          BASE_ARCH: ${{ github.event.inputs.base-arch }}
+        run: |
+          ./freeze.sh latest/stable "$BASE_ARCH" | jq -s add > "freeze/bundle_stable_$BASE_ARCH.json"
+      - name: Create a PR for local changes
+        uses: peter-evans/create-pull-request@v6
+        id: cpr
+        with:
+          token: ${{ secrets.OBSERVABILITY_NOCTUA_TOKEN }}
+          commit-message: "chore: freeze charm revisions"
+          committer: "Github Actions <github-actions@github.com>"
+          author: "Github Actions <github-actions@github.com>"
+          title: "Freeze charm revisions"
+          body: |
+            Automated action to generate a revision manifest of stable COS charms.
+            The branch of this PR will be wiped during the next check.
+            Unless you really know what you're doing, you most likely don't want to push any
+            commits to this branch.
+          branch: "chore/freeze-revs"
+          delete-branch: true

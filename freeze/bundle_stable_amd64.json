@@ -1,0 +1,45 @@
+{
+  "grafana-agent-k8s": {
+    "revision": 64,
+    "resources": {
+      "agent-image": 38
+    }
+  },
+  "traefik-k8s": {
+    "revision": 169,
+    "resources": {
+      "traefik-image": 158
+    }
+  },
+  "catalogue-k8s": {
+    "revision": 33,
+    "resources": {
+      "catalogue-image": 32
+    }
+  },
+  "grafana-k8s": {
+    "revision": 105,
+    "resources": {
+      "grafana-image": 68,
+      "litestream-image": 43
+    }
+  },
+  "loki-k8s": {
+    "revision": 118,
+    "resources": {
+      "loki-image": 91
+    }
+  },
+  "prometheus-k8s": {
+    "revision": 170,
+    "resources": {
+      "prometheus-image": 139
+    }
+  },
+  "alertmanager-k8s": {
+    "revision": 101,
+    "resources": {
+      "alertmanager-image": 87
+    }
+  }
+}
