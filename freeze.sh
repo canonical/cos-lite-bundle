@@ -14,6 +14,9 @@ if [[ $# -ne 2 ]]; then
   exit 1
 fi
 
+CHANNEL="$1"
+BASE_ARCH="$2"
+
 # CHARMHUB_TOKEN has the same semantics as in charming-actions: credentials exported using
 # `charmcraft login --export`.
 # https://github.com/canonical/charming-actions/tree/main/release-charm
@@ -69,10 +72,6 @@ get_charm_revisions () {
   #   }
   # }
 }
-
-
-CHANNEL="latest/stable"
-BASE_ARCH="amd64"
 
 get_charm_revisions "grafana-agent-k8s" "$CHANNEL" "$BASE_ARCH" "22.04"
 get_charm_revisions "traefik-k8s" "$CHANNEL" "$BASE_ARCH" "20.04"
