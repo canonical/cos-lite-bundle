@@ -16,17 +16,17 @@ jobs:
       matrix:
         charm-channel: [ "edge", "beta", "candidate", "stable" ]
         juju-track: [ "3.1", "3.2", "4.0" ]
-        microk8s-channel: [ "1.25-strict/stable" ]
+        microk8s-channel: [ "1.27-strict/stable", "1.28-strict/stable" ]
         include:
           - juju-track: "3.1"
             juju-channel: "3.1/stable"
-            juju-agent-version: "3.1.5"
-          - juju-track: "3.2"
-            juju-channel: "3.2/stable"
-            juju-agent-version: "3.2.0"
+            juju-agent-version: "3.1.7"
+          - juju-track: "3.4"
+            juju-channel: "3.4/stable"
+            juju-agent-version: "3.4.0"
           - juju-track: "4.0"
             juju-channel: "4.0/beta"
-            juju-agent-version: "4.0-beta1"
+            juju-agent-version: "4.0-beta2"
     steps:
     - name: Checkout
       uses: actions/checkout@v3
