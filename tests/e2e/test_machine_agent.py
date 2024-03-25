@@ -6,10 +6,10 @@
 import asyncio
 import logging
 import os
-import subprocess
 from types import SimpleNamespace
-import sh
+
 import pytest
+import sh
 from helpers import get_or_add_model
 from juju.controller import Controller
 from pytest_operator.plugin import OpsTest
@@ -51,14 +51,17 @@ async def test_setup_models(ops_test: OpsTest):
 async def test_deploy_cos(rendered_bundle):
     # Use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/816 is fixed.
     # await k8s_mdl.deploy(str(rendered_bundle), trust=True)
-    sh.juju.deploy([
-        "--trust",
-        "-m",
-        f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
-        rendered_bundle,
-        "--overlay",
-        "./overlays/offers-overlay.yaml",
-    ])
+    sh.juju.deploy(
+        [
+            "--trust",
+            "-m",
+            f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
+            rendered_bundle,
+            "--overlay",
+            "./overlays/offers-overlay.yaml",
+        ]
+    )
+
 
 @pytest.mark.abort_on_fail
 async def test_deploy_machine_charms():
@@ -148,13 +151,15 @@ async def test_metrics(ops_test):
     #  "principal-juju-info/0","principal-juju-info/1",
     #  "prometheus-k8s","traefik/0"
     # ]}
-    output = sh.juju.ssh([
-        "-m",
-        f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
-        "prometheus/0",
-        "curl",
-        "localhost:9090/api/v1/label/juju_unit/values",
-    ]).strip()
+    output = sh.juju.ssh(
+        [
+            "-m",
+            f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
+            "prometheus/0",
+            "curl",
+            "localhost:9090/api/v1/label/juju_unit/values",
+        ]
+    ).strip()
     logger.info("Label values: %s", output)
     assert output.count(principal_cos_agent.name) == principal_cos_agent.scale
     assert output.count(principal_juju_info.name) == principal_juju_info.scale
@@ -170,13 +175,15 @@ async def test_logs(ops_test):
     #  "principal-cos-agent/2","principal-cos-agent/3",
     #  "principal-juju-info/0","principal-juju-info/1"
     # ]}
-    output = sh.juju.ssh([
-        "-m",
-        f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
-        "loki/0",
-        "curl",
-        "localhost:3100/loki/api/v1/label/juju_unit/values",
-    ]).strip()
+    output = sh.juju.ssh(
+        [
+            "-m",
+            f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
+            "loki/0",
+            "curl",
+            "localhost:3100/loki/api/v1/label/juju_unit/values",
+        ]
+    ).strip()
 
     logger.info("Label values: %s", output)
     assert output.count(principal_cos_agent.name) == principal_cos_agent.scale
@@ -205,15 +212,17 @@ async def test_dashboards(ops_test):
     #   "url":"/cos-grafana/d/SDE76m7Zzz/zookeeper-by-prometheus","slug":"","type":"dash-db",
     #   "tags":["v4"],"isStarred":false,"sortMeta":0}
     # ]
-    output = sh.juju.ssh([
-        "-m",
-        f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
-        "grafana/0",
-        "curl",
-        "--user",
-        f"admin:{password}",
-        "localhost:3000/api/search",
-    ]).strip()
+    output = sh.juju.ssh(
+        [
+            "-m",
+            f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
+            "grafana/0",
+            "curl",
+            "--user",
+            f"admin:{password}",
+            "localhost:3000/api/search",
+        ]
+    ).strip()
 
     assert "zookeeper" in output
     assert "grafana-agent-node-exporter" in output
