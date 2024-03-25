@@ -56,7 +56,7 @@ async def test_deploy_cos(rendered_bundle):
             "--trust",
             "-m",
             f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
-            rendered_bundle,
+            str(rendered_bundle),
             "--overlay",
             "./overlays/offers-overlay.yaml",
         ]
