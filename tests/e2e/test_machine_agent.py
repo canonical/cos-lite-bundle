@@ -119,9 +119,14 @@ async def test_integration():
 
     # `idle_period` needs to be greater than the scrape interval to make sure metrics ingested.
     await asyncio.gather(
-        lxd_mdl.wait_for_idle(status="active", timeout=7200, idle_period=180, raise_on_error=False),
-        k8s_mdl.wait_for_idle(status="active", timeout=7200, idle_period=180, raise_on_error=False),
+        lxd_mdl.wait_for_idle(
+            status="active", timeout=7200, idle_period=180, raise_on_error=False
+        ),
+        k8s_mdl.wait_for_idle(
+            status="active", timeout=7200, idle_period=180, raise_on_error=False
+        ),
     )
+
 
 async def test_metrics(ops_test):
     """Make sure machine charm metrics reach Prometheus."""
