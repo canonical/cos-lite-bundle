@@ -29,7 +29,7 @@ jobs:
             juju-agent-version: "4.0-beta2"
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Get prefsrc
       run: |
         echo "IPADDR=$(ip -4 -j route get 2.2.2.2 | jq -r '.[] | .prefsrc')" >> $GITHUB_ENV
