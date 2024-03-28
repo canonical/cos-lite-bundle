@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 
-"""
-This script updates a bundle.yaml file with revisions from charmhub.
-"""
+"""This script updates a bundle.yaml file with revisions from charmhub."""
 
-import sys
-import yaml
-import json
-from pathlib import Path
-import os
 import base64
-from urllib.request import urlopen, Request
+import json
+import os
+import sys
+from pathlib import Path
+from urllib.request import Request, urlopen
+
+import yaml
 
 
 def obtain_charm_releases(charm_name: str) -> dict:
@@ -20,9 +19,9 @@ def obtain_charm_releases(charm_name: str) -> dict:
         charm_name: e.g. "grafana-k8s".
     """
     if token := os.environ.get("CHARMHUB_TOKEN"):
-        macaroon = json.loads(base64.b64decode(token))['v']
+        macaroon = json.loads(base64.b64decode(token))["v"]
     elif file := os.environ.get("CREDS_FILE"):
-        macaroon = json.loads(base64.b64decode(Path(file).read_text()))['v']
+        macaroon = json.loads(base64.b64decode(Path(file).read_text()))["v"]
     else:
         raise RuntimeError("Must set one of CHARMHUB_TOKEN, CREDS_FILE envvars.")
     headers = {"Authorization": f"Macaroon {macaroon}"}
@@ -64,7 +63,9 @@ def obtain_charm_releases(charm_name: str) -> dict:
     return json.loads(body)
 
 
-def obtain_revisions_from_charmhub(charm_name: str, channel: str, base_arch: str, base_channel: str) -> dict:
+def obtain_revisions_from_charmhub(
+    charm_name: str, channel: str, base_arch: str, base_channel: str
+) -> dict:
     """Obtain revisions for a given channel and arch.
 
     Args:
@@ -86,19 +87,33 @@ def obtain_revisions_from_charmhub(charm_name: str, channel: str, base_arch: str
     """
     releases = obtain_charm_releases(charm_name)
     for channel_dict in releases["channel-map"]:
-        print(charm_name, channel_dict["channel"], channel_dict["base"]["architecture"], channel_dict["base"]["channel"])
-        if not(channel_dict["channel"] == channel and channel_dict["base"]["architecture"] == base_arch and channel_dict["base"]["channel"] == base_channel):
+        print(
+            charm_name,
+            channel_dict["channel"],
+            channel_dict["base"]["architecture"],
+            channel_dict["base"]["channel"],
+        )
+        if not (
+            channel_dict["channel"] == channel
+            and channel_dict["base"]["architecture"] == base_arch
+            and channel_dict["base"]["channel"] == base_channel
+        ):
             continue
 
         return {
             charm_name: {
                 "revision": channel_dict["revision"],
-                "resources": {res["name"]: res["revision"] for res in channel_dict["resources"]}
+                "resources": {res["name"]: res["revision"] for res in channel_dict["resources"]},
             }
         }
 
+    raise ValueError(
+        f"Didn't find any entry in {charm_name} releases with {base_arch}/{base_channel}"
+    )
+
 
 def freeze_bundle(bundle: dict, cleanup: bool = True):
+    """Take a bundle (dict) and update (freeze) revision entries."""
     bundle = bundle.copy()
     for app_name in bundle["applications"]:
         app = bundle["applications"][app_name]
