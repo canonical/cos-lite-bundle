@@ -49,8 +49,10 @@ jobs:
     - name: Update python-libjuju dependency to match juju version
       # Assuming the dep is given on a separate tox.ini line
       run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=3.1.0/g' tox.ini
+    - name: Render bundle
+      run: tox -e render-edge
     - name: Run tests (edge channel)
-      run: tox -e integration -- --channel=edge
+      run: tox -e integration
     - name: Dump logs
       if: failure()
       uses: sed-i/charming-actions/dump-logs@feature/dump_logs
@@ -90,6 +92,8 @@ jobs:
           chmod -R ugo+rwX ~/.kube
       - name: Update python-libjuju dependency to match juju
         run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=3.1.0/g' tox.ini
+      - name: Render bundle
+        run: tox -e render-edge
       - name: Run end-to-end tests
         run: tox run -vve e2e
         env:
