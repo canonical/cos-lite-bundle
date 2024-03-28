@@ -53,7 +53,7 @@ jobs:
       run: tox -e integration -- --channel=edge
     - name: Dump logs
       if: failure()
-      uses: canonical/cos-lite-bundle/.github/workflows/_dump-logs.yaml@feature/dump_logs_helper
+      uses: sed-i/charming-actions/dump-logs@feature/dump_logs
   end-to-end-tests:
     # Must use Juju 3 to bootstrap both uk8s and lxd:https://bugs.launchpad.net/juju/+bug/2003582
     name: End-to-end tests
@@ -97,4 +97,4 @@ jobs:
           LXD_CONTROLLER: ${{ steps.lxd-controller.outputs.name }}
       - name: Dump logs
         if: failure()
-        uses: canonical/cos-lite-bundle/.github/workflows/_dump-logs.yaml@feature/dump_logs_helper
+        uses: sed-i/charming-actions/dump-logs@feature/dump_logs

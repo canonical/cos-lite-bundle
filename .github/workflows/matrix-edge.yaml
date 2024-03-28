@@ -68,7 +68,7 @@ jobs:
       run: tox -e integration -- --channel=edge
     - name: Dump logs
       if: failure()
-      uses: canonical/observability/.github/workflows/_dump-logs.yaml@feature/dump_logs_helper
+      uses: sed-i/charming-actions/dump-logs@feature/dump_logs
   release-pinned-bundle:
     name: Release pinned bundle
     needs: [ integration-matrix ]
