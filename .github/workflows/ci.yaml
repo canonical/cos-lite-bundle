@@ -51,12 +51,9 @@ jobs:
       run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=3.1.0/g' tox.ini
     - name: Run tests (edge channel)
       run: tox -e integration -- --channel=edge
-    - name: Dump debug log
+    - name: Dump logs
       if: failure()
-      run: |
-        for ctl in $(juju controllers --format json | jq -r '.controllers | keys[]'); do for mdl in $(juju models --format json | jq -r '.models[].name' | grep -v "admin/controller"); do juju debug-log -m $ctl:$mdl --replay --ms --no-tail; done; done || true
-        exit 0
-      shell: bash
+      uses: canonical/cos-lite-bundle/.github/workflows/_dump-logs.yaml@main
   end-to-end-tests:
     # Must use Juju 3 to bootstrap both uk8s and lxd:https://bugs.launchpad.net/juju/+bug/2003582
     name: End-to-end tests
@@ -98,7 +95,6 @@ jobs:
         env:
           K8S_CONTROLLER: ${{ steps.k8s-controller.outputs.name }}
           LXD_CONTROLLER: ${{ steps.lxd-controller.outputs.name }}
-      - name: Dump debug log
+      - name: Dump logs
         if: failure()
-        run: for ctl in $(juju controllers --format json | jq -r '.controllers | keys[]'); do for mdl in $(juju models --format json | jq -r '.models[].name' | grep -v "admin/controller"); do juju debug-log -m $ctl:$mdl --replay --ms --no-tail; done; done || true
-        shell: bash
+        uses: canonical/cos-lite-bundle/.github/workflows/_dump-logs.yaml@main

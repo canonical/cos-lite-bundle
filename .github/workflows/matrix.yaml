@@ -46,35 +46,6 @@ jobs:
       run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=${{ matrix.juju-track }}.0/g' tox.ini
     - name: Run tests (${{ matrix.charm-channel }} charms, juju ${{ matrix.juju-channel }}, microk8s ${{ matrix.microk8s-channel }})
       run: tox -e integration -- --channel=${{ matrix.charm-channel }}
-    - name: Dump debug log
+    - name: Dump logs
       if: failure()
-      run: for m in $(juju models --format json | jq -r '.models[].name' | grep -v "admin/controller"); do juju debug-log -m $m --replay --ms --no-tail; done
-      shell: bash
-    - name: Dump charmcraft logs
-      if: failure()
-      uses: actions/upload-artifact@v3
-      with:
-        name: charmcraft-logs
-        path: ~/.local/state/charmcraft/log/*.log
-    - name: Dump deployments
-      if: failure()
-      run: kubectl describe deployments -A
-    - name: Dump replicasets
-      if: failure()
-      run: kubectl describe replicasets -A
-    - name: Dump pods and their logs
-      if: failure()
-      shell: bash
-      run: |
-        juju status --relations --storage
-        kubectl get pods \
-            -A \
-            -o=jsonpath='{range.items[*]}{.metadata.namespace} {.metadata.name}{"\n"}' \
-            --sort-by=.metadata.namespace \
-            | grep -v "^\s*$" \
-            | while read namespace pod; do \
-                 kubectl -n $namespace describe pod $pod; \
-                 kubectl -n $namespace logs $pod \
-                    --all-containers=true \
-                    --tail=100; \
-             done
+      uses: canonical/observability/.github/workflows/_dump-logs.yaml@feature/dump_logs_helper
