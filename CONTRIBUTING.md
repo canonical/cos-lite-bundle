@@ -60,22 +60,6 @@ Optionally, you may render the template with local charms, for example:
   --loki=$(pwd)/../loki-operator/loki-k8s-operator_ubuntu-20.04-amd64.charm
 ```
 
-#### Render template using tox
-You can render and deploy the template in a single tox command:
-
-```shell
-tox -e integration -- --keep-models -k test_build_and_deploy \
-  --traefik=$(pwd)/../traefik-k8s-operator/traefik-k8s_ubuntu-20.04-amd64.charm \
-  --prometheus=$(pwd)/../prometheus-k8s-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
-  --alertmanager=$(pwd)/../alertmanager-k8s-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
-  --grafana=$(pwd)/../grafana-k8s-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
-  --loki=$(pwd)/../loki-operator/loki-k8s-operator_ubuntu-20.04-amd64.charm
-```
-
-Now `juju switch` into the newly created model (or use `--model=MODEL` in
-addition to `--keep-models` to use an existing model).
-
-For more details, see the Testing section.
 
 ## Testing
 Integration tests render the
@@ -92,11 +76,6 @@ yaml is rendered with default values (all charms deployed from charmhub).
 tox -e integration
 ```
 
-You can also specify the channel:
-
-```shell
-tox -e integration -- --channel=edge
-```
 
 To keep the model and applications running after the tests completes:
 
@@ -111,13 +90,16 @@ K8S_CONTROLLER="k8s_ctl_name" LXD_CONTROLLER="lxd_ctl_name" tox -e e2e
 ```
 
 ### Tests with local charms
-To have all charms deployed from local files:
+To have all charms deployed from local files, first render the bundle and then
+run integration tests.
 
 ```shell
-tox -e integration -- \
+./render_bundle.py bundle.yaml --channel=edge \
   --traefik=$(pwd)/../traefik-k8s-operator/traefik-k8s_ubuntu-20.04-amd64.charm \
   --prometheus=$(pwd)/../prometheus-k8s-operator/prometheus-k8s_ubuntu-20.04-amd64.charm \
   --alertmanager=$(pwd)/../alertmanager-k8s-operator/alertmanager-k8s_ubuntu-20.04-amd64.charm \
   --grafana=$(pwd)/../grafana-k8s-operator/grafana-k8s_ubuntu-20.04-amd64.charm \
   --loki=$(pwd)/../loki-operator/loki-k8s-operator_ubuntu-20.04-amd64.charm
+
+tox -e integration
 ```

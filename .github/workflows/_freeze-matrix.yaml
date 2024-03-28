@@ -1,0 +1,98 @@
+name: Integration matrix
+
+on:
+  workflow_call:
+    inputs:
+      charm-channel:
+        type: string
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  validate-inputs:
+    name: Validate action inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate charm-channel
+        if: ${{ inputs.charm-channel != 'edge' && inputs.charm-channel != 'beta' && inputs.charm-channel != 'candidate' && inputs.charm-channel != 'stable'}}
+        run: |
+          echo "Error: The 'charm-channel' input must be one of edge, beta, candidate, stable."
+          exit 1
+  render-freeze-bundle:
+    name: Render and freeze bundle
+    needs: [ validate-inputs ]
+    # We render and freeze at the start to avoid possible races, in case a new charm was release
+    # while these tests are still running.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Render and freeze bundle
+        env:
+          CHARMHUB_TOKEN: "${{ secrets.CHARMHUB_TOKEN }}"
+        run: |
+          tox -e render-${{ inputs.charm-channel }}
+          python3 freeze_bundle.py bundle.yaml > bundle.yaml
+      - name: Upload bundle as artifact to be used by the next job
+        uses: actions/upload-artifact@v3
+        with:
+          name: frozen-bundle
+          path: bundle.yaml
+  integration-matrix:
+    name: Matrix tests for edge charms
+    needs: [ render-freeze-bundle ]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        juju-track: [ "3.1", "3.4" ]
+        microk8s-channel: [ "1.27-strict/stable", "1.28-strict/stable" ]
+        include:
+          - juju-track: "3.1"
+            juju-channel: "3.1/stable"
+            juju-agent-version: "3.1.7"
+          - juju-track: "3.4"
+            juju-channel: "3.4/stable"
+            juju-agent-version: "3.4.0"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Get prefsrc
+        run: |
+          echo "IPADDR=$(ip -4 -j route get 2.2.2.2 | jq -r '.[] | .prefsrc')" >> $GITHUB_ENV
+      - name: Setup operator environment
+        uses: charmed-kubernetes/actions-operator@main
+        with:
+          juju-channel: ${{ matrix.juju-channel }}
+          provider: microk8s
+          channel: ${{ matrix.microk8s-channel }}
+          microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
+          bootstrap-options: "--agent-version ${{ matrix.juju-agent-version }}"
+      - name: Update python-libjuju dependency to match juju version
+        # Assuming the dep is given on a separate tox.ini line
+        run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=${{ matrix.juju-track }}.0/g' tox.ini
+      - uses: actions/download-artifact@v3
+        with:
+          name: frozen-bundle
+      - name: Run tests (juju ${{ matrix.juju-channel }}, microk8s ${{ matrix.microk8s-channel }})
+        run: tox -e integration
+      - name: Dump logs
+        if: failure()
+        uses: sed-i/charming-actions/dump-logs@feature/dump_logs
+  release-pinned-bundle:
+    name: Release pinned bundle
+    needs: [ integration-matrix ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: frozen-bundle
+      - name: Upload bundle to the pinned track
+        uses: canonical/charming-actions/upload-bundle@1.0.0
+        with:
+          channel: "pinned/${{ inputs.charm-channel }}"
+          credentials: "${{ secrets.CHARMHUB_TOKEN }}"
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
