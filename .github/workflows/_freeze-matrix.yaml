@@ -81,7 +81,7 @@ jobs:
         run: tox -e integration
       - name: Dump logs
         if: failure()
-        uses: sed-i/charming-actions/dump-logs@feature/dump_logs
+        uses: canonical/charming-actions/dump-logs@main
   release-pinned-bundle:
     name: Release pinned bundle
     needs: [ integration-matrix ]
