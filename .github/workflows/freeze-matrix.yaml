@@ -1,0 +1,26 @@
+name: Periodic integration matrix tests
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  schedule:
+    # every Wednesday at 02:00
+    - cron: '0 02 * * WED'
+  workflow_dispatch:
+
+jobs:
+  per-channel-integration-matrix:
+    name: Per-channel integration matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        charm-channel: [ "edge", "beta", "candidate", "stable" ]
+    steps:
+    - name: Run integration matrix for ${{ matrix.charm-channel }} channel
+      uses: canonical/cos-lite-bundle/.github/workflows/_freeze-matrix.yaml@main
+      with:
+        charm-channel: ${{ matrix.charm-channel }}
+
