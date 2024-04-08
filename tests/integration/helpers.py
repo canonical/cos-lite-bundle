@@ -62,7 +62,7 @@ async def get_all_proxied_urls(ops_test: OpsTest) -> Dict[str, Dict[str, str]]:
 
     logging.debug(f"Endpoints proxied by Traefik/0: {proxied_endpoints}")
 
-    return {p: p["url"] for p in proxied_endpoints}
+    return {k: v["url"] for k, v in proxied_endpoints.items()}
 
 
 async def get_proxied_url(ops_test: OpsTest, app_name: str, unit_num: Optional[int] = None) -> str:

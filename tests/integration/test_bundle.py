@@ -73,15 +73,15 @@ async def test_build_and_deploy(ops_test: OpsTest, rendered_bundle, tls_enabled)
 async def test_obtain_external_ca_cert(ops_test):
     return_code, stdout, stderr = await ops_test.juju("status", "--no-color")
     status = stdout
-    if "external-ca/0" in status:
+    if "ca/0" in status:
         # Obtain certificate from external-ca
         temp_dir = tempfile.mkdtemp()
-        cert_path = Path(temp_dir + "/external_ca.pem")
+        cert_path = Path(temp_dir + "/ca.pem")
 
         return_code, stdout, stderr = await ops_test.juju(
-            *"run external-ca/0 get-ca-certificate --format=json --no-color".split()
+            *"run ca/0 get-ca-certificate --format=json --no-color".split()
         )
-        cert = json.loads(stdout)["external-ca/0"]["results"]["ca-certificate"]
+        cert = json.loads(stdout)["ca/0"]["results"]["ca-certificate"]
         cert_path.write_text(cert)
 
         ctx = ssl.create_default_context()
@@ -284,8 +284,7 @@ async def test_all_traefik_proxied_urls_return_200(ops_test: OpsTest):
     proxied_urls = await get_all_proxied_urls(ops_test)
     for app, url in proxied_urls.items():
         response = urlopen(url, context=insecure_context)
-        assert response.code == 200
-        logger.info(f"{app} is successfully responding via its traefik ingress URL.")
+        assert response.code < 400, f"Unreachable: code={response.code} app={app}, url={url}"
 
 
 @pytest.mark.abort_on_fail

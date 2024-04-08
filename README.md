@@ -1,5 +1,8 @@
 # COS Lite bundle
 
+[![CharmHub Badge](https://charmhub.io/cos-lite/badge.svg)](https://charmhub.io/cos-lite)
+[![Discourse Status](https://img.shields.io/discourse/status?server=https%3A%2F%2Fdiscourse.charmhub.io&style=flat&label=CharmHub%20Discourse)](https://discourse.charmhub.io)
+
 The lite flavor of Canonical Observability Stack, also called COS Lite, is a light-weight, highly-integrated, Juju-based observability suite running on Kubernetes.
 
 This Juju bundle deploys the stack, consisting of the following interrelated charms:
