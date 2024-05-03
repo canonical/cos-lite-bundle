@@ -10,9 +10,9 @@ import ssl
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 from urllib.request import urlopen
-
+import sh
 import juju
 import juju.utils
 import pytest
@@ -23,6 +23,7 @@ from helpers import (
     get_alertmanager_alerts,
     get_alertmanager_groups,
     get_proxied_url,
+    get_related_apps,
 )
 from pytest_operator.plugin import OpsTest
 
@@ -90,8 +91,7 @@ async def test_obtain_external_ca_cert(ops_test):
     # whether TLS is enabled.
 
 
-@pytest.mark.abort_on_fail
-async def test_web_uis_are_reachable_via_ingress_url(ops_test):
+async def _get_catalogue_app_urls(ops_test) -> Dict[str, str]:
     # Create mapping from app name (as it appears in catalogue) to its url
     # Looks like this:
     # {
@@ -104,8 +104,13 @@ async def test_web_uis_are_reachable_via_ingress_url(ops_test):
     )
     cat_conf = json.loads(stdout)
 
-    apps = {app["name"]: app["url"] for app in cat_conf["apps"]}
+    return {app["name"]: app["url"] for app in cat_conf["apps"]}
 
+
+@pytest.mark.abort_on_fail
+async def test_web_uis_are_reachable_via_ingress_url(ops_test):
+    apps = await _get_catalogue_app_urls(ops_test)
+    assert len(apps) > 0
     for name, url in apps.items():
         logger.info("Attempting to reach %s (%s)...", name, url)
         # We intentionally do not want to use "insecure" here, to make sure TLS is set up correctly
@@ -275,6 +280,25 @@ async def test_loki_receives_logs(ops_test: OpsTest):
     assert "flog-k8s" in as_str
     logger.info("loki is successfully receiving flog logs")
 
+@pytest.mark.abort_on_fail
+@pytest.mark.skipif(context.external_ca is None, reason="This test is only relevant for TLS")
+async def test_remove_certificate_relations(ops_test):
+    """Disabling TLS should transition smoothly into plain-HTTP comms."""
+    # GIVEN a list of all the apps that are related over "certificates" relation
+    apps_to_unrelate = get_related_apps("ca", "certificates")
+
+    # WHEN all certificates relations are removed
+    for app in apps_to_unrelate:
+        sh.juju("remove-relation", "ca:certificates", app)
+    await ops_test.model.wait_for_idle(status="active")
+
+    # THEN all workloads are still reachable via ingress url
+    apps = await _get_catalogue_app_urls(ops_test)
+    assert len(apps) > 0
+    for name, url in apps.items():
+        logger.info("Attempting to reach %s (%s)...", name, url)
+        response = urlopen(url, data=None, timeout=2.0)
+        assert response.code == 200
 
 @pytest.mark.abort_on_fail
 async def test_remove(ops_test):

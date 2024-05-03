@@ -12,6 +12,7 @@ from typing import List, Optional, Union
 from juju.controller import Controller
 from juju.model import Model
 from pytest_operator.plugin import OpsTest
+import sh
 
 logger = logging.getLogger(__name__)
 
@@ -188,3 +189,10 @@ async def get_or_add_model(controller: Controller, model_name: str) -> Model:
         if model_name in await controller.get_models()
         else controller.add_model(model_name)
     )
+
+def get_related_apps(app_name: str, relation_name: str) -> List[str]:
+    return sh.jq(
+        '-r',
+        f'.applications.{app_name}.relations.{relation_name}[]."related-application"',
+        _in=sh.juju.status(app_name, "--relations", "--format=json", "--no-color")
+    ).splitlines()
