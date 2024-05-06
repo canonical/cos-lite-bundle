@@ -10,12 +10,13 @@ import ssl
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Dict, Optional
 from urllib.request import urlopen
-import sh
+
 import juju
 import juju.utils
 import pytest
+import sh
 from helpers import (
     ModelConfigChange,
     cli_deploy_bundle,
@@ -280,6 +281,7 @@ async def test_loki_receives_logs(ops_test: OpsTest):
     assert "flog-k8s" in as_str
     logger.info("loki is successfully receiving flog logs")
 
+
 @pytest.mark.abort_on_fail
 @pytest.mark.skipif(context.external_ca is None, reason="This test is only relevant for TLS")
 async def test_remove_certificate_relations(ops_test):
@@ -299,6 +301,7 @@ async def test_remove_certificate_relations(ops_test):
         logger.info("Attempting to reach %s (%s)...", name, url)
         response = urlopen(url, data=None, timeout=2.0)
         assert response.code == 200
+
 
 @pytest.mark.abort_on_fail
 async def test_remove(ops_test):
