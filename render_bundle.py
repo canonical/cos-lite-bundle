@@ -89,7 +89,7 @@ def render_bundle(template: Path, output: Path, variables: Optional[Dict[str, st
 
     # print(jinja_template.render(**variables))
     with open(output, "wt") as o:
-        jinja_template.stream(**variables).dump(o)
+        jinja_template.stream(**variables).dump(o)  # type: ignore
 
 
 if __name__ == "__main__":
