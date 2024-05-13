@@ -134,9 +134,11 @@ def freeze_bundle(bundle: dict, cleanup: bool = True):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        raise RuntimeError("Expecting one arg: path to bundle yaml")
+    if len(sys.argv) != 3:
+        raise RuntimeError("Expecting two args: path to bundle.yaml and to the output filename")
 
     bundle_path = sys.argv[1]
+    output_path = sys.argv[2]
     frozen = freeze_bundle(yaml.safe_load(Path(bundle_path).read_text()))
-    print(yaml.safe_dump(frozen))
+    with open(output_path, "w") as f:
+        yaml.dump(frozen, f)
