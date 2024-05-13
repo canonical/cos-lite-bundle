@@ -122,7 +122,9 @@ def freeze_bundle(bundle: dict, cleanup: bool = True):
         # TODO externalize "base_arch" as an input to the script.
         frozen_app = obtain_revisions_from_charmhub(charm_name, app_channel, "amd64", "20.04")
         app["revision"] = frozen_app[charm_name]["revision"]
-        app["resources"].update(frozen_app[charm_name]["resources"])
+        if "resources" not in app:
+            app["resources"] = {}
+        app["resources"].update(frozen_app[charm_name].get("resources", {}))
 
         if cleanup:
             app.pop("constraints", None)
