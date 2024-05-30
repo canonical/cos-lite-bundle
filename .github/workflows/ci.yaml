@@ -42,13 +42,13 @@ jobs:
     - name: Setup operator environment
       uses: charmed-kubernetes/actions-operator@main
       with:
-        juju-channel: 3.1/stable
+        juju-channel: 3.4/stable
         provider: microk8s
         channel: 1.25-strict/stable
         microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
     - name: Update python-libjuju dependency to match juju version
       # Assuming the dep is given on a separate tox.ini line
-      run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=3.1.0/g' tox.ini
+      run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=3.4.0/g' tox.ini
     - name: Render bundle
       run: tox -e render-edge
     - name: Run tests (edge channel)
