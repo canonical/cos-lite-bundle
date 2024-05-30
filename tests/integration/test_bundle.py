@@ -48,7 +48,8 @@ insecure_context.verify_mode = ssl.CERT_NONE
 
 @pytest.mark.abort_on_fail
 @pytest.mark.parametrize("tls_enabled", [False, True], scope="module")
-async def test_build_and_deploy(ops_test: OpsTest, rendered_bundle, tls_enabled):
+@pytest.mark.parametrize("tracing_enabled", [False, True], scope="module")
+async def test_build_and_deploy(ops_test: OpsTest, rendered_bundle, tls_enabled, tracing_enabled):
     """Build the charm-under-test and deploy it together with related charms.
 
     Assert on the unit status before any relations/configurations take place.
@@ -57,6 +58,8 @@ async def test_build_and_deploy(ops_test: OpsTest, rendered_bundle, tls_enabled)
     overlays = ["overlays/testing-overlay.yaml"]
     if tls_enabled:
         overlays.extend(["overlays/tls-overlay.yaml"])
+    if tracing_enabled:
+        overlays.extend(["overlays/tracing-overlay.yaml"])
     await cli_deploy_bundle(ops_test, str(rendered_bundle), overlays=overlays)
 
     # Idle period is set to 90 to capture restarts caused by applying resource limits
