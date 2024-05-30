@@ -10,7 +10,7 @@ applications:
     channel: edge
 
 relations:
-- [tempo:ingress, traefik:ingress]
+- [tempo:ingress, traefik:traefik-route]
 # self-monitoring relations to cos-lite
 - [tempo:logging, loki:logging]
 - [grafana:grafana-dashboard, tempo:grafana-dashboard]
