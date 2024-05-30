@@ -1,0 +1,13 @@
+applications:
+  alertmanager:
+    scale: 3
+    constraints: tags=anti-pod.app.kubernetes.io/name=alertmanager,anti-pod.topology-key=kubernetes.io/hostname
+  prometheus:
+    scale: 3
+    constraints: tags=anti-pod.app.kubernetes.io/name=prometheus,anti-pod.topology-key=kubernetes.io/hostname
+  grafana:
+    scale: 3
+    constraints: tags=anti-pod.app.kubernetes.io/name=grafana,anti-pod.topology-key=kubernetes.io/hostname
+  loki:
+    scale: 3
+    constraints: tags=anti-pod.app.kubernetes.io/name=loki,anti-pod.topology-key=kubernetes.io/hostname
