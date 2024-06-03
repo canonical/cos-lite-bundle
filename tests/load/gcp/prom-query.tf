@@ -32,6 +32,8 @@ data "cloudinit_config" "prom_query" {
         ],
 
         "package_update" : "true",
+        "package_upgrade": "true",
+        "package_reboot_if_required": "true",
 
         "packages" : [
           "python3-pip",

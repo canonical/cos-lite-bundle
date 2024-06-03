@@ -19,9 +19,9 @@ jobs:
         python: [3.8]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python }}
     - name: Install dependencies
@@ -35,23 +35,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Get prefsrc
       run: |
         echo "IPADDR=$(ip -4 -j route get 2.2.2.2 | jq -r '.[] | .prefsrc')" >> $GITHUB_ENV
     - name: Setup operator environment
       uses: charmed-kubernetes/actions-operator@main
       with:
-        juju-channel: 2.9/stable
+        juju-channel: 3.4/stable
         provider: microk8s
         channel: 1.25-strict/stable
         microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
+    - name: Update python-libjuju dependency to match juju version
+      # Assuming the dep is given on a separate tox.ini line
+      run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=3.4.0/g' tox.ini
+    - name: Render bundle
+      run: tox -e render-edge
     - name: Run tests (edge channel)
-      run: tox -e integration -- --channel=edge
-    - name: Dump debug log
+      run: tox -e integration
+    - name: Dump logs
       if: failure()
-      run: for ctl in $(juju controllers --format json | jq -r '.controllers | keys[]'); do for mdl in $(juju models --format json | jq -r '.models[].name' | grep -v "admin/controller"); do juju debug-log -m $ctl:$mdl --replay --ms --no-tail; done; done || true
-      shell: bash
+      uses: canonical/charming-actions/dump-logs@main
   end-to-end-tests:
     # Must use Juju 3 to bootstrap both uk8s and lxd:https://bugs.launchpad.net/juju/+bug/2003582
     name: End-to-end tests
@@ -59,14 +63,14 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Get prefsrc
         run: |
           echo "IPADDR=$(ip -4 -j route get 2.2.2.2 | jq -r '.[] | .prefsrc')" >> $GITHUB_ENV
       - name: Setup lxd controller
         uses: charmed-kubernetes/actions-operator@main
         with:
-          juju-channel: 2.9/stable
+          juju-channel: 3.1/stable
           provider: lxd
       - name: Save lxd controller name
         id: lxd-controller
@@ -75,7 +79,7 @@ jobs:
       - name: Setup k8s controller
         uses: charmed-kubernetes/actions-operator@main
         with:
-          juju-channel: 2.9/stable
+          juju-channel: 3.1/stable
           provider: microk8s
           channel: 1.25-strict/stable
           microk8s-addons: "hostpath-storage dns metallb:${{ env.IPADDR }}-${{ env.IPADDR }}"
@@ -86,12 +90,15 @@ jobs:
       - name: Fix microk8s permissions
         run: |
           chmod -R ugo+rwX ~/.kube
+      - name: Update python-libjuju dependency to match juju
+        run: sed -E -i 's/^\s*juju\s*~=.+/    juju~=3.1.0/g' tox.ini
+      - name: Render bundle
+        run: tox -e render-edge
       - name: Run end-to-end tests
         run: tox run -vve e2e
         env:
           K8S_CONTROLLER: ${{ steps.k8s-controller.outputs.name }}
           LXD_CONTROLLER: ${{ steps.lxd-controller.outputs.name }}
-      - name: Dump debug log
+      - name: Dump logs
         if: failure()
-        run: for ctl in $(juju controllers --format json | jq -r '.controllers | keys[]'); do for mdl in $(juju models --format json | jq -r '.models[].name' | grep -v "admin/controller"); do juju debug-log -m $ctl:$mdl --replay --ms --no-tail; done; done || true
-        shell: bash
+        uses: canonical/charming-actions/dump-logs@main

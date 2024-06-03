@@ -6,6 +6,9 @@ sudo cat /var/lib/cloud/instance/cloud-config.txt
 ```
 
 ```shell
+# check cloud-init completed
+cat /var/log/cloud-init-output.log
+
 # check service status
 systemctl status flood-element-grafana
 pgrep -laf chrome
@@ -50,6 +53,12 @@ ssh -i ~/secrets/cos-lite-load-testing-ssh \
     -L localhost:8080:10.128.0.7:80 \
     ubuntu@35.184.199.203
 ```
+
+- `34.42.192.203` is the GCP vm IP
+- `10.128.0.7:80` is the traefik address inside the GCP vm
+
+In the *.js file, replace the address in `await browser.visit(...)` with
+`localhost:8080`.
 
 Run the test (a browser window should pop up):
 ```

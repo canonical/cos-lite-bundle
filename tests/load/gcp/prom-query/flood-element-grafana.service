@@ -4,7 +4,9 @@ After=network.target multi-user.target
 
 [Service]
 Type=simple
+User=ubuntu
+Group=ubuntu
 Restart=always
-ExecStartPre=sh -c "stat /run/geckodriver-v0.31.0-linux64.tar.gz 1>/dev/null 2>&1 || wget https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz -P /run"
-ExecStartPre=sh -c "stat /usr/bin/geckodriver 1>/dev/null 2>&1 || tar -xzvf /run/geckodriver-v0.31.0-linux64.tar.gz -C /usr/bin"
+ExecStartPre=sh -c "stat /home/ubuntu/geckodriver-v0.31.0-linux64.tar.gz 1>/dev/null 2>&1 || wget https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz -P /home/ubuntu"
+ExecStartPre=sh -c "stat /usr/bin/geckodriver 1>/dev/null 2>&1 || sudo tar -xzvf /home/ubuntu/geckodriver-v0.31.0-linux64.tar.gz -C /usr/bin"
 ExecStart=element run /home/ubuntu/prom-query-grafana-dashboards.ts --config /home/ubuntu/prom-query-grafana-dashboards.config.js --mu

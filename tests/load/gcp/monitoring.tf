@@ -28,7 +28,7 @@ data "cloudinit_config" "monitoring" {
       {
         "write_files" : [
           {
-            "path" : "/run/agent.yaml",
+            "path" : "/var/agent.yaml",
             "content" : templatefile("monitoring/agent.tpl.yaml", {
               REMOTE_WRITE_URL             = var.grafana_cloud_remote_write_url,
               REMOTE_WRITE_USERNAME        = var.grafana_cloud_username,
@@ -52,7 +52,7 @@ data "cloudinit_config" "monitoring" {
             "content" : file("monitoring/grafana-agent.service"),
           },
           {
-            "path" : "/run/wait-for-prom-ready.sh",
+            "path" : "/var/wait-for-prom-ready.sh",
             "permissions" : "0755",
             "content" : templatefile("common/wait-for-prom-ready.tpl.sh", {
               PROM_EXTERNAL_URL = local.prom_url,
@@ -61,6 +61,8 @@ data "cloudinit_config" "monitoring" {
         ],
 
         "package_update" : "true",
+        "package_upgrade": "true",
+        "package_reboot_if_required": "true",
 
         "packages" : [
           "unzip",

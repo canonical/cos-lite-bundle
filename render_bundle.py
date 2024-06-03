@@ -87,9 +87,7 @@ def render_bundle(template: Path, output: Path, variables: Optional[Dict[str, st
     with open(template) as t:
         jinja_template = Template(t.read(), autoescape=True)
 
-    # print(jinja_template.render(**variables))
-    with open(output, "wt") as o:
-        jinja_template.stream(**variables).dump(o)
+    jinja_template.stream(**variables).dump(str(output))
 
 
 if __name__ == "__main__":

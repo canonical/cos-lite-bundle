@@ -2,3 +2,4 @@ terraform.tfstate*
 .terraform*
 node_modules/*
 var_grafana_cloud.tfvars
+venv/

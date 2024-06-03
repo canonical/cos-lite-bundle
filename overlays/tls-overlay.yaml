@@ -1,0 +1,15 @@
+applications:
+  ca:
+    charm: self-signed-certificates
+    channel: edge
+    scale: 1
+    options:
+      ca-common-name: ca.demo.local
+
+relations:
+ - [ca, traefik:certificates]
+ - [ca, alertmanager:certificates]
+ - [ca, prometheus:certificates]
+ - [ca, grafana:certificates]
+ - [ca, loki:certificates]
+ - [ca, catalogue:certificates]

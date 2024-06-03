@@ -28,14 +28,14 @@ data "cloudinit_config" "cos_lite" {
             "content" : file("common/node-exporter.service"),
           },
           {
-            "path" : "/run/wait-for-prom-ready.sh",
+            "path" : "/var/wait-for-prom-ready.sh",
             "permissions" : "0755",
             "content" : templatefile("common/wait-for-prom-ready.tpl.sh", {
               PROM_EXTERNAL_URL = local.prom_url,
             }),
           },
           {
-            "path" : "/run/wait-for-grafana-ready.sh",
+            "path" : "/var/wait-for-grafana-ready.sh",
             "permissions" : "0755",
             "content" : templatefile("cos-lite/wait-for-grafana-ready.tpl.sh", {
               GRAFANA_EXTERNAL_URL = local.grafana_url,
@@ -48,7 +48,7 @@ data "cloudinit_config" "cos_lite" {
             }),
           },
           {
-            "path" : "/run/pod_top_exporter.py",
+            "path" : "/var/pod_top_exporter.py",
             "permissions" : "0755",
             "content" : templatefile("cos-lite/pod_top_exporter.tpl.py", {
               JUJU_MODEL_NAME = var.juju_model_name,
@@ -59,7 +59,8 @@ data "cloudinit_config" "cos_lite" {
             "content" : file("cos-lite/pod-top-exporter.service"),
           },
           {
-            "path" : "/run/overlay-load-test.yaml",
+            # Path must be inside $HOME because juju 3 is a strictly confined snap
+            "path" : "/home/ubuntu/overlay-load-test.yaml",
             "content" : templatefile("cos-lite/overlay-load-test.tpl.yaml", {
               COS_APPLIANCE_HOSTNAME = local.cos_appliance_hostname,
               NUM_TARGETS            = var.num_avalanche_targets,
@@ -68,7 +69,7 @@ data "cloudinit_config" "cos_lite" {
             }),
           },
           {
-            "path" : "/run/cos-lite-rest-server.py",
+            "path" : "/var/cos-lite-rest-server.py",
             "permissions" : "0755",
             "content" : file("cos-lite/cos-lite-rest-server.py"),
           },
@@ -79,6 +80,8 @@ data "cloudinit_config" "cos_lite" {
         ],
 
         "package_update" : "true",
+        "package_upgrade": "true",
+        "package_reboot_if_required": "true",
 
         "packages" : [
           "python3-pip",
@@ -94,9 +97,11 @@ data "cloudinit_config" "cos_lite" {
 
         "snap" : {
           "commands" : [
-            "snap install --classic juju --channel=2.9/stable",
-            "snap install --classic microk8s --channel=1.26/stable",
+            "snap install --classic juju --channel=3.1/stable",
+            "snap install --classic microk8s --channel=1.27-strict/stable",
             "snap alias microk8s.kubectl kubectl",
+            "snap alias microk8s.kubectl k",
+            "snap install yq",
             "snap refresh",
           ]
         }
@@ -126,7 +131,7 @@ resource "google_compute_instance" "vm_cos_lite_appliance" {
     initialize_params {
       image = "ubuntu-os-cloud/ubuntu-minimal-2204-lts"
       type  = var.disk_type
-      size  = "100"
+      size  = "200"
     }
   }
 
@@ -141,4 +146,3 @@ resource "google_compute_instance" "vm_cos_lite_appliance" {
     }
   }
 }
-

@@ -14,7 +14,7 @@ applications:
     trust: true
     {%- if traefik is defined and traefik.endswith('.charm') %}
     resources:
-        traefik-image: "jnsgruk/traefik:2.7.0"
+        traefik-image: "docker.io/ubuntu/traefik:2-22.04"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -24,7 +24,7 @@ applications:
     trust: true
     {%- if alertmanager is defined and alertmanager.endswith('.charm') %}
     resources:
-        alertmanager-image: "ubuntu/prometheus-alertmanager:0.23-22.04_beta"
+        alertmanager-image: "docker.io/ubuntu/alertmanager:0-22.04"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -34,7 +34,7 @@ applications:
     trust: true
     {%- if prometheus is defined and prometheus.endswith('.charm') %}
     resources:
-      prometheus-image: "ubuntu/prometheus:2.33-22.04_beta"
+      prometheus-image: "docker.io/ubuntu/prometheus:2-22.04"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -44,8 +44,8 @@ applications:
     trust: true
     {%- if grafana is defined and grafana.endswith('.charm') %}
     resources:
-      grafana-image: "ubuntu/grafana:9.2-22.04_beta"
-      litestream-image: "litestream/litestream:0.4.0-beta.2"
+      grafana-image: "docker.io/ubuntu/grafana:9-22.04"
+      litestream-image: "docker.io/litestream/litestream:0.4.0-beta.2"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -55,7 +55,7 @@ applications:
     trust: true
     {%- if catalogue is defined and catalogue.endswith('.charm') %}
     resources:
-      catalogue-image: "ghcr.io/canonical/catalogue-k8s"
+      catalogue-image: "ghcr.io/canonical/catalogue-k8s-operator:dev"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
@@ -71,7 +71,7 @@ applications:
     trust: true
     {%- if loki is defined and loki.endswith('.charm') %}
     resources:
-      loki-image: "grafana/loki:2.4.1"
+      loki-image: "docker.io/ubuntu/loki:2-22.04"
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}

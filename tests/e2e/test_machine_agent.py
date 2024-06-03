@@ -6,10 +6,10 @@
 import asyncio
 import logging
 import os
-import subprocess
 from types import SimpleNamespace
 
 import pytest
+import sh
 from helpers import get_or_add_model
 from juju.controller import Controller
 from pytest_operator.plugin import OpsTest
@@ -34,7 +34,7 @@ async def test_setup_models(ops_test: OpsTest):
     k8s_mdl_name = lxd_mdl_name = ops_test.model_name
 
     # We do not want to make assumptions here about the current controller.
-    # Assuming a k8s controller is ready and its name is stored in $LXD_CONTROLLER.
+    # Assuming a lxd controller is ready and its name is stored in $LXD_CONTROLLER.
     lxd_ctl = Controller()
     await lxd_ctl.connect(lxd_ctl_name)
     lxd_mdl = await get_or_add_model(ops_test, lxd_ctl, lxd_mdl_name)
@@ -51,85 +51,71 @@ async def test_setup_models(ops_test: OpsTest):
 async def test_deploy_cos(rendered_bundle):
     # Use CLI to deploy bundle until https://github.com/juju/python-libjuju/issues/816 is fixed.
     # await k8s_mdl.deploy(str(rendered_bundle), trust=True)
-    cmd = [
-        "juju",
-        "deploy",
-        "--trust",
-        "-m",
-        f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
-        rendered_bundle,
-        "--overlay",
-        "./overlays/offers-overlay.yaml",
-    ]
-    try:
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        logger.error(e.output.decode())
-        raise
+    sh.juju.deploy(
+        [
+            "--trust",
+            "-m",
+            f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
+            str(rendered_bundle),
+            "--overlay",
+            "./overlays/offers-overlay.yaml",
+        ]
+    )
 
 
 @pytest.mark.abort_on_fail
 async def test_deploy_machine_charms():
-    await asyncio.gather(
-        # Principal
-        lxd_mdl.deploy(
-            principal_cos_agent.charm,
-            application_name=principal_cos_agent.name,
-            num_units=principal_cos_agent.scale,
-            series="jammy",
-            channel="edge",
-        ),
-        # Principal 2
-        lxd_mdl.deploy(
-            principal_juju_info.charm,
-            application_name=principal_juju_info.name,
-            num_units=principal_juju_info.scale,
-            series="jammy",
-        ),
-        # Subordinate
-        lxd_mdl.deploy(
-            agent.charm,
-            application_name=agent.name,
-            num_units=0,
-            series="jammy",
-            channel="edge",
-        ),
+    await lxd_mdl.deploy(
+        principal_cos_agent.charm,
+        application_name=principal_cos_agent.name,
+        num_units=principal_cos_agent.scale,
+        series="jammy",
+        channel="edge",
+    )
+    # Principal 2
+    await lxd_mdl.deploy(
+        principal_juju_info.charm,
+        application_name=principal_juju_info.name,
+        num_units=principal_juju_info.scale,
+        series="jammy",
+    )
+    # Subordinate
+    await lxd_mdl.deploy(
+        agent.charm,
+        application_name=agent.name,
+        num_units=0,
+        series="jammy",
+        channel="edge",
     )
     # Must relate the subordinate before any "wait for idle", because otherwise agent would be in
     # 'unknown' status.
-    await asyncio.gather(
-        lxd_mdl.add_relation(f"{principal_cos_agent.name}:cos-agent", agent.name),
-        lxd_mdl.add_relation(f"{principal_juju_info.name}:juju-info", agent.name),
-        lxd_mdl.block_until(lambda: len(lxd_mdl.applications[agent.name].units) > 0),
-    )
+    await lxd_mdl.add_relation(f"{principal_cos_agent.name}:cos-agent", agent.name)
+    await lxd_mdl.add_relation(f"{principal_juju_info.name}:juju-info", agent.name)
+    await lxd_mdl.block_until(lambda: len(lxd_mdl.applications[agent.name].units) > 0)
 
 
 @pytest.mark.abort_on_fail
 async def test_integration():
     # The consumed endpoint names must match offers-overlay.yaml.
-    await asyncio.gather(
-        lxd_mdl.consume(
-            f"admin/{k8s_mdl.name}.prometheus-receive-remote-write",
-            application_alias="prometheus",
-            controller_name=k8s_ctl.controller_name,  # same as os.environ["K8S_CONTROLLER"]
-        ),
-        lxd_mdl.consume(
-            f"admin/{k8s_mdl.name}.loki-logging",
-            application_alias="loki",
-            controller_name=k8s_ctl.controller_name,  # same as os.environ["K8S_CONTROLLER"]
-        ),
-        lxd_mdl.consume(
-            f"admin/{k8s_mdl.name}.grafana-dashboards",
-            application_alias="grafana",
-            controller_name=k8s_ctl.controller_name,  # same as os.environ["K8S_CONTROLLER"]
-        ),
+    await lxd_mdl.consume(
+        f"admin/{k8s_mdl.name}.prometheus-receive-remote-write",
+        application_alias="prometheus",
+        controller_name=k8s_ctl.controller_name,  # same as os.environ["K8S_CONTROLLER"]
+    )
+    await lxd_mdl.consume(
+        f"admin/{k8s_mdl.name}.loki-logging",
+        application_alias="loki",
+        controller_name=k8s_ctl.controller_name,  # same as os.environ["K8S_CONTROLLER"]
+    )
+    await lxd_mdl.consume(
+        f"admin/{k8s_mdl.name}.grafana-dashboards",
+        application_alias="grafana",
+        controller_name=k8s_ctl.controller_name,  # same as os.environ["K8S_CONTROLLER"]
     )
 
-    await asyncio.gather(
-        lxd_mdl.add_relation(agent.name, "prometheus"),
-        lxd_mdl.add_relation(agent.name, "loki"),
-        lxd_mdl.add_relation(agent.name, "grafana"),
-    )
+    await lxd_mdl.add_relation(agent.name, "prometheus")
+    await lxd_mdl.add_relation(agent.name, "loki")
+    await lxd_mdl.add_relation(agent.name, "grafana")
 
     # `idle_period` needs to be greater than the scrape interval to make sure metrics ingested.
     await asyncio.gather(
@@ -153,24 +139,27 @@ async def test_metrics(ops_test):
     #  "principal-juju-info/0","principal-juju-info/1",
     #  "prometheus-k8s","traefik/0"
     # ]}
-    cmd = [
-        "juju",
-        "ssh",
-        "-m",
-        f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
-        "prometheus/0",
-        "curl",
-        f"localhost:9090/{k8s_mdl.name}-prometheus-0/api/v1/label/juju_unit/values",
-    ]
-    try:
-        result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        logger.error(e.stdout.decode())
-        raise
-    output = result.stdout.decode().strip()
+    output = sh.juju.ssh(
+        [
+            "-m",
+            f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
+            "prometheus/0",
+            "curl",
+            "localhost:9090/api/v1/label/juju_unit/values",
+        ]
+    ).strip()
     logger.info("Label values: %s", output)
+
+    # The "juju_unit" label is named after the app, when related over cos-agent.
     assert output.count(principal_cos_agent.name) == principal_cos_agent.scale
-    assert output.count(principal_juju_info.name) == principal_juju_info.scale
+
+    # The "juju_unit" label is named after grafana-agent (not the app), when related over
+    # juju-info. This is important for when multiple principles are deployed to the same VM.
+    assert agent.name in output
+    assert "principal-juju-info" not in output
+
+    # In any case, for this test deployment, we should have a subordinate agent unit for every
+    # principal deployed.
     assert output.count(agent.name) >= principal_cos_agent.scale + principal_juju_info.scale
 
 
@@ -183,25 +172,30 @@ async def test_logs(ops_test):
     #  "principal-cos-agent/2","principal-cos-agent/3",
     #  "principal-juju-info/0","principal-juju-info/1"
     # ]}
-    cmd = [
-        "juju",
-        "ssh",
-        "-m",
-        f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
-        "loki/0",
-        "curl",
-        "localhost:3100/loki/api/v1/label/juju_unit/values",
-    ]
-    try:
-        result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        logger.error(e.stdout.decode())
-        raise
+    output = sh.juju.ssh(
+        [
+            "-m",
+            f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
+            "loki/0",
+            "curl",
+            "localhost:3100/loki/api/v1/label/juju_unit/values",
+        ]
+    ).strip()
 
-    output = result.stdout.decode().strip()
     logger.info("Label values: %s", output)
-    assert output.count(principal_cos_agent.name) == principal_cos_agent.scale
-    assert output.count(principal_juju_info.name) == principal_juju_info.scale
+
+    # The "juju_unit" label is named after the app, when related over cos-agent.
+    # TODO: Uncomment after fixing https://github.com/canonical/grafana-agent-operator/issues/76
+    # assert output.count(principal_cos_agent.name) == principal_cos_agent.scale
+
+    # The "juju_unit" label is named after grafana-agent (not the app), when related over
+    # juju-info. This is important for when multiple principles are deployed to the same VM.
+    assert agent.name in output
+    assert "principal-juju-info" not in output
+
+    # In any case, for this test deployment, we should have a subordinate agent unit for every
+    # principal deployed.
+    assert output.count(agent.name) >= principal_cos_agent.scale + principal_juju_info.scale
 
 
 async def test_dashboards(ops_test):
@@ -226,26 +220,22 @@ async def test_dashboards(ops_test):
     #   "url":"/cos-grafana/d/SDE76m7Zzz/zookeeper-by-prometheus","slug":"","type":"dash-db",
     #   "tags":["v4"],"isStarred":false,"sortMeta":0}
     # ]
-    cmd = [
-        "juju",
-        "ssh",
-        "-m",
-        f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
-        "grafana/0",
-        "curl",
-        "--user",
-        f"admin:{password}",
-        "localhost:3000/api/search",
-    ]
-    try:
-        result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        logger.error(e.stdout.decode())
-        raise
+    output = sh.juju.ssh(
+        [
+            "-m",
+            f"{k8s_ctl.controller_name}:{k8s_mdl.name}",
+            "grafana/0",
+            "curl",
+            "--user",
+            f"admin:{password}",
+            "localhost:3000/api/search",
+        ]
+    ).strip()
 
-    output = result.stdout.decode().strip()
     assert "zookeeper" in output
-    assert "grafana-agent-node-exporter" in output
+
+    # The grafana-agent dashboard is called "system-resources"
+    assert "system-resources" in output
 
 
 async def test_destroy(ops_test):
@@ -255,16 +245,14 @@ async def test_destroy(ops_test):
     # First, must remove the machine charms and saas, otherwise:
     # ERROR cannot destroy application "grafana": application is used by 3 consumers
     # Do not `block_until_done=True` because of the juju bug where teardown never completes.
-    await asyncio.gather(
-        lxd_mdl.remove_application(agent.name),
-        lxd_mdl.remove_application(principal_cos_agent.name),
-        lxd_mdl.remove_application(principal_juju_info.name),
-    )
-    await asyncio.gather(
-        lxd_mdl.remove_saas("prometheus"),
-        lxd_mdl.remove_saas("loki"),
-        lxd_mdl.remove_saas("grafana"),
-    )
+    await lxd_mdl.remove_application(agent.name),
+    await lxd_mdl.remove_application(principal_cos_agent.name),
+    await lxd_mdl.remove_application(principal_juju_info.name),
+
+    await lxd_mdl.remove_saas("prometheus")
+    await lxd_mdl.remove_saas("loki")
+    await lxd_mdl.remove_saas("grafana")
+
     # Give it some time to settle, since we cannot block until complete.
     await asyncio.sleep(60)
 

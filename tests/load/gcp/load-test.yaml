@@ -1,0 +1,52 @@
+# This cloud-init script can we used with multipass like so:
+# multipass launch jammy --cloud-init ./load-test.yaml \
+#   --name load-test --memory 7G --cpus 2 --disk 50G \
+#   --mount ~/code:/home/ubuntu/code
+
+package_update: true
+
+packages:
+- python3-pip
+- jq
+- zsh
+- fzf
+- tox
+- kitty-terminfo
+
+snap:
+  commands:
+  - snap install yq
+  - snap install --classic google-cloud-sdk
+  - snap install --classic terraform
+  - snap refresh
+
+runcmd:
+- DEBIAN_FRONTEND=noninteractive apt-get remove -y landscape-client landscape-common adwaita-icon-theme humanity-icon-theme
+- DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+- DEBIAN_FRONTEND=noninteractive apt-get -y autoremove
+
+- |
+  # disable swap
+  sysctl -w vm.swappiness=0
+  echo "vm.swappiness = 0" | tee -a /etc/sysctl.conf
+  swapoff -a
+
+- |
+  # disable unnecessary services
+  systemctl disable man-db.timer man-db.service --now
+  systemctl disable apport.service apport-autoreport.service  --now
+  systemctl disable apt-daily.service apt-daily.timer --now
+  systemctl disable apt-daily-upgrade.service apt-daily-upgrade.timer --now
+  systemctl disable unattended-upgrades.service --now
+  systemctl disable motd-news.service motd-news.timer --now
+  systemctl disable bluetooth.target --now
+  systemctl disable ua-messaging.service ua-messaging.timer --now
+  systemctl disable ua-timer.timer ua-timer.service --now
+  systemctl disable systemd-tmpfiles-clean.timer --now
+
+- |
+  # oh-my-zsh + juju plugin
+  sudo -u ubuntu sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  sudo -u ubuntu git clone https://github.com/zsh-users/zsh-autosuggestions.git ~ubuntu/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+  sudo -u ubuntu git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~ubuntu/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+  sudo -u ubuntu sed -i 's/plugins=(git)/plugins=(fzf git zsh-autosuggestions zsh-syntax-highlighting terraform colored-man-pages colorize)/g' ~ubuntu/.zshrc
