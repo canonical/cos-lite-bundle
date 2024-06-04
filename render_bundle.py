@@ -87,7 +87,12 @@ def render_bundle(template: Path, output: Path, variables: Optional[Dict[str, st
     with open(template) as t:
         jinja_template = Template(t.read(), autoescape=True)
 
-    jinja_template.stream(**variables).dump(str(output))
+    # print(jinja_template.render(**variables))
+    with open(output, "wt") as o:
+        # Type-ignore because pyright complains:
+        # Argument 1 to "dump" of "TemplateStream" has
+        # incompatible type "TextIOWrapper"; expected "Union[str, IO[bytes]]"
+        jinja_template.stream(**variables).dump(o)  # type: ignore[arg-type]
 
 
 if __name__ == "__main__":
