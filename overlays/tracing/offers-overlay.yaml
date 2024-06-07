@@ -1,0 +1,6 @@
+applications:
+  tempo:
+    offers:
+      tracing:
+        endpoints:
+          - tracing
