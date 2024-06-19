@@ -1,0 +1,3 @@
+# assumes you are also using the base cos-lite tls-overlay.
+relations:
+ - [ca, tempo:certificates]
