@@ -59,7 +59,9 @@ async def test_build_and_deploy(ops_test: OpsTest, rendered_bundle, tls_enabled,
     if tls_enabled:
         overlays.extend(["overlays/tls-overlay.yaml"])
     if tracing_enabled:
-        overlays.extend(["overlays/tracing-overlay.yaml"])
+        overlays.extend(["overlays/tracing/tracing-overlay.yaml"])
+        if tls_enabled:
+            overlays.extend(["overlays/tracing/tls-overlay.yaml"])
     await cli_deploy_bundle(ops_test, str(rendered_bundle), overlays=overlays)
 
     # Idle period is set to 90 to capture restarts caused by applying resource limits
@@ -277,6 +279,19 @@ async def test_loki_receives_logs(ops_test: OpsTest):
     as_str = response.read().decode("utf8")
     assert "flog-k8s" in as_str
     logger.info("loki is successfully receiving flog logs")
+
+
+@pytest.mark.abort_on_fail
+async def test_tempo_receieves_traces(ops_test: OpsTest):
+    """Tempo should be able to receive traces."""
+    tempo_address = await get_address(ops_test, "tempo", 0)
+    url = f"{'http' if context.external_ca is None else 'https'}://{tempo_address}:3200/api/search"
+
+    response = urlopen(url, data=None, timeout=2.0, context=insecure_context)
+    assert response.code == 200
+    decoded = json.loads(response.read().decode("utf8"))
+    traces = decoded["traces"]
+    assert len(traces) > 0
 
 
 @pytest.mark.abort_on_fail
