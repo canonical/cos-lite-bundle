@@ -8,7 +8,7 @@
 #  --name three-node \
 #  --memory 32G \
 #  --cpus 16 \
-#  --disk 100G
+#  --disk 160G
 #
 # This cloud-config creates a 3-node microk8s ha cluster for juju (e.g. in a nested multipass VM).
 # A microk8s controller and an empty model are created as part of the cloud-init script,
@@ -33,6 +33,7 @@ snap:
 
 write_files:
 - path: "/run/microk8s-cloud-init.yaml"
+  # This is the cloud-config for the microk8s nodes that will we nested inside the outer VM.
   permissions: "0666"
   content: |
     #cloud-config
@@ -41,6 +42,8 @@ write_files:
     packages:
     - jq
     - kitty-terminfo
+    # Need this package to have the kernel rbd module, which is needed by ceph.
+    - linux-image-extra-virtual
 
     snap:
       commands:
@@ -67,7 +70,7 @@ write_files:
       echo "net.ipv6.conf.lo.disable_ipv6=1" | tee -a /etc/sysctl.conf
       sysctl -p
 
-      # disable unnecessary services
+      echo "Disabling unnecessary systemd services"
       systemctl disable man-db.timer man-db.service --now
       systemctl disable apport.service apport-autoreport.service  --now
       systemctl disable apt-daily.service apt-daily.timer --now
@@ -103,10 +106,13 @@ write_files:
       set -eux
 
       # Setup microceph
+      modprobe rbd
       microceph cluster bootstrap
-      microceph.ceph config set global osd_pool_default_size 1
+      # Set the replication to 2x and make the failure domain OSD instead of HOST, so that we only
+      # need 2 min OSDs, not 2 hosts, to spread data across.
+      microceph.ceph config set global osd_pool_default_size 2
       microceph.ceph config set osd osd_crush_chooseleaf_type 0
-      microceph disk add loop,20G,1
+      microceph disk add loop,20G,2
       microk8s connect-external-ceph
       microceph.ceph status
 
@@ -122,7 +128,7 @@ runcmd:
   swapoff -a
 
 - |
-  # disable unnecessary services
+  echo "Disabling unnecessary systemd services"
   systemctl disable man-db.timer man-db.service --now
   systemctl disable apport.service apport-autoreport.service  --now
   systemctl disable apt-daily.service apt-daily.timer --now
@@ -143,21 +149,26 @@ runcmd:
   # Set up cluster
   # Strictly confined snap cannot see `/run`.
   cp /run/microk8s-cloud-init.yaml ~ubuntu/
-  sudo -u ubuntu multipass launch 22.04 --name node-0 --memory 8G --cpus 4 --disk 30G --cloud-init ~ubuntu/microk8s-cloud-init.yaml
+
+  echo "Launching node-0..."
+  sudo -u ubuntu multipass launch 22.04 --timeout 2000 --name node-0 --memory 8G --cpus 4 --disk 50G --cloud-init ~ubuntu/microk8s-cloud-init.yaml
   sudo -u ubuntu multipass exec node-0 -- cloud-init status --wait
   sudo -u ubuntu multipass exec node-0 -- microk8s config > ~ubuntu/node-0.kube.conf
   chown ubuntu:ubuntu ~ubuntu/node-0.kube.conf
 
-  sudo -u ubuntu multipass launch 22.04 --name node-1 --memory 8G --cpus 4 --disk 30G --cloud-init ~ubuntu/microk8s-cloud-init.yaml
+  echo "Launching node-1..."
+  sudo -u ubuntu multipass launch 22.04 --timeout 2000 --name node-1 --memory 8G --cpus 4 --disk 50G --cloud-init ~ubuntu/microk8s-cloud-init.yaml
   sudo -u ubuntu multipass exec node-1 -- cloud-init status --wait
   sudo -u ubuntu multipass exec node-1 -- microk8s config > ~ubuntu/node-1.kube.conf
   chown ubuntu:ubuntu ~ubuntu/node-1.kube.conf
 
-  sudo -u ubuntu multipass launch 22.04 --name node-2 --memory 8G --cpus 4 --disk 30G --cloud-init ~ubuntu/microk8s-cloud-init.yaml
+  echo "Launching node-2..."
+  sudo -u ubuntu multipass launch 22.04 --timeout 2000 --name node-2 --memory 8G --cpus 4 --disk 50G --cloud-init ~ubuntu/microk8s-cloud-init.yaml
   sudo -u ubuntu multipass exec node-2 -- cloud-init status --wait
   sudo -u ubuntu multipass exec node-2 -- microk8s config > ~ubuntu/node-2.kube.conf
   chown ubuntu:ubuntu ~ubuntu/node-2.kube.conf
 
+  echo "Joining microk8s nodes..."
   # https://unix.stackexchange.com/questions/230673/how-to-generate-a-random-string
   TOKEN=$(tr -dc a-f0-9 </dev/urandom | head -c 32)
   URL=$(sudo -u ubuntu multipass exec node-0 -- sudo microk8s add-node --token $TOKEN --format json | jq -r '.urls[0]')
@@ -169,9 +180,11 @@ runcmd:
 
   # Make sure everything is ok
   sudo -u ubuntu multipass exec node-0 microk8s kubectl get node
+  sudo -u ubuntu multipass exec node-1 microk8s kubectl get node
+  sudo -u ubuntu multipass exec node-2 microk8s kubectl get node
 
 - |
-  # Setup juju
+  echo "Setting up juju..."
   sudo -u ubuntu mkdir -p /home/ubuntu/.local/share/juju
 
   # Gotta sleep a bit before add-k8s, otherwise:
