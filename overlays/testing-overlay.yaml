@@ -20,6 +20,7 @@ applications:
     options:
       cpu: 1m
       memory: 1Mi
+      retention-period: 30 # retention period in number of days
   avalanche:
     charm: avalanche-k8s
     channel: edge

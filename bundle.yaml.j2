@@ -75,6 +75,8 @@ applications:
     {%- else %}
     channel: {{ channel|default('edge', true) }}
     {%- endif %}
+    options:
+      retention-period: {{ loki_retention_period|default(0) }}
 
 relations:
 - [traefik:ingress-per-unit, prometheus:ingress]

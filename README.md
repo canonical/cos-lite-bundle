@@ -84,7 +84,8 @@ $ ./render_bundle.py bundle.yaml --channel=edge \
   --prometheus=$(pwd)/../path/to/prometheus.charm \
   --alertmanager=$(pwd)/../path/to/alertmanager.charm \
   --grafana=$(pwd)/../path/to/grafana.charm \
-  --loki=$(pwd)/../path/to/loki.charm
+  --loki=$(pwd)/../path/to/loki.charm \
+  --loki_retention_period=30
 
 # deploy rendered bundle
 $ juju deploy ./bundle.yaml --trust
