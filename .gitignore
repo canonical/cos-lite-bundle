@@ -6,3 +6,4 @@
 build/
 bundle.yaml
 cos-lite.zip
+*.egg-info

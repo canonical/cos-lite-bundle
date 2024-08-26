@@ -1,0 +1,11 @@
+# Storage overlay
+#
+# This sample overlay shows how to configure the amount of
+# storage to grant to the various COS components.
+---
+applications:
+  tempo:
+    storage:
+      # Tempo can use local storage for traces, if an s3 integration is not available.
+      # See the `--storage.path` argument of Tempo
+      data: 2G  # TODO size this properly
