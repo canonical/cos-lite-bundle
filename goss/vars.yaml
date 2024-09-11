@@ -1,0 +1,8 @@
+model_name: goss
+
+alertmanager_app_name: alertmanager
+catalogue_app_name: catalogue
+grafana_app_name: grafana
+loki_app_name: loki
+prometheus_app_name: prometheus
+traefik_app_name: traefik

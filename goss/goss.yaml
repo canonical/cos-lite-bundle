@@ -1,0 +1,63 @@
+command:
+  # Charm Pebble health checks
+  alertmanager-pebble:
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.alertmanager_app_name }}/0 /charm/bin/pebble health
+    exit-status: 0
+    stdout:
+      - healthy
+  catalogue-pebble:
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.catalogue_app_name }}/0 /charm/bin/pebble health
+    exit-status: 0
+    stdout:
+      - healthy
+  grafana-pebble:
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.grafana_app_name }}/0 /charm/bin/pebble health
+    exit-status: 0
+    stdout:
+      - healthy
+  loki-pebble:
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.loki_app_name }}/0 /charm/bin/pebble health
+    exit-status: 0
+    stdout:
+      - healthy
+  prometheus-pebble:
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.prometheus_app_name }}/0 /charm/bin/pebble health
+    exit-status: 0
+    stdout:
+      - healthy
+  traefik-pebble:
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.traefik_app_name }}/0 /charm/bin/pebble health
+    exit-status: 0
+    stdout:
+      - healthy
+
+  # Deployment relation checks
+  relation-grafana-loki:
+    exec: juju status -m {{ .Vars.model_name }} --relations | grep grafana_datasource | grep -E "{{ .Vars.loki_app_name }}:{{ .Vars.grafana_app_name }}|{{ .Vars.grafana_app_name }}:{{ .Vars.loki_app_name }}"
+    exit-status: 0
+    stdout:
+      - grafana-source
+
+  # Kubernetes-type checks
+  loki-pod-status-healthy:
+    exec: kubectl get pod {{ .Vars.loki_app_name }}-0 -n {{ .Vars.model_name }} -o json | jq -r '[.status.conditions[] | .status == "True"] | all'
+    exit-status: 0
+    stdout:
+      - 'true'
+  loki-pod-container-healthy:
+    exec: kubectl get pod {{ .Vars.loki_app_name }}-0 -n {{ .Vars.model_name }} -o json | jq -r '[.status.containerStatuses[] | .ready == true] | all'
+    exit-status: 0
+    stdout:
+      - 'true'
+
+  # Networking checks
+  loki-reachable-via-ingress-url:
+    exec: curl $(juju ssh --container loki loki/0 cat /etc/loki/loki-local-config.yaml | yq -r '.ruler.external_url')/ready
+    exit-status: 0
+    stdout:
+      - ready
+
+  # Grafana post-relation checks
+  grafana-related-dashboards:
+    exec: bash goss/scripts/compare-uids.sh
+    exit-status: 0
