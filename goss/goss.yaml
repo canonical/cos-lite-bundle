@@ -33,10 +33,10 @@ command:
 
   # Deployment relation checks
   relation-grafana-loki:
-    exec: juju status -m {{ .Vars.model_name }} --relations | grep grafana_datasource | grep -E "{{ .Vars.loki_app_name }}:{{ .Vars.grafana_app_name }}|{{ .Vars.grafana_app_name }}:{{ .Vars.loki_app_name }}"
+    exec: juju status --format json -m {{ .Vars.model_name }} | jq -r '.applications.{{ .Vars.loki_app_name }}.relations["grafana-source"][]["related-application"]'
     exit-status: 0
     stdout:
-      - grafana-source
+      - {{ .Vars.grafana_app_name }}
 
   # Kubernetes-type checks
   loki-pod-status-healthy:
@@ -52,12 +52,12 @@ command:
 
   # Networking checks
   loki-reachable-via-ingress-url:
-    exec: curl $(juju ssh --container loki loki/0 cat /etc/loki/loki-local-config.yaml | yq -r '.ruler.external_url')/ready
+    exec: curl $(juju ssh --container {{ .Vars.loki_app_name }} {{ .Vars.loki_app_name }}/0 cat /etc/loki/loki-local-config.yaml | yq -r '.ruler.external_url')/ready
     exit-status: 0
     stdout:
       - ready
 
   # Grafana post-relation checks
   grafana-related-dashboards:
-    exec: bash goss/scripts/compare-uids.sh
+    exec: bash goss/scripts/compare-uids.sh grafana alertmanager
     exit-status: 0
