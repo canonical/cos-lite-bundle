@@ -1,4 +1,5 @@
-model_name: goss
+model_name: cos-model
+run_self_tests: true
 
 alertmanager_app_name: alertmanager
 catalogue_app_name: catalogue

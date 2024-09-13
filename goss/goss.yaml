@@ -1,4 +1,5 @@
 command:
+  {{ if .Vars.run_self_tests }}
   # Charm Pebble health checks
   alertmanager-pebble:
     exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.alertmanager_app_name }}/0 /charm/bin/pebble health
@@ -30,6 +31,7 @@ command:
     exit-status: 0
     stdout:
       - healthy
+  {{ end }}
 
   # Deployment relation checks
   relation-grafana-loki:
@@ -59,7 +61,7 @@ command:
 
   # Grafana post-relation checks
   grafana-related-dashboards:
-    exec: bash goss/scripts/compare-dashboard-uids.sh cos-model grafana alertmanager
+    exec: bash goss/scripts/compare-dashboard-uids.sh {{ .Vars.model_name }} {{ .Vars.grafana_app_name }} {{ .Vars.alertmanager_app_name }}
     exit-status: 0
     stdout:
-      - "Match found in at least one file."
+      - "The {{ .Vars.alertmanager_app_name }} dashboard UID is a subset of the Grafana dashboard UIDs."

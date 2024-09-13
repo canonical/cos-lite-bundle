@@ -29,7 +29,7 @@ for file_path in ${file_list}; do
 done
 
 if [ "$match_found" = true ]; then
-  echo "Match found in at least one file."
+  echo "The ${OTHER_APP_NAME} dashboard UID is a subset of the Grafana dashboard UIDs."
 else
   echo "No matches found."
 fi
