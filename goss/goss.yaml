@@ -36,7 +36,7 @@ command:
     exec: juju status --format json -m {{ .Vars.model_name }} | jq -r '.applications.{{ .Vars.loki_app_name }}.relations["grafana-source"][]["related-application"]'
     exit-status: 0
     stdout:
-      - {{ .Vars.grafana_app_name }}
+      - '{{ .Vars.grafana_app_name }}'
 
   # Kubernetes-type checks
   loki-pod-status-healthy:
@@ -59,5 +59,7 @@ command:
 
   # Grafana post-relation checks
   grafana-related-dashboards:
-    exec: bash goss/scripts/compare-uids.sh grafana alertmanager
+    exec: bash goss/scripts/compare-dashboard-uids.sh cos_model grafana alertmanager
     exit-status: 0
+    stdout:
+      - "Match found in at least one file."
