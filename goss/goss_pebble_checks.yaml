@@ -1,8 +1,50 @@
-# Import other goss.yaml files
-gossfile:
-  goss_pebble_checks.yaml: {}
-
 command:
+  # Charm Pebble health checks
+  {{ if .Vars.enable_self_tests }}
+  pebble-alertmanager:
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.alertmanager_app_name }}/0 /charm/bin/pebble health
+    exit-status: 0
+    stdout:
+      have-patterns:
+      - healthy
+    stderr: ""
+  pebble-catalogue:
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.catalogue_app_name }}/0 /charm/bin/pebble health
+    exit-status: 0
+    stdout:
+      have-patterns:
+      - healthy
+    stderr: ""
+  pebble-grafana:
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.grafana_app_name }}/0 /charm/bin/pebble health
+    exit-status: 0
+    stdout:
+      have-patterns:
+      - healthy
+    stderr: ""
+  pebble-loki:
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.loki_app_name }}/0 /charm/bin/pebble health
+    exit-status: 0
+    stdout:
+      have-patterns:
+      - healthy
+    stderr: ""
+  pebble-prometheus:
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.prometheus_app_name }}/0 /charm/bin/pebble health
+    exit-status: 0
+    stdout:
+      have-patterns:
+      - healthy
+    stderr: ""
+  pebble-traefik:
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.traefik_app_name }}/0 /charm/bin/pebble health
+    exit-status: 0
+    stdout:
+      have-patterns:
+      - healthy
+    stderr: ""
+  {{ end }}
+
   # Deployment relation checks
   {{ if .Vars.enable_relation_tests }}
   relation-grafana-loki:
@@ -47,6 +89,13 @@ command:
   {{ if .Vars.enable_network_tests }}
   loki-reachable-via-ingress-url:
     exec: curl -s $(juju ssh --container {{ .Vars.loki_app_name }} {{ .Vars.loki_app_name }}/0 cat /etc/loki/loki-local-config.yaml | yq -r '.ruler.external_url')/ready
+    exit-status: 0
+    stdout:
+      have-patterns:
+      - ready
+    stderr: ""
+  loki-can-reach-altermanager-internally:
+    exec: juju ssh --container {{ .Vars.loki_app_name }} {{ .Vars.loki_app_name }}/0 cat /etc/loki/loki-local-config.yaml | yq -r '.ruler.alertmanager_url'
     exit-status: 0
     stdout:
       have-patterns:
