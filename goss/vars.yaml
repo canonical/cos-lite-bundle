@@ -1,4 +1,5 @@
 model_name: cos-model
+
 enable_self_tests: true
 enable_relation_tests: true
 enable_post_relation_tests: true

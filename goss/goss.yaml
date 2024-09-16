@@ -1,19 +1,11 @@
 # Import other goss.yaml files
 gossfile:
+  goss_k8s_checks.yaml: {}
+  goss_network_checks.yaml: {}
   goss_pebble_checks.yaml: {}
+  goss_relation_checks.yaml: {}
 
 command:
-  # Deployment relation checks
-  {{ if .Vars.enable_relation_tests }}
-  relation-grafana-loki:
-    exec: juju status --format json -m {{ .Vars.model_name }} | jq -r '.applications.{{ .Vars.loki_app_name }}.relations["grafana-source"][]["related-application"]'
-    exit-status: 0
-    stdout:
-      have-patterns:
-      - '{{ .Vars.grafana_app_name }}'
-    stderr: ""
-  {{ end }}
-
   # Grafana post-relation checks
   {{ if .Vars.enable_post_relation_tests }}
   grafana-related-dashboards:
@@ -21,35 +13,6 @@ command:
     exit-status: 0
     stdout:
       have-patterns:
-      - "The {{ .Vars.alertmanager_app_name }} dashboard UID is a subset of the Grafana dashboard UIDs."
-    stderr: ""
-  {{ end }}
-
-  # Kubernetes-type checks
-  {{ if .Vars.enable_k8s_tests }}
-  loki-pod-status-healthy:
-    exec: kubectl get pod {{ .Vars.loki_app_name }}-0 -n {{ .Vars.model_name }} -o json | jq -r '[.status.conditions[] | .status == "True"] | all'
-    exit-status: 0
-    stdout:
-      have-patterns:
-      - 'true'
-    stderr: ""
-  loki-pod-container-healthy:
-    exec: kubectl get pod {{ .Vars.loki_app_name }}-0 -n {{ .Vars.model_name }} -o json | jq -r '[.status.containerStatuses[] | .ready == true] | all'
-    exit-status: 0
-    stdout:
-      have-patterns:
-      - 'true'
-    stderr: ""
-  {{ end }}
-
-  # Networking checks
-  {{ if .Vars.enable_network_tests }}
-  loki-reachable-via-ingress-url:
-    exec: curl -s $(juju ssh --container {{ .Vars.loki_app_name }} {{ .Vars.loki_app_name }}/0 cat /etc/loki/loki-local-config.yaml | yq -r '.ruler.external_url')/ready
-    exit-status: 0
-    stdout:
-      have-patterns:
-      - ready
+      - "Match found."
     stderr: ""
   {{ end }}
