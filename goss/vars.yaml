@@ -1,5 +1,9 @@
 model_name: cos-model
-run_self_tests: true
+enable_self_tests: true
+enable_relation_tests: true
+enable_post_relation_tests: true
+enable_network_tests: true
+enable_k8s_tests: true
 
 alertmanager_app_name: alertmanager
 catalogue_app_name: catalogue

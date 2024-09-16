@@ -1,67 +1,86 @@
 command:
-  {{ if .Vars.run_self_tests }}
   # Charm Pebble health checks
+  {{ if .Vars.enable_self_tests }}
   alertmanager-pebble:
-    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.alertmanager_app_name }}/0 /charm/bin/pebble health
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.alertmanager_app_name }}/0 /charm/bin/pebble health 2>&1
     exit-status: 0
     stdout:
+      have-patterns:
       - healthy
   catalogue-pebble:
-    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.catalogue_app_name }}/0 /charm/bin/pebble health
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.catalogue_app_name }}/0 /charm/bin/pebble health 2>&1
     exit-status: 0
     stdout:
+      have-patterns:
       - healthy
   grafana-pebble:
-    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.grafana_app_name }}/0 /charm/bin/pebble health
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.grafana_app_name }}/0 /charm/bin/pebble health 2>&1
     exit-status: 0
     stdout:
+      have-patterns:
       - healthy
   loki-pebble:
-    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.loki_app_name }}/0 /charm/bin/pebble health
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.loki_app_name }}/0 /charm/bin/pebble health 2>&1
     exit-status: 0
     stdout:
+      have-patterns:
       - healthy
   prometheus-pebble:
-    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.prometheus_app_name }}/0 /charm/bin/pebble health
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.prometheus_app_name }}/0 /charm/bin/pebble health 2>&1
     exit-status: 0
     stdout:
+      have-patterns:
       - healthy
   traefik-pebble:
-    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.traefik_app_name }}/0 /charm/bin/pebble health
+    exec: juju ssh -m {{ .Vars.model_name }} {{ .Vars.traefik_app_name }}/0 /charm/bin/pebble health 2>&1
     exit-status: 0
     stdout:
+      have-patterns:
       - healthy
   {{ end }}
 
   # Deployment relation checks
+  {{ if .Vars.enable_relation_tests }}
   relation-grafana-loki:
-    exec: juju status --format json -m {{ .Vars.model_name }} | jq -r '.applications.{{ .Vars.loki_app_name }}.relations["grafana-source"][]["related-application"]'
+    exec: juju status --format json -m {{ .Vars.model_name }} | jq -r '.applications.{{ .Vars.loki_app_name }}.relations["grafana-source"][]["related-application"]' 2>&1
     exit-status: 0
     stdout:
+      have-patterns:
       - '{{ .Vars.grafana_app_name }}'
-
-  # Kubernetes-type checks
-  loki-pod-status-healthy:
-    exec: kubectl get pod {{ .Vars.loki_app_name }}-0 -n {{ .Vars.model_name }} -o json | jq -r '[.status.conditions[] | .status == "True"] | all'
-    exit-status: 0
-    stdout:
-      - 'true'
-  loki-pod-container-healthy:
-    exec: kubectl get pod {{ .Vars.loki_app_name }}-0 -n {{ .Vars.model_name }} -o json | jq -r '[.status.containerStatuses[] | .ready == true] | all'
-    exit-status: 0
-    stdout:
-      - 'true'
-
-  # Networking checks
-  loki-reachable-via-ingress-url:
-    exec: curl $(juju ssh --container {{ .Vars.loki_app_name }} {{ .Vars.loki_app_name }}/0 cat /etc/loki/loki-local-config.yaml | yq -r '.ruler.external_url')/ready
-    exit-status: 0
-    stdout:
-      - ready
+  {{ end }}
 
   # Grafana post-relation checks
+  {{ if .Vars.enable_post_relation_tests }}
   grafana-related-dashboards:
-    exec: bash goss/scripts/compare-dashboard-uids.sh {{ .Vars.model_name }} {{ .Vars.grafana_app_name }} {{ .Vars.alertmanager_app_name }}
+    exec: bash goss/scripts/compare-dashboard-uids.sh {{ .Vars.model_name }} {{ .Vars.grafana_app_name }} {{ .Vars.alertmanager_app_name }} 2>&1
     exit-status: 0
     stdout:
+      have-patterns:
       - "The {{ .Vars.alertmanager_app_name }} dashboard UID is a subset of the Grafana dashboard UIDs."
+  {{ end }}
+
+  # Kubernetes-type checks
+  {{ if .Vars.enable_k8s_tests }}
+  loki-pod-status-healthy:
+    exec: kubectl get pod {{ .Vars.loki_app_name }}-0 -n {{ .Vars.model_name }} -o json | jq -r '[.status.conditions[] | .status == "True"] | all' 2>&1
+    exit-status: 0
+    stdout:
+      have-patterns:
+      - 'true'
+  loki-pod-container-healthy:
+    exec: kubectl get pod {{ .Vars.loki_app_name }}-0 -n {{ .Vars.model_name }} -o json | jq -r '[.status.containerStatuses[] | .ready == true] | all' 2>&1
+    exit-status: 0
+    stdout:
+      have-patterns:
+      - 'true'
+  {{ end }}
+
+  # Networking checks
+  {{ if .Vars.enable_network_tests }}
+  loki-reachable-via-ingress-url:
+    exec: curl $(juju ssh --container {{ .Vars.loki_app_name }} {{ .Vars.loki_app_name }}/0 cat /etc/loki/loki-local-config.yaml | yq -r '.ruler.external_url')/ready 2>&1
+    exit-status: 0
+    stdout:
+      have-patterns:
+      - ready
+  {{ end }}
