@@ -1,17 +1,18 @@
 # Charm Pebble health checks
 command:
+{{ if .Vars.enable_self_tests }}
+  # $root is required to access the root context of the current template,
+  # which refers to the entire data structure being passed into the template.
+  # This provides access to .Vars and .Env in loops like the one below.
+  {{- $root := . -}}
 
-# $root is required to access the root context of the current template,
-# which refers to the entire data structure being passed into the template.
-# This provides access to .Vars and .Env in loops like the one below.
-{{- $root := . -}}
-
-{{range .Vars.pebble_checks}}
-  pebble-{{.}}:
-    exec: juju ssh -m {{ $root.Vars.model_name }} {{.}}/0 /charm/bin/pebble health
-    exit-status: 0
-    stdout:
-      have-patterns:
-      - healthy
-    stderr: ""
+  {{range .Vars.pebble_checks}}
+    pebble-{{.}}:
+      exec: juju ssh -m {{ $root.Vars.model_name }} {{.}}/0 /charm/bin/pebble health
+      exit-status: 0
+      stdout:
+        have-patterns:
+        - healthy
+      stderr: ""
+  {{end}}
 {{end}}
