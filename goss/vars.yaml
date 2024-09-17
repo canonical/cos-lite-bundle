@@ -12,3 +12,5 @@ grafana_app_name: grafana
 loki_app_name: loki
 prometheus_app_name: prometheus
 traefik_app_name: traefik
+
+pebble_checks: [alertmanager, catalogue, grafana, loki, prometheus, traefik]
