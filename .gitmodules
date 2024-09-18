@@ -1,0 +1,3 @@
+[submodule "goss-submodule/goss-templates"]
+	path = goss-submodule/goss-templates
+	url = https://github.com/MichaelThamm/goss-templates.git
