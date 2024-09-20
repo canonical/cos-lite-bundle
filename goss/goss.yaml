@@ -9,7 +9,7 @@ command:
   # Grafana post-relation checks
   {{ if .Vars.enable_post_relation_tests }}
   grafana-related-dashboards:
-    exec: bash goss/scripts/compare-dashboard-uids.sh {{ .Vars.model_name }} {{ .Vars.grafana_app_name }} {{ .Vars.alertmanager_app_name }}
+    exec: bash goss/scripts/compare-dashboard-uids.sh {{ .Vars.model_name }} {{ .Vars.apps.grafana.name }} {{ .Vars.apps.alertmanager.name }}
     exit-status: 0
     stdout:
       have-patterns:

@@ -1,16 +1,21 @@
 model_name: cos-model
 
+apps:
+  alertmanager:
+    name: alertmanager
+  catalogue:
+    name: catalogue
+  grafana:
+    name: grafana
+  loki:
+    name: loki
+  prometheus:
+    name: prometheus
+  traefik:
+    name: traefik
+
 enable_self_tests: true
 enable_relation_tests: true
 enable_post_relation_tests: true
 enable_network_tests: true
 enable_k8s_tests: true
-
-alertmanager_app_name: alertmanager
-catalogue_app_name: catalogue
-grafana_app_name: grafana
-loki_app_name: loki
-prometheus_app_name: prometheus
-traefik_app_name: traefik
-
-pebble_checks: [alertmanager, catalogue, grafana, loki, prometheus, traefik]

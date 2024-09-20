@@ -2,10 +2,10 @@
 command:
   {{ if .Vars.enable_relation_tests }}
   relation-grafana-loki:
-    exec: juju status --format json -m {{ .Vars.model_name }} | jq -r '.applications.{{ .Vars.loki_app_name }}.relations["grafana-source"][]["related-application"]'
+    exec: juju status --format json -m {{ .Vars.model_name }} | jq -r '.applications.{{ .Vars.apps.loki.name }}.relations["grafana-source"][]["related-application"]'
     exit-status: 0
     stdout:
       have-patterns:
-      - '{{ .Vars.grafana_app_name }}'
+      - '{{ .Vars.apps.grafana.name }}'
     stderr: ""
   {{ end }}
