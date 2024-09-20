@@ -16,6 +16,7 @@ from urllib.request import urlopen
 import juju
 import juju.utils
 import pytest
+import sh
 from helpers import (
     ModelConfigChange,
     cli_deploy_bundle,
@@ -66,6 +67,18 @@ async def test_build_and_deploy(ops_test: OpsTest, rendered_bundle, tls_enabled)
     )
     await ops_test.model.wait_for_idle(status="active", timeout=1000, idle_period=90)
 
+@pytest.mark.abort_on_fail
+async def test_goss_validate(ops_test: OpsTest):
+    # Run the goss validate with json format
+    goss_output = sh.goss(
+        "-g", "goss/goss.yaml",
+        "--vars", "goss/vars.yaml",
+        "v", "-f", "json"
+    )
+
+    # Parse the JSON output to extract the failed checks count
+    goss_json = json.loads(goss_output)
+    assert goss_json["summary"]["failed-count"] == 0
 
 @pytest.mark.abort_on_fail
 async def test_obtain_external_ca_cert(ops_test):
