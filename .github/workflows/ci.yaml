@@ -116,3 +116,4 @@ jobs:
         with:
           name: goss-artifact
           path: goss
+          retention-days: 90
