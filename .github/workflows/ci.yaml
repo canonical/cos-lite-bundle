@@ -11,6 +11,16 @@ on:
       - main
 
 jobs:
+  goss-archive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create ZIP file
+        run: zip -r goss.zip goss/
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: goss-artifact
+          path: goss.zip
   lint:
     name: Lint
     runs-on: ubuntu-latest
