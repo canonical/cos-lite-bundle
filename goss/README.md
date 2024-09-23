@@ -1,10 +1,10 @@
 # Usage Workflow
 
 ## Installation
-1. Install the [Goss binary](https://goss.readthedocs.io/en/stable/installation/) or `sudo snap install goss --classic`
+1. Install the [Goss binary](https://goss.readthedocs.io/en/stable/installation/).
 
 ## Validate a Model/Deployment
-To validate a model, `goss.yaml` files (customised to a specific deployment) are required. These can be an artifact or [centrally stored](https://docs.google.com/document/d/1EG71A2pJ244PQRaGVzGj7Mx2B_bzE4U_OSqx4eeVI1E/edit#heading=h.w2r1144djmlw).
+To validate a model, `goss.yaml` files (customised to a specific deployment) are required. These can be an artifact or centrally stored.
 
 ### Via CI Artifact
 1. Download the [goss-artifact](https://github.com/canonical/cos-lite-bundle/actions/runs/11001501181/artifacts/1968217647).
