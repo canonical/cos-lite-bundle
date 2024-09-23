@@ -15,19 +15,6 @@ To validate a model, `goss.yaml` files (customised to a specific deployment) are
             * E.g. get latest artifact: `curl -sL 'https://api.github.com/repos/canonical/cos-lite-bundle/actions/artifacts' | jq -r '.artifacts[0].archive_download_url'`
 2. Move the artifact to the host context where `goss validate` will be run and unzip.
 
-<details>
-<summary>Centrally Stored YAMLs</summary>
-
-Via Sparse Checkout
-1. `git init goss && cd goss`
-2. `git remote add -f origin https://github.com/canonical/cos-lite-bundle.git`
-3. `git config core.sparseCheckout true`
-4. `echo "goss/*" > .git/info/sparse-checkout`
-5. `git pull origin investigate-goss`
-
-</details>
-
-
 ### Test with Goss
 #### Manually
 1. `juju add-model cos-model`
