@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Print Current Working Directory
         run: pwd
+      - name: List Directory Contents
+        run: ls -la
       - name: Create ZIP file
         run: zip -r goss.zip goss/
       - name: Upload artifact
