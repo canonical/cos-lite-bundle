@@ -111,10 +111,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Create ZIP file
-        run: zip -r goss-artifact.zip goss/
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: goss-artifact
-          path: goss-artifact.zip
+          path: goss
