@@ -106,15 +106,15 @@ jobs:
       - name: Dump logs
         if: failure()
         uses: canonical/charming-actions/dump-logs@main
-  goss-archive:
+  goss-artifact:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Create ZIP file
-        run: zip -r goss.zip goss/
+        run: zip -r goss-artifact.zip goss/
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: goss-artifact
-          path: goss.zip
+          path: goss-artifact.zip
