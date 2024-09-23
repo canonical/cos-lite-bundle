@@ -11,22 +11,6 @@ on:
       - main
 
 jobs:
-  goss-archive:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Print Current Working Directory
-        run: pwd
-      - name: List Directory Contents
-        run: ls -la
-      - name: Create ZIP file
-        run: zip -r goss.zip goss/
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: goss-artifact
-          path: goss.zip
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -122,3 +106,15 @@ jobs:
       - name: Dump logs
         if: failure()
         uses: canonical/charming-actions/dump-logs@main
+  goss-archive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Create ZIP file
+        run: zip -r goss.zip goss/
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: goss-artifact
+          path: goss.zip
