@@ -60,6 +60,7 @@ Count: 22, Failed: 0, Skipped: 0
 
 1. `git clone --branch investigate-goss https://github.com/canonical/cos-lite-bundle.git`
 2. Modify the contents of the goss directory according to your needs.
-3. See the docs for [quickstart](https://goss.readthedocs.io/en/stable/quickstart/), [goss-test-creation](https://goss.readthedocs.io/en/stable/gossfile/#goss-test-creation), [gossfile](https://goss.readthedocs.io/en/stable/gossfile/#gossfile), and [complex examples](https://goss.readthedocs.io/en/stable/gossfile/#examples).
+   1. See the docs for [quickstart](https://goss.readthedocs.io/en/stable/quickstart/), [goss-test-creation](https://goss.readthedocs.io/en/stable/gossfile/#goss-test-creation), [gossfile](https://goss.readthedocs.io/en/stable/gossfile/#gossfile), and [complex examples](https://goss.readthedocs.io/en/stable/gossfile/#examples).
+3. Ensure all the [Tox Integration Tests](https://github.com/canonical/cos-lite-bundle/blob/investigate-goss/goss/README.md#tox-integration-tests) pass.
 
 [OPENG-2677]: https://warthogs.atlassian.net/browse/OPENG-2677?atlOrigin=eyJpIjoiNWRkNTljNzYxNjVmNDY3MDlhMDU5Y2ZhYzA5YTRkZjUiLCJwIjoiZ2l0aHViLWNvbS1KU1cifQ
