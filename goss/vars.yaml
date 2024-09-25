@@ -20,7 +20,7 @@ apps:
     prometheus_openstack_exporter:
       name: prometheus-openstack-exporter
 
-enable_az_tests: true
+enable_az_tests: false  # Only useful for machine charm deployments
 enable_k8s_tests: true
 enable_model_tests: true
 enable_network_tests: true
