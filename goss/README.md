@@ -3,31 +3,23 @@
 ## Installation
 1. Install the [Goss binary](https://goss.readthedocs.io/en/stable/installation/).
 
-## Validate a Model/Deployment
-To validate a model, `goss.yaml` files (customised to a specific deployment) are required. These can be an artifact or centrally stored.
+## Fetch the goss.yaml files
+To validate a model, `goss.yaml` files (customised to a specific deployment) are required. These files can be decentralised, but must exist on the FS for Goss validation. For cos-lite-bundle these files exist in [cos-lite-bundle/goss](https://github.com/canonical/cos-lite-bundle/tree/investigate-goss/goss).
 
-### Via CI Artifact
-1. Download the [goss-artifact](https://github.com/canonical/cos-lite-bundle/actions/runs/11001501181/artifacts/1968217647).
-    * Note:
-        1. This [CI step](https://github.com/canonical/cos-lite-bundle/blob/0a74e1354a1e77cc55dcd6dcda7d0ee4d45c78b9/.github/workflows/ci.yaml#L109) creates a .zip file of the `goss` dir as an artifact.
-        2. Artifacts are generated only on RELEASE
-        3. Programmatically use the [GH Artifacts API](https://docs.github.com/en/rest/actions/artifacts?apiVersion=2022-11-28)
-            * E.g. get latest artifact: `curl -sL 'https://api.github.com/repos/canonical/cos-lite-bundle/actions/artifacts' | jq -r '.artifacts[0].archive_download_url'`
-2. Move the artifact to the host context where `goss validate` will be run and unzip.
+2. `git clone https://github.com/canonical/cos-lite-bundle.git`
 
-### Test with Goss
-#### Manually
-1. `juju add-model cos-model`
-2. `juju deploy cos-lite --trust`
-3. `juju status --watch 1s` -> wait for `active/idle`
-4. `goss -g goss/goss.yaml --vars goss/vars.yaml v -f documentation`
+## Test with Goss
+### Manually
+3. `juju add-model cos-model`
+4. `juju deploy cos-lite --trust`
+5. `juju status --watch 1s` -> wait for `active/idle`
+6. `goss -g cos-lite-bundle/goss/goss.yaml --vars cos-lite-bundle/goss/vars.yaml v -f documentation`
 
+### Tox Integration Tests
+3. `tox -e render-edge`
+4. `tox -e integration`
 
-#### Tox Integration Tests
-2. `tox -e render-edge`
-3. `tox -e integration`
-
-Expected results:
+Sample results:
 ```
 Command: loki-pod-container-healthy: stdout: matches expectation: ["true"]
 Command: loki-pod-status-healthy: stdout: matches expectation: ["true"]
@@ -37,7 +29,6 @@ Command: grafana-pebble: stdout: matches expectation: ["healthy"]
 Command: traefik-pebble: stdout: matches expectation: ["healthy"]
 Command: loki-reachable-via-ingress-url: stdout: matches expectation: ["ready"]
 Command: grafana-related-dashboards: stdout: matches expectation: ["The alertmanager dashboard UID is a subset of the Grafana dashboard UIDs."]
-
 
 Total Duration: 2.375s
 Count: 22, Failed: 0, Skipped: 0
