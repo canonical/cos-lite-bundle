@@ -1,18 +1,23 @@
 # Kubernetes-type checks
 command:
   {{ if .Vars.enable_k8s_tests }}
-  loki-pod-status-healthy:
-    exec: kubectl get pod {{ .Vars.apps.loki.name }}-0 -n {{ .Vars.model_name }} -o json | jq -r '[.status.conditions[] | .status == "True"] | all'
+  pod-status-healthy:
+    exec: kubectl get pods -n {{ .Vars.model_name }} --output=json
     exit-status: 0
     stdout:
-      have-patterns:
-      - 'true'
+      gjson:
+        items.#.status.conditions.#.status|@flatten:
+          not:
+            - "False"
     stderr: ""
-  loki-pod-container-healthy:
-    exec: kubectl get pod {{ .Vars.apps.loki.name }}-0 -n {{ .Vars.model_name }} -o json | jq -r '[.status.containerStatuses[] | .ready == true] | all'
+
+  pod-container-healthy:
+    exec: kubectl get pods -n {{ .Vars.model_name }} --output=json 
     exit-status: 0
     stdout:
-      have-patterns:
-      - 'true'
+      gjson:
+        items.#.status.containerStatuses.#.ready:
+          not:
+            - "false"
     stderr: ""
   {{ end }}

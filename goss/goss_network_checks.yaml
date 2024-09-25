@@ -2,14 +2,14 @@
 command:
   {{ if .Vars.enable_network_tests }}
   loki-reachable-via-ingress-url:
-    exec: curl -s $(juju ssh -m {{ .Vars.model_name }} --container loki {{ .Vars.apps.loki.name }}/0 cat /etc/loki/loki-local-config.yaml | yq -r '.ruler.external_url')/ready
+    exec: curl -s $(juju ssh -m {{ .Vars.model_name }} --container loki {{ .Vars.apps.k8s.loki.name }}/0 cat /etc/loki/loki-local-config.yaml | yq -r '.ruler.external_url')/ready
     exit-status: 0
     stdout:
       have-patterns:
       - ready
     stderr: ""
   loki-can-reach-altermanager-internally:
-    exec: bash goss/scripts/test-internal-routing.sh {{ .Vars.model_name }} {{ .Vars.apps.loki.name }} {{ .Vars.apps.alertmanager.name }}
+    exec: bash goss/scripts/test-internal-routing.sh {{ .Vars.model_name }} {{ .Vars.apps.k8s.loki.name }} {{ .Vars.apps.k8s.alertmanager.name }}
     exit-status: 0
     stdout:
       have-patterns:

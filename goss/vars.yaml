@@ -1,21 +1,28 @@
 model_name: cos-model
 
 apps:
-  alertmanager:
-    name: alertmanager
-  catalogue:
-    name: catalogue
-  grafana:
-    name: grafana
-  loki:
-    name: loki
-  prometheus:
-    name: prometheus
-  traefik:
-    name: traefik
+  k8s:
+    alertmanager:
+      name: alertmanager
+    catalogue:
+      name: catalogue
+    grafana:
+      name: grafana
+    loki:
+      name: loki
+    prometheus:
+      name: prometheus
+    traefik:
+      name: traefik
+  machine:
+    # TODO: File an issue that keys cannot have '-' in the name, replace with _.
+    # E.g. app.machine.prometheus_openstack_exporter is valid but app.machine.prometheus-openstack-exporter is not
+    prometheus_openstack_exporter:
+      name: prometheus-openstack-exporter
 
-enable_self_tests: true
-enable_relation_tests: true
-enable_post_relation_tests: true
-enable_network_tests: true
+enable_az_tests: true
 enable_k8s_tests: true
+enable_model_tests: true
+enable_network_tests: true
+enable_pebble_tests: true
+enable_post_relation_tests: true

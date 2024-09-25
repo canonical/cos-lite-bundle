@@ -1,0 +1,21 @@
+# Deployment relation checks
+command:
+  {{ if .Vars.enable_model_tests }}
+  validate-model-configuration:
+    exec: juju status --format=json -m {{ .Vars.model_name }}
+    exit-status: 0
+    stdout:
+      gjson:
+        applications:
+          and:
+            - {have-key: {{ .Vars.apps.k8s.alertmanager.name }}}
+            - {have-key: {{ .Vars.apps.k8s.catalogue.name }}}
+            - {have-key: {{ .Vars.apps.k8s.grafana.name }}}
+            - {have-key: {{ .Vars.apps.k8s.loki.name }}}
+            - {have-key: {{ .Vars.apps.k8s.prometheus.name }}}
+            - {have-key: {{ .Vars.apps.k8s.traefik.name }}}
+        applications.{{ .Vars.apps.k8s.prometheus.name }}.relations:
+          and:
+            - {have-key: {{ .Vars.apps.k8s.alertmanager.name }}}
+    stderr: ""
+  {{ end }}
