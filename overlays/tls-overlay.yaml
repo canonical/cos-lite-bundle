@@ -4,10 +4,26 @@ applications:
     channel: edge
     scale: 1
     options:
-      ca-common-name: ca.demo.local
+      ca-common-name: <your-domain-name>
+  external-ca:
+    # This charm needs to be replaced with a real CA charm.
+    # Use `juju refresh --switch` to replace via a "crossgrade refresh".
+    charm: self-signed-certificates
+    channel: edge
+    scale: 1
+    options:
+      #ca-common-name: external-ca.example.com
+      ca-common-name: traefik-0.traefik-endpoints.cos.svc.cluster.local
 
 relations:
- - [ca, traefik:certificates]
+ # This is a more general CA (e.g. root CA) that signs traefik's own CSR.
+ - [external-ca, traefik:certificates]
+ - [external-ca, grafana:receive-ca-cert]
+
+  # This is the local CA that signs CSRs from COS charms (excluding traefik).
+  # Traefik is trusting this CA so that it could load balance via TLS.
+ - [ca, traefik:receive-ca-cert]
+
  - [ca, alertmanager:certificates]
  - [ca, prometheus:certificates]
  - [ca, grafana:certificates]
