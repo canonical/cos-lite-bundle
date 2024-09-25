@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Collect the UID from the charm dashboard and check if it is a subset of Grafana dashboard UIDs
 

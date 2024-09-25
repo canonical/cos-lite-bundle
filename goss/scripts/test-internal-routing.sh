@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Obtain the alertmanager_url from Loki's loki-local-config.yaml and test routability from Loki's charm container
 
