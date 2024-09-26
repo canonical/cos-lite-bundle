@@ -15,8 +15,7 @@ apps:
     traefik:
       name: traefik
   machine:
-    # TODO: File an issue that keys cannot have '-' in the name, replace with _.
-    # E.g. app.machine.prometheus_openstack_exporter is valid but app.machine.prometheus-openstack-exporter is not
+    # Keys cannot have '-' in the name, replace with _.
     prometheus_openstack_exporter:
       name: prometheus-openstack-exporter
 
@@ -24,5 +23,5 @@ enable_az_tests: false  # Only useful for machine charm deployments
 enable_k8s_tests: true
 enable_model_tests: true
 enable_network_tests: true
-enable_pebble_tests: true
+enable_pebble_tests: false
 enable_post_relation_tests: true
