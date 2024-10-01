@@ -1,0 +1,52 @@
+command:
+  validate-model-configuration:
+    exec: juju status --format=json -m cos-model
+    exit-status: 0
+    stdout:
+      gjson:
+        applications:
+          and:
+            - {have-key: alertmanager}
+            - {have-key: catalogue}
+            - {have-key: grafana}
+            - {have-key: loki}
+            - {have-key: prometheus}
+            - {have-key: traefik}
+        applications.prometheus.relations:
+          and:
+            - {have-key: alertmanager}
+        applications.alertmanager.relations:
+          and:
+            - {have-key: grafana-source}
+    stderr: ""
+
+  # app-az-distribution:
+  #   exec: juju status --format=json -m cos-model
+  #   exit-status: 0
+  #   stdout:
+  #     gjson:
+  #       applications.machine-app.name.units.@values.#.machine:
+  #         consist-of:
+  #           - "0"
+  #           - "1"
+  #           - "2"
+
+  pod-status-healthy:
+    exec: kubectl get pods -n cos-model --output=json
+    exit-status: 0
+    stdout:
+      gjson:
+        items.#.status.conditions.#.status|@flatten:
+          not:
+            - "False"
+    stderr: ""
+
+  pod-container-healthy:
+    exec: kubectl get pods -n cos-model --output=json
+    exit-status: 0
+    stdout:
+      gjson:
+        items.#.status.containerStatuses.#.ready:
+          not:
+            - "false"
+    stderr: ""
