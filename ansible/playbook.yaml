@@ -1,0 +1,60 @@
+---
+- name: Run Juju Status and Log Output
+  hosts: localhost
+
+  tasks:
+    - name: Ensure the ansible/output directory exists
+      ansible.builtin.file:
+        path: ./output
+        state: directory
+        mode: '0755'
+
+    - name: Run Juju status command
+      ansible.builtin.command:
+        cmd: juju controllers --format=json | from_json | json_query('controllers.*')
+      register: juju_controllers_output
+
+    # TODO: OPTION 1 - Create file
+    - name: Log Juju status output to a file
+      ansible.builtin.copy:
+        content: "{{ juju_controllers_output.stdout }}"
+        dest: ./output/juju_controllers.json
+
+    # TODO: OPTION 2 - Create file
+    # - name: Run Juju controllers command and log output to a file
+    #   ansible.builtin.shell: |
+    #     juju controllers --format=json > ./output/juju_controllers.json
+
+    # ------------------------------------------------
+    - name: Get all Juju models
+      ansible.builtin.command:
+        cmd: juju models --format=json
+      register: juju_models_output
+
+    # TODO: Do we want to support native jmespath (pip install jmespath) or use jq for consistency with goss?
+    # -> I think jq is better since it can be run in a shell rather than "from_json" and "json_query" which are specific to Ansible
+    # -> We can also use the ansible.builtin.shell since everyone knows bash
+    - name: Extract model names
+      set_fact:
+        models: "{{ juju_models_output.stdout | from_json | json_query('models[*].name') }}"
+
+    - name: Debug model names
+      debug:
+        var: models
+
+    - name: Run Juju status for each model and collect outputs
+      ansible.builtin.command:
+        cmd: juju status -m {{ item }} --format=json
+      register: juju_status_output
+      loop: "{{ models }}"
+
+    # - name: Debug model status outputs
+    #   debug:
+    #     var: item.stdout  # Access the stdout of each command
+    #   loop: "{{ juju_status_output.results }}"
+  
+    - name: Log Juju status output to separate files with sanitized names
+      ansible.builtin.copy:
+        content: "{{ item.stdout }}"
+        dest: "./output/juju_status_{{ item.item | replace('/', '-') }}.json"
+      loop: "{{ juju_status_output.results }}"
