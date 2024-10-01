@@ -1,6 +1,8 @@
-import subprocess
-import requests
 import json
+import subprocess
+
+import requests
+
 
 def get_pod_ips(namespace):
     command = f"kubectl get pods -n {namespace} -o jsonpath='{{.items[*].status.podIP}}'"
@@ -20,6 +22,7 @@ def check_health(ip):
         return False
 
 def main():
+    """Query each charm container's /v1/health API."""
     namespace = "cos-model"
     pod_ips = get_pod_ips(namespace)
     for ip in pod_ips:
