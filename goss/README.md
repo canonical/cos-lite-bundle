@@ -4,9 +4,9 @@
 1. Install the [Goss binary](https://goss.readthedocs.io/en/stable/installation/).
 
 ## Fetch the goss.yaml files
-To validate a model, `goss.yaml` files (customised to a specific deployment) are required. These files can be decentralised, but must exist on the FS for Goss validation. For cos-lite-bundle these files exist in [cos-lite-bundle/goss](https://github.com/canonical/cos-lite-bundle/tree/investigate-goss/goss).
+To validate a model, `goss.yaml` files (customised to a specific deployment) are required. These files can be decentralised, but must exist on the FS for Goss validation. For cos-lite-bundle these files exist in [cos-lite-bundle/goss](https://github.com/canonical/cos-lite-bundle/tree/investigate-goss-complex/goss).
 
-2. `git clone https://github.com/canonical/cos-lite-bundle.git`
+2. `git clone --branch investigate-goss-complex https://github.com/canonical/cos-lite-bundle.git`
 
 ## Test with Goss
 ### Manually
@@ -36,9 +36,9 @@ Count: 22, Failed: 0, Skipped: 0
 
 ## Contributing
 
-1. `git clone --branch investigate-goss https://github.com/canonical/cos-lite-bundle.git`
+1. `git clone --branch investigate-goss-complex https://github.com/canonical/cos-lite-bundle.git`
 2. Modify the contents of the goss directory according to your needs.
    1. See the docs for [quickstart](https://goss.readthedocs.io/en/stable/quickstart/), [goss-test-creation](https://goss.readthedocs.io/en/stable/gossfile/#goss-test-creation), [gossfile](https://goss.readthedocs.io/en/stable/gossfile/#gossfile), and [complex examples](https://goss.readthedocs.io/en/stable/gossfile/#examples).
-3. Ensure all the [Tox Integration Tests](https://github.com/canonical/cos-lite-bundle/blob/investigate-goss/goss/README.md#tox-integration-tests) pass.
+3. Ensure all the [Tox Integration Tests](https://github.com/canonical/cos-lite-bundle/blob/investigate-goss-complex/goss/README.md#tox-integration-tests) pass.
 
 [OPENG-2677]: https://warthogs.atlassian.net/browse/OPENG-2677?atlOrigin=eyJpIjoiNWRkNTljNzYxNjVmNDY3MDlhMDU5Y2ZhYzA5YTRkZjUiLCJwIjoiZ2l0aHViLWNvbS1KU1cifQ
