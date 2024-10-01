@@ -21,9 +21,7 @@ def check_health(ip):
 
 def main():
     namespace = "cos-model"
-
     pod_ips = get_pod_ips(namespace)
-
     for ip in pod_ips:
         if not check_health(ip):
             print(f"Curl failed for {ip}")

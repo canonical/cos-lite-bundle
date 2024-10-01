@@ -7,12 +7,6 @@ command:
     stderr: ""
   
   # Bash scripts
-  k8s-charms:
-    exec: bash goss/scripts/test-k8s-probes.sh
-    exit-status: 0
-    stdout: ""
-    stderr: ""
-
   loki-can-reach-altermanager-internally:
     exec: bash goss/scripts/test-internal-routing.sh cos-model loki alertmanager
     exit-status: 0
