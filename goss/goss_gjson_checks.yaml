@@ -20,6 +20,7 @@ command:
             - {have-key: grafana-source}
     stderr: ""
 
+  # TODO: This check is only valid for machine-type controllers
   # app-az-distribution:
   #   exec: juju status --format=json -m cos-model
   #   exit-status: 0

@@ -6,14 +6,14 @@
 ## Fetch the goss.yaml files
 To validate a model, `goss.yaml` files (customised to a specific deployment) are required. These files can be decentralised, but must exist on the FS for Goss validation. For cos-lite-bundle these files exist in [cos-lite-bundle/goss](https://github.com/canonical/cos-lite-bundle/tree/investigate-goss/goss).
 
-2. `git clone https://github.com/canonical/cos-lite-bundle.git`
+2. `git clone --branch investigate-goss https://github.com/canonical/cos-lite-bundle.git`
 
 ## Test with Goss
 ### Manually
 3. `juju add-model cos-model`
 4. `juju deploy cos-lite --trust`
 5. `juju status --watch 1s` -> wait for `active/idle`
-6. `goss -g cos-lite-bundle/goss/goss.yaml --vars cos-lite-bundle/goss/vars.yaml v -f documentation`
+6. `goss -g cos-lite-bundle/goss/goss.yaml v -f documentation`
 
 ### Tox Integration Tests
 3. `tox -e render-edge`
