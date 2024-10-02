@@ -9,49 +9,46 @@
         state: directory
         mode: '0755'
 
-    - name: Run Juju status command
+    - name: Get Juju controllers
       ansible.builtin.command:
-        cmd: juju controllers --format=json | from_json | json_query('controllers.*')
+        cmd: juju controllers --format=json
       register: juju_controllers_output
 
-    # TODO: OPTION 1 - Create file
+    - name: Get Juju controller names
+      set_fact:
+        juju_controller_names: "{{ juju_controllers_output.stdout | from_json | json_query('controllers | keys(@)') }}"
+
+    - name: Get Juju models
+      ansible.builtin.command:
+        cmd: juju models --format=json
+      register: juju_models_output
+
+    - name: Get Juju model names
+      set_fact:
+        juju_model_names: "{{ juju_models_output.stdout | from_json | json_query('models[*].name') }}"
+
+    - name: Debug Juju model names
+      debug:
+        var: juju_model_names
+
+    - name: Debug Juju controller names
+      debug:
+        var: juju_controller_names
+
+    # ------------------------------------------------
+
     - name: Log Juju status output to a file
       ansible.builtin.copy:
         content: "{{ juju_controllers_output.stdout }}"
         dest: ./output/juju_controllers.json
 
-    # TODO: OPTION 2 - Create file
-    # - name: Run Juju controllers command and log output to a file
-    #   ansible.builtin.shell: |
-    #     juju controllers --format=json > ./output/juju_controllers.json
-
     # ------------------------------------------------
-    - name: Get all Juju models
-      ansible.builtin.command:
-        cmd: juju models --format=json
-      register: juju_models_output
-
-    # TODO: Do we want to support native jmespath (pip install jmespath) or use jq for consistency with goss?
-    # -> I think jq is better since it can be run in a shell rather than "from_json" and "json_query" which are specific to Ansible
-    # -> We can also use the ansible.builtin.shell since everyone knows bash
-    - name: Extract model names
-      set_fact:
-        models: "{{ juju_models_output.stdout | from_json | json_query('models[*].name') }}"
-
-    - name: Debug model names
-      debug:
-        var: models
 
     - name: Run Juju status for each model and collect outputs
       ansible.builtin.command:
         cmd: juju status -m {{ item }} --format=json
       register: juju_status_output
-      loop: "{{ models }}"
-
-    # - name: Debug model status outputs
-    #   debug:
-    #     var: item.stdout  # Access the stdout of each command
-    #   loop: "{{ juju_status_output.results }}"
+      loop: "{{ juju_model_names }}"
   
     - name: Log Juju status output to separate files with sanitized names
       ansible.builtin.copy:
