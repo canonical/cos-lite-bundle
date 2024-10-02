@@ -1,7 +1,11 @@
 # Usage Workflow
 
 ## Installation
-1. `python -m pip install --user ansible`
+1. `sudo apt install ansible`
+
+or if you want a lightweight version:
+1. `sudo apt install ansible-core`
+2. `ansible-galaxy collection install community.general`
 
 ## Fetch the goss.yaml files
 To validate a model, `playboook.yaml` files are required. These files can be decentralised, but must exist on the FS for Ansible validation. For cos-lite-bundle these files exist in [cos-lite-bundle/ansible](https://github.com/canonical/cos-lite-bundle/tree/investigate-ansible/ansible).
