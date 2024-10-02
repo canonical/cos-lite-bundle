@@ -27,17 +27,9 @@
       set_fact:
         juju_model_names: "{{ juju_models_output.stdout | from_json | json_query('models[*].name') }}"
 
-    - name: Debug Juju model names
-      debug:
-        var: juju_model_names
-
-    - name: Debug Juju controller names
-      debug:
-        var: juju_controller_names
-
     # ------------------------------------------------
 
-    - name: Log Juju status output to a file
+    - name: Log Juju controllers to a file
       ansible.builtin.copy:
         content: "{{ juju_controllers_output.stdout }}"
         dest: ./output/juju_controllers.json
@@ -50,7 +42,7 @@
       register: juju_status_output
       loop: "{{ juju_model_names }}"
   
-    - name: Log Juju status output to separate files with sanitized names
+    - name: Log Juju status outputs to separate files with sanitized names
       ansible.builtin.copy:
         content: "{{ item.stdout }}"
         dest: "./output/juju_status_{{ item.item | replace('/', '-') }}.json"
