@@ -106,14 +106,3 @@ jobs:
       - name: Dump logs
         if: failure()
         uses: canonical/charming-actions/dump-logs@main
-  goss-artifact:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: goss
-          path: goss
-          retention-days: 90
