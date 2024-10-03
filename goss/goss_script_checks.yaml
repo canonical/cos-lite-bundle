@@ -10,7 +10,5 @@ command:
   loki-can-reach-altermanager-internally:
     exec: bash goss/scripts/test-internal-routing.sh cos-model loki alertmanager
     exit-status: 0
-    stdout:
-      have-patterns:
-      - 'Status code: 200'
+    stdout: "Status code: 200"
     stderr: ""

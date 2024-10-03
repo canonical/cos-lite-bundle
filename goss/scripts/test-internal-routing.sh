@@ -9,4 +9,4 @@ ALERTMANAGER_APP_NAME="$3"
 alertmanager_url=$(juju ssh --container loki ${LOKI_APP_NAME}/0 cat /etc/loki/loki-local-config.yaml | yq -r '.ruler.alertmanager_url')
 status_code=$(juju ssh ${LOKI_APP_NAME}/0 "python3 -c \"import urllib.request; response = urllib.request.urlopen('${alertmanager_url}'); print(response.getcode())\"")
 
-echo "Status code: $status_code"
+echo -n "Status code: $status_code"
