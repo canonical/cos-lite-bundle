@@ -4,31 +4,43 @@ command:
     exit-status: 0
     stdout:
       gjson:
-        applications:
-          and:
-            - {have-key: alertmanager}
-            - {have-key: catalogue}
-            - {have-key: grafana}
-            - {have-key: loki}
-            - {have-key: prometheus}
-            - {have-key: traefik}
-        applications.prometheus.relations:
-          and:
-            - {have-key: alertmanager}
-            - {have-key: catalogue}
-            - {have-key: grafana-dashboard}
-            - {have-key: grafana-source}
-            - {have-key: ingress}
-            - {have-key: metrics-endpoint}
-        applications.alertmanager.relations:
-          and:
-            - {have-key: alerting}
-            - {have-key: catalogue}
-            - {have-key: grafana-dashboard}
-            - {have-key: grafana-source}
-            - {have-key: ingress}
-            - {have-key: replicas}
-            - {have-key: self-metrics-endpoint}
+        # Deployed applications
+        applications.@keys:
+          equal:
+            [
+              alertmanager,
+              catalogue,
+              grafana,
+              loki,
+              mimir-worker-k8s,
+              prometheus,
+              traefik,
+            ]
+        # Prometheus relations
+        applications.prometheus.relations.@keys:
+          equal:
+            [
+              alertmanager,
+              catalogue,
+              grafana-dashboard,
+              grafana-source,
+              ingress,
+              metrics-endpoint,
+              prometheus-peers,
+            ]
+        # Alertmanager relations
+        applications.alertmanager.relations.@keys:
+          equal:
+            [
+              alerting,
+              catalogue,
+              grafana-dashboard,
+              grafana-source,
+              ingress,
+              replicas,
+              self-metrics-endpoint,
+            ]
+        # Applications related to Alertmanager over the alerting relation
         applications.alertmanager.relations.alerting.#.related-application:
           equal: [loki, prometheus]
     stderr: ""
