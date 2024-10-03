@@ -1,6 +1,5 @@
 # Deployment relation checks
 command:
-  {{ if .Vars.enable_model_tests }}
   validate-model-configuration:
     exec: juju status --format=json -m {{ .Vars.model_name }} | jq -r '.applications'
     exit-status: 0
@@ -18,4 +17,3 @@ command:
           and:
             - {have-key: {{ .Vars.apps.k8s.alertmanager.name }}}
     stderr: ""
-  {{ end }}

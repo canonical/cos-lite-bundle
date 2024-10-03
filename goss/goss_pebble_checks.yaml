@@ -1,6 +1,5 @@
 # Charm Pebble health checks
 command:
-  {{ if .Vars.enable_pebble_tests }}
   # $root is required to access the root context of the current template,
   # which refers to the entire data structure being passed into the template.
   # This provides access to .Vars and .Env in loops like the one below.
@@ -19,4 +18,3 @@ command:
     exit-status: 0
     stdout: ""
     stderr: ""
-  {{end}}

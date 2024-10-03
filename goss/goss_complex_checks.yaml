@@ -1,6 +1,6 @@
 # Availability Zone checks
 command:
-  {{ if .Vars.enable_az_tests }}
+  {{ if .Vars.enable_machine_tests }}
   app-az-distribution:
     exec: juju status --format=json -m {{ .Vars.model_name }}
     exit-status: 0
@@ -12,3 +12,11 @@ command:
             - "1"
             - "2"
   {{ end }}
+
+  relations-over-grafana-dashboard-interface:
+    exec: bash goss/scripts/test-relation-if-interface.sh cos-model grafana grafana-dashboard grafana_dashboard
+    exit-status: 0
+    stdout:
+      - "INFO"
+      - "!ERROR"
+    stderr: ""

@@ -1,3 +1,5 @@
+enable_machine_tests: false
+
 model_name: cos-model
 
 apps:
@@ -19,9 +21,3 @@ apps:
     prometheus_openstack_exporter:
       name: prometheus-openstack-exporter
 
-enable_az_tests: false  # Only useful for machine charm deployments
-enable_k8s_tests: true
-enable_model_tests: true
-enable_network_tests: true
-enable_pebble_tests: false
-enable_post_relation_tests: true
