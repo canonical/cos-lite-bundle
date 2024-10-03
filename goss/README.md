@@ -9,15 +9,10 @@ To validate a model, `goss.yaml` files (customised to a specific deployment) are
 2. `git clone --branch investigate-goss https://github.com/canonical/cos-lite-bundle.git`
 
 ## Test with Goss
-### Manually
 3. `juju add-model cos-model`
 4. `juju deploy cos-lite --trust`
 5. `juju status --watch 1s` -> wait for `active/idle`
 6. `goss -g cos-lite-bundle/goss/goss.yaml v -f documentation`
-
-### Tox Integration Tests
-3. `tox -e render-edge`
-4. `tox -e integration`
 
 Sample results:
 ```
@@ -39,6 +34,5 @@ Count: 22, Failed: 0, Skipped: 0
 1. `git clone --branch investigate-goss https://github.com/canonical/cos-lite-bundle.git`
 2. Modify the contents of the goss directory according to your needs.
    1. See the docs for [quickstart](https://goss.readthedocs.io/en/stable/quickstart/), [goss-test-creation](https://goss.readthedocs.io/en/stable/gossfile/#goss-test-creation), [gossfile](https://goss.readthedocs.io/en/stable/gossfile/#gossfile), and [complex examples](https://goss.readthedocs.io/en/stable/gossfile/#examples).
-3. Ensure all the [Tox Integration Tests](https://github.com/canonical/cos-lite-bundle/blob/investigate-goss/goss/README.md#tox-integration-tests) pass.
 
 [OPENG-2677]: https://warthogs.atlassian.net/browse/OPENG-2677?atlOrigin=eyJpIjoiNWRkNTljNzYxNjVmNDY3MDlhMDU5Y2ZhYzA5YTRkZjUiLCJwIjoiZ2l0aHViLWNvbS1KU1cifQ
