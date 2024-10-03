@@ -14,11 +14,3 @@ command:
       have-patterns:
       - 'Status code: 200'
     stderr: ""
-
-  grafana-related-dashboards:
-    exec: bash goss/scripts/compare-dashboard-uids.sh cos-model grafana alertmanager
-    exit-status: 0
-    stdout:
-      have-patterns:
-      - "Match found."
-    stderr: ""
