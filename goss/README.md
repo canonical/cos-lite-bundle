@@ -12,7 +12,6 @@ To validate a model, `goss.yaml` files (customised to a specific deployment) are
 3. `juju add-model cos-model`
 4. `juju deploy cos-lite --trust`
 5. `juju status --watch 1s` -> wait for `active/idle`
-6. `goss -g cos-lite-bundle/goss/goss.yaml v -f documentation`
 6. `goss -g goss/goss.yaml --vars-inline '{"goss_dir": "goss"}' validate -f documentation`
 
 Sample results:
