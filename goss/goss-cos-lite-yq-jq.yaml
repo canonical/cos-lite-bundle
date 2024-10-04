@@ -5,7 +5,7 @@ command:
     stdout: "ready"
     stderr: ""
 
-  pod-status-ready:
+  all-k8-pods-status-ready:
     exec: kubectl get pods -n cos-model --output=json | jq -c '[.items[].status.containerStatuses[].ready]'
     exit-status: 0
     stdout:

@@ -1,6 +1,6 @@
 command:
-  validate-model-configuration:
-    exec: juju status --format=json -m cos-model
+  validate-cos-lite-configuration:
+    exec: juju status -m cos-model --format=json
     exit-status: 0
     stdout:
       gjson:
