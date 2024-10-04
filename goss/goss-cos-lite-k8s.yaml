@@ -1,6 +1,5 @@
-# Kubernetes-type checks
 command:
-  pod-status-healthy:
+  all-pods-status-healthy:
     exec: kubectl get pods -n {{ .Vars.model_name }} --output=json
     exit-status: 0
     stdout:
@@ -10,7 +9,7 @@ command:
             - "False"
     stderr: ""
 
-  pod-container-healthy:
+  all-pods-all-containers-healthy:
     exec: kubectl get pods -n {{ .Vars.model_name }} --output=json 
     exit-status: 0
     stdout:

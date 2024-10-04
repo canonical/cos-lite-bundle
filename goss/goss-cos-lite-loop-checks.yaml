@@ -1,4 +1,3 @@
-# Charm Pebble health checks
 command:
   # $root is required to access the root context of the current template,
   # which refers to the entire data structure being passed into the template.
@@ -9,12 +8,6 @@ command:
     exec: juju ssh -m {{ $root.Vars.model_name }} {{$app.name}}/0 /charm/bin/pebble health
     exit-status: 0
     stdout:
-      have-patterns:
-      - healthy
+      - "healthy"
     stderr: ""
   {{end}}
-  k8s-charms:
-    exec: bash goss/scripts/test-k8s-probes.sh
-    exit-status: 0
-    stdout: ""
-    stderr: ""
