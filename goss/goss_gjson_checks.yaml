@@ -12,7 +12,6 @@ command:
               catalogue,
               grafana,
               loki,
-              mimir-worker-k8s,
               prometheus,
               traefik,
             ]
