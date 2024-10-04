@@ -1,0 +1,49 @@
+---
+- name: Run Juju Status and Log Output
+  hosts: localhost
+
+  tasks:
+    - name: Ensure the ansible/output directory exists
+      ansible.builtin.file:
+        path: ./output
+        state: directory
+        mode: '0755'
+
+    - name: Get Juju controllers
+      ansible.builtin.command:
+        cmd: juju controllers --format=json
+      register: juju_controllers_output
+
+    - name: Get Juju controller names
+      set_fact:
+        juju_controller_names: "{{ juju_controllers_output.stdout | from_json | json_query('controllers | keys(@)') }}"
+
+    - name: Get Juju models
+      ansible.builtin.command:
+        cmd: juju models --format=json
+      register: juju_models_output
+
+    - name: Get Juju model names
+      set_fact:
+        juju_model_names: "{{ juju_models_output.stdout | from_json | json_query('models[*].name') }}"
+
+    # ------------------------------------------------
+
+    - name: Log Juju controllers to a file
+      ansible.builtin.copy:
+        content: "{{ juju_controllers_output.stdout }}"
+        dest: ./output/juju_controllers.json
+
+    # ------------------------------------------------
+
+    - name: Run Juju status for each model and collect outputs
+      ansible.builtin.command:
+        cmd: juju status -m {{ item }} --format=json
+      register: juju_status_output
+      loop: "{{ juju_model_names }}"
+  
+    - name: Log Juju status outputs to separate files with sanitized names
+      ansible.builtin.copy:
+        content: "{{ item.stdout }}"
+        dest: "./output/juju_status_{{ item.item | replace('/', '-') }}.json"
+      loop: "{{ juju_status_output.results }}"
