@@ -2,7 +2,7 @@
 command:
   {{ if .Vars.enable_machine_tests }}
   app-distributed-evenly-across-AZs:
-    exec: juju status -m {{ .Vars.model_name }} --format=json
+    exec: cat juju_status.json
     exit-status: 0
     stdout:
       gjson:
