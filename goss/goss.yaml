@@ -1,3 +1,9 @@
 # Import other goss.yaml files
 gossfile:
-  goss-*.yaml: {}
+  {{ if .Vars.lint }}
+  lint-*.yaml: {}  # These checks operate on static files, i.e. status.json
+  {{end}}
+
+  {{ if .Vars.validate }}
+  validate-*.yaml: {}  # These checks operate on the live Juju deployment
+  {{end}}
