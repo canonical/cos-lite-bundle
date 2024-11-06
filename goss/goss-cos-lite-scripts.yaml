@@ -12,3 +12,9 @@ command:
     exit-status: 0
     stdout: ""
     stderr: ""
+
+  grafana-related-dashboards:
+    exec: bash {{ .Vars.goss_dir }}/scripts/compare-dashboard-uids.sh cos-model grafana alertmanager 
+    exit-status: 0
+    stdout: "Match found."
+    stderr: ""
