@@ -1,0 +1,55 @@
+default-base: ubuntu@22.04/stable
+
+saas:
+  graf:
+    url: microk8s:admin/cos.grafana-dashboards
+  prom:
+    url: microk8s:admin/cos.prometheus-receive-remote-write
+
+machines:
+  '0':
+  '1':
+  '2':
+  '3':
+    constraints: cores=2 mem=4G root-disk=25G virt-type=virtual-machine
+  '4':
+    constraints: cores=2 mem=4G root-disk=25G virt-type=virtual-machine
+  '5':
+    constraints: cores=2 mem=4G root-disk=25G virt-type=virtual-machine
+
+applications:
+  ceph-mon:
+    charm: ch:ceph-mon
+    channel: quincy/stable
+    num_units: 3
+    options:
+      monitor-count: 3
+    to:
+      - '0'
+      - '1'
+      - '2'
+
+  ceph-osd:
+    charm: ch:ceph-osd
+    channel: quincy/stable
+    num_units: 3
+    storage:
+      osd-devices: 'loop,5G,2'
+    to:
+      - '3'
+      - '4'
+      - '5'
+
+  grafana-agent:
+    charm: grafana-agent
+    channel: latest/edge
+
+relations:
+- - ceph-mon:osd
+  - ceph-osd:mon
+- - ceph-mon:cos-agent
+  - grafana-agent:cos-agent
+- - grafana-agent:send-remote-write
+  - prom:receive-remote-write
+- - grafana-agent:grafana-dashboards-provider
+  - graf:grafana-dashboard

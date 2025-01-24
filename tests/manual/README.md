@@ -49,3 +49,12 @@ multipass exec node-1 microk8s.kubectl -n welcome-k8s get pods -A
 
 Note that with Juju <3.3.5,<3.4.4, you would need to manually patch the
 statefulsets due to a [bug](https://bugs.launchpad.net/juju/+bug/2062934).
+
+## CMR to Ceph with Grafana-agent
+The `lxd-ceph-cmr.yaml` file contains a bundle for deploying Ceph with grafana-agent (subordinate) on a LXD model. This bundle expects a CMR to a COS-lite deployment in microk8s which can be created by running `juju deploy cos-lite --trust --overlay ./offers-overlay.yaml`.
+
+Validation Process
+1. Open the Grafana UI with:
+`juju run traefik/0 show-proxied-endpoints --format=yaml | yq '."traefik/0".results."proxied-endpoints"' | jq`
+`juju run grafana/leader get-admin-password`
+2. Navigate to `Home/Dashboards` and check that Ceph dashboards exist and have populated data.
