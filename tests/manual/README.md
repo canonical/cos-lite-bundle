@@ -51,10 +51,15 @@ Note that with Juju <3.3.5,<3.4.4, you would need to manually patch the
 statefulsets due to a [bug](https://bugs.launchpad.net/juju/+bug/2062934).
 
 ## CMR to Ceph with Grafana-agent
-The `lxd-ceph-cmr.yaml` file contains a bundle for deploying Ceph with grafana-agent (subordinate) on a LXD model. This bundle expects a CMR to a COS-lite deployment in microk8s which can be created by running `juju deploy cos-lite --trust --overlay ./offers-overlay.yaml`.
+The `lxd-ceph-quincy.yaml` file contains a bundle for deploying Ceph with grafana-agent (subordinate) on a LXD model.
 
 Validation Process
-1. Open the Grafana UI with:
+1. Deploy COS-lite in microk8s with `juju deploy cos-lite --trust --overlay ./offers-overlay.yaml`. Then relating:
+```
+- grafana-agent:send-remote-write <-> prom:receive-remote-write
+- grafana-agent:grafana-dashboards-provider <-> graf:grafana-dashboard
+```
+2. Open the Grafana UI with:
 `juju run traefik/0 show-proxied-endpoints --format=yaml | yq '."traefik/0".results."proxied-endpoints"' | jq`
 `juju run grafana/leader get-admin-password`
-2. Navigate to `Home/Dashboards` and check that Ceph dashboards exist and have populated data.
+3. Navigate to `Home/Dashboards` and check that Ceph dashboards exist and have populated data.

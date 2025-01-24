@@ -1,11 +1,5 @@
 default-base: ubuntu@22.04/stable
 
-saas:
-  graf:
-    url: microk8s:admin/cos.grafana-dashboards
-  prom:
-    url: microk8s:admin/cos.prometheus-receive-remote-write
-
 machines:
   '0':
   '1':
@@ -49,7 +43,3 @@ relations:
   - ceph-osd:mon
 - - ceph-mon:cos-agent
   - grafana-agent:cos-agent
-- - grafana-agent:send-remote-write
-  - prom:receive-remote-write
-- - grafana-agent:grafana-dashboards-provider
-  - graf:grafana-dashboard
