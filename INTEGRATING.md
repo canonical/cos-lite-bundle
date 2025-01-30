@@ -1,5 +1,5 @@
 # Bundle topology
-For clarity and readability, the bundle topology is depicted here using several separate diagrams.
+For clarity and readability, the bundle topology is depicted here using several separate diagrams. The arrows in the diagram depict the direction the requests are being made, not the direction the data is flowing.
 
 ## Externally
 
@@ -66,6 +66,8 @@ end
 ```
 
 ## Self-monitoring
+
+Self-monitoring in this context refers to the COS stacks ability to monitor itself.
 
 ```mermaid
 graph TD
