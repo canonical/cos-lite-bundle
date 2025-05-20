@@ -92,7 +92,7 @@ $ juju deploy ./bundle.yaml --trust
 
 
 ### Overlays
-We also make available some [**overlays**](https://juju.is/docs/sdk/bundle-reference) for convenience:
+We also make available some [**overlays**](https://documentation.ubuntu.com/juju/latest/reference/bundle/) for convenience:
 
 - [`offers`](overlays/offers-overlay.yaml): exposes as
   offers the relation endpoints of the COS Lite charms that are likely to be
@@ -135,5 +135,5 @@ $ charmcraft release cos-lite --channel=edge --revision=4
 ```
 
 
-[cross-model relations]: https://juju.is/docs/olm/cross-model-relations
-[tutorial]: https://charmhub.io/topics/canonical-observability-stack/tutorials/install-microk8s
+[cross-model relations]: https://documentation.ubuntu.com/juju/latest/reference/relation/index.html#cross-model
+[tutorial]: https://documentation.ubuntu.com/observability/tutorial/installation/getting-started-with-cos-lite/
