@@ -16,7 +16,7 @@ applications:
     resources:
         traefik-image: "docker.io/ubuntu/traefik:2-22.04"
     {%- else %}
-    channel: {{ channel|default('1/edge', true) }}
+    channel: latest/stable
     {%- endif %}
   alertmanager:
     charm: {{ alertmanager|default('alertmanager-k8s', true) }}
