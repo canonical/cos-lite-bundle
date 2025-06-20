@@ -16,9 +16,9 @@ from urllib.request import urlopen
 import juju
 import juju.utils
 import pytest
+import sh
 from helpers import (
     ModelConfigChange,
-    cli_deploy_bundle,
     get_address,
     get_alertmanager_alerts,
     get_alertmanager_groups,
@@ -53,11 +53,19 @@ async def test_build_and_deploy(ops_test: OpsTest, rendered_bundle, tls_enabled)
 
     Assert on the unit status before any relations/configurations take place.
     """
-    # Add "testing" overlay to deploy avalanche, to have metrics and alerts
-    overlays = ["overlays/testing-overlay.yaml"]
+    sh.juju.switch(ops_test.model_name)
+
     if tls_enabled:
-        overlays.extend(["overlays/tls-overlay.yaml"])
-    await cli_deploy_bundle(ops_test, str(rendered_bundle), overlays=overlays)
+        sh.juju.deploy(
+            rendered_bundle,
+            "--overlay",
+            "overlays/testing-overlay.yaml",
+            "--overlay",
+            "overlays/tls-overlay.yaml",
+            trust=True,
+        )
+    else:
+        sh.juju.deploy(rendered_bundle, "--overlay", "overlays/testing-overlay.yaml", trust=True)
 
     # Idle period is set to 90 to capture restarts caused by applying resource limits
     # FIXME: raise_on_error should be removed (i.e. set to True) when units stop flapping to error

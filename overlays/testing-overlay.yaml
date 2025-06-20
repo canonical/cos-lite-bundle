@@ -22,7 +22,7 @@ applications:
       memory: 1Mi
   avalanche:
     charm: avalanche-k8s
-    channel: edge
+    channel: 1/edge
     scale: 2
     trust: true
     options:

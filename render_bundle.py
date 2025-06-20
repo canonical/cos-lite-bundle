@@ -18,7 +18,7 @@ BUNDLE_TEMPLATE_PATH = os.path.join(this_script_dir, "bundle.yaml.j2")
 
 
 def read_bundle_template(
-    filename: Union[str, Path] = BUNDLE_TEMPLATE_PATH
+    filename: Union[str, Path] = BUNDLE_TEMPLATE_PATH,
 ) -> Tuple[str, Set[str]]:
     """Read the template file from disk.
 
