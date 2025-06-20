@@ -16,7 +16,7 @@ applications:
     resources:
         traefik-image: "docker.io/ubuntu/traefik:2-22.04"
     {%- else %}
-    channel: {{ channel|default('edge', true) }}
+    channel: {{ channel|default('1/edge', true) }}
     {%- endif %}
   alertmanager:
     charm: {{ alertmanager|default('alertmanager-k8s', true) }}
@@ -26,7 +26,7 @@ applications:
     resources:
         alertmanager-image: "docker.io/ubuntu/alertmanager:0-22.04"
     {%- else %}
-    channel: {{ channel|default('edge', true) }}
+    channel: {{ channel|default('1/edge', true) }}
     {%- endif %}
   prometheus:
     charm: {{ prometheus|default('prometheus-k8s', true) }}
@@ -36,7 +36,7 @@ applications:
     resources:
       prometheus-image: "docker.io/ubuntu/prometheus:2-22.04"
     {%- else %}
-    channel: {{ channel|default('edge', true) }}
+    channel: {{ channel|default('1/edge', true) }}
     {%- endif %}
   grafana:
     charm: {{ grafana|default('grafana-k8s', true) }}
@@ -47,7 +47,7 @@ applications:
       grafana-image: "docker.io/ubuntu/grafana:9-22.04"
       litestream-image: "docker.io/litestream/litestream:0.4.0-beta.2"
     {%- else %}
-    channel: {{ channel|default('edge', true) }}
+    channel: {{ channel|default('1/edge', true) }}
     {%- endif %}
   catalogue:
     charm: {{ catalogue|default('catalogue-k8s', true) }}
@@ -57,7 +57,7 @@ applications:
     resources:
       catalogue-image: "ghcr.io/canonical/catalogue-k8s-operator:dev"
     {%- else %}
-    channel: {{ channel|default('edge', true) }}
+    channel: {{ channel|default('1/edge', true) }}
     {%- endif %}
     options:
       title: Canonical Observability Stack
@@ -73,7 +73,7 @@ applications:
     resources:
       loki-image: "docker.io/ubuntu/loki:2-22.04"
     {%- else %}
-    channel: {{ channel|default('edge', true) }}
+    channel: {{ channel|default('1/edge', true) }}
     {%- endif %}
 
 relations:
