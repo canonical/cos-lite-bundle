@@ -1,0 +1,148 @@
+bundle: kubernetes
+applications:
+  alertmanager:
+    charm: alertmanager-k8s
+    channel: dev/edge
+    scale: 1
+    constraints: arch=amd64
+    trust: true
+  ca:
+    charm: self-signed-certificates
+    channel: 1/edge
+    revision: 637
+    scale: 1
+    constraints: arch=amd64
+  catalogue:
+    charm: catalogue-k8s
+    channel: dev/edge
+    scale: 1
+    constraints: arch=amd64
+    trust: true
+  grafana:
+    charm: grafana-k8s
+    channel: dev/edge
+    scale: 1
+    constraints: arch=amd64
+    trust: true
+  loki:
+    charm: loki-k8s
+    channel: dev/edge
+    scale: 1
+    constraints: arch=amd64
+    trust: true
+  prometheus:
+    charm: prometheus-k8s
+    channel: dev/edge
+    scale: 1
+    constraints: arch=amd64
+    trust: true
+  traefik:
+    charm: traefik-k8s
+    channel: latest/edge
+    revision: 292
+    base: ubuntu@20.04/stable
+    resources:
+      traefik-image: 162
+    scale: 1
+    constraints: arch=amd64
+    trust: true
+relations:
+- - ca:certificates
+  - catalogue:certificates
+- - ca:certificates
+  - prometheus:certificates
+- - prometheus:metrics-endpoint
+  - traefik:metrics-endpoint
+- - traefik:receive-ca-cert
+  - ca:send-ca-cert
+- - catalogue:catalogue
+  - prometheus:catalogue
+- - grafana:metrics-endpoint
+  - prometheus:metrics-endpoint
+- - alertmanager:certificates
+  - ca:certificates
+- - alertmanager:alerting
+  - loki:alertmanager
+- - catalogue:ingress
+  - traefik:ingress
+- - prometheus:metrics-endpoint
+  - alertmanager:self-metrics-endpoint
+- - alertmanager:ingress
+  - traefik:ingress
+- - alertmanager:catalogue
+  - catalogue:catalogue
+- - alertmanager:alerting
+  - prometheus:alertmanager
+- - grafana:grafana-source
+  - loki:grafana-source
+- - grafana:grafana-source
+  - prometheus:grafana-source
+- - loki:metrics-endpoint
+  - prometheus:metrics-endpoint
+- - grafana:ingress
+  - traefik:ingress
+- - grafana:grafana-dashboard
+  - loki:grafana-dashboard
+- - alertmanager:grafana-dashboard
+  - grafana:grafana-dashboard
+- - loki:ingress
+  - traefik:ingress-per-unit
+- - catalogue:catalogue
+  - grafana:catalogue
+- - alertmanager:grafana-source
+  - grafana:grafana-source
+- - ca:certificates
+  - grafana:certificates
+- - ca:certificates
+  - loki:certificates
+- - prometheus:ingress
+  - traefik:ingress-per-unit
+- - grafana:grafana-dashboard
+  - prometheus:grafana-dashboard
+--- # overlay.yaml
+applications:
+  alertmanager:
+    offers:
+      alertmanager-karma-dashboard:
+        endpoints:
+        - karma-dashboard
+        acl:
+          admin: admin
+  ca:
+    offers:
+      certificates:
+        endpoints:
+        - certificates
+        acl:
+          admin: admin
+      send-ca-cert:
+        endpoints:
+        - send-ca-cert
+        acl:
+          admin: admin
+  grafana:
+    offers:
+      grafana-dashboards:
+        endpoints:
+        - grafana-dashboard
+        acl:
+          admin: admin
+  loki:
+    offers:
+      loki-logging:
+        endpoints:
+        - logging
+        acl:
+          admin: admin
+  prometheus:
+    offers:
+      prometheus-metrics-endpoint:
+        endpoints:
+        - metrics-endpoint
+        acl:
+          admin: admin
+      prometheus-receive-remote-write:
+        endpoints:
+        - receive-remote-write
+        acl:
+          admin: admin
